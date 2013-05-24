@@ -1,3 +1,34 @@
 # OASIS_START
+# DO NOT EDIT (digest: 5087d6eb0a276f86b4fbf9ba1e3b55fb)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library core_bench
+"lib/core_bench.cmxs": use_core_bench
+"lib/bench_main.cmx": for-pack(Core_bench)
+"lib/std.cmx": for-pack(Core_bench)
+<lib/core_bench.{cma,cmxa}>: use_libcore_bench_stubs
+<lib/*.ml{,i}>: pkg_core
+<lib/*.ml{,i}>: pkg_textutils
+<lib/*.ml{,i}>: pkg_threads
+"lib/rdtsc_stubs.c": pkg_core
+"lib/rdtsc_stubs.c": pkg_textutils
+"lib/rdtsc_stubs.c": pkg_threads
+# Executable test_bench
+<lib_test/test_bench.{native,byte}>: pkg_core
+<lib_test/test_bench.{native,byte}>: pkg_textutils
+<lib_test/*.ml{,i}>: pkg_core
+<lib_test/*.ml{,i}>: pkg_textutils
+<lib_test/test_bench.{native,byte}>: custom
 # OASIS_STOP
 <lib/*.ml{,i}>: syntax_camlp4o

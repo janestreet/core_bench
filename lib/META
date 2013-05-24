@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: 8aed0daa5011884f7c8c5ed78d4e3527)
+version = "109.24.00"
+description = "Benchmark library"
+requires = "core textutils threads"
+archive(byte) = "core_bench.cma"
+archive(byte, plugin) = "core_bench.cma"
+archive(native) = "core_bench.cmxa"
+archive(native, plugin) = "core_bench.cmxs"
+exists_if = "core_bench.cma"
+# OASIS_STOP
+
