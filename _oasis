@@ -23,6 +23,9 @@ Library core_bench
                       Std
   CSources:           rdtsc_stubs.c
   BuildDepends:       core (>= 109.24.00),
+                      sexplib.syntax,
+                      fieldslib.syntax,
+                      comparelib.syntax,
                       textutils (>= 109.24.00),
                       threads
   XMETARequires:      core,
@@ -32,9 +35,14 @@ Library core_bench
 Executable test_bench
   Path:               lib_test
   MainIs:             test_bench.ml
-  #Build$:             flag(tests)
+  #Build$:            flag(tests)
   Custom:             true
   CompiledObject:     best
   Install:            false
   BuildDepends:       core,
-                      textutils
+                      textutils,
+                      core_bench,
+                      sexplib.syntax,
+                      fieldslib.syntax,
+                      comparelib.syntax,
+                      threads
