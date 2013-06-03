@@ -1,6 +1,8 @@
 open Core.Std
 module Ascii_table = Textutils.Ascii_table
 
+open To_string
+
 
 let map_array_to_list arr ~len ~f =
   List.rev (Array.foldi arr ~init:[] ~f:(fun i ls x ->
@@ -44,10 +46,6 @@ let print_high s = match !verbosity with
   | `High -> printf s
   | `Low -> Printf.ifprintf stdout s
 
-(* let print_mid s = match !verbosity with
- *   | `High | `Mid -> printf s
- *   | `Low -> Printf.ifprintf stdout s *)
-
 (************************************************************)
 (* Simple stats and linear regression                       *)
 
@@ -80,7 +78,7 @@ module Rstats = struct
   let _slope_through_origin ~x ~xy =
     mean xy /. sqmean x
 
-  let slope_and_intercept ~len ~get_x ~get_y =
+  let slope_intercept_and_mean ~len ~get_x ~get_y =
     (* calculate the slope *)
     let x  = create () in
     let xy = create () in
@@ -95,26 +93,30 @@ module Rstats = struct
     done;
     let est_slope = slope ~x ~y ~xy in
     (* calculate the error *)
-    let y_int = (mean y) -. (mean x) *. est_slope  in
-    est_slope, y_int
+    let y_mean = mean y in
+    let y_int = y_mean -. mean x *. est_slope  in
+    est_slope, y_int, y_mean
 
   let slope  ~len ~get_x ~get_y =
-    fst (slope_and_intercept  ~len ~get_x ~get_y)
+    let (slope, _, _) = slope_intercept_and_mean ~len ~get_x ~get_y in
+    slope
 
-  let standard_error ~len ~get_x ~get_y ~slope ~y_int =
+  let r_square ~len ~get_x ~get_y ~slope ~y_int ~y_mean =
     let stderr = create () in
+    let mean_err = create () in
     for i = 0 to len - 1 do
       let fx = Float.of_int (get_x i) in
       let fy = Float.of_int (get_y i) in
       let est_y = fx *. slope +. y_int in
-      update_in_place stderr (est_y -. fy);
+      update_in_place stderr (fy -. est_y);
+      update_in_place mean_err (fy -. y_mean);
     done;
-    sqrt (sqmean stderr)
+    1.0 -. (sqmean stderr) /. (sqmean mean_err)
 
-  let slope_and_stderr ~len ~get_x ~get_y =
-    let slope, y_int = slope_and_intercept ~len ~get_x ~get_y in
-    let stderr = standard_error ~len ~get_x ~get_y ~slope ~y_int in
-    slope, stderr
+  let slope_and_r_square ~len ~get_x ~get_y =
+    let slope, y_int, y_mean = slope_intercept_and_mean ~len ~get_x ~get_y in
+    let rsq = r_square ~len ~get_x ~get_y ~slope ~y_int ~y_mean in
+    slope, rsq
 end
 
 (************************************************************)
@@ -184,8 +186,8 @@ module Test_metrics = struct
       ~get_y:(fun i -> field stats.(i))
 
   (* compute both the slope and the standard error *)
-  let slope_and_stderr stats ~len ~field =
-    Rstats.slope_and_stderr ~len
+  let slope_and_r_square stats ~len ~field =
+    Rstats.slope_and_r_square ~len
       ~get_x:(fun i -> stats.(i).runs)
       ~get_y:(fun i -> field stats.(i))
 
@@ -217,15 +219,15 @@ module Test_metrics = struct
 
   let bootstrap ?(bootstrap_trials=2000) ?(save_file="bootstrap.txt") stats ~len ~field =
     let est = Array.create ~len:bootstrap_trials 0.0 in
-    let est_stderr = Array.create ~len:bootstrap_trials 0.0 in
+    let est_err = Array.create ~len:bootstrap_trials 0.0 in
     let selected_indexes = Array.create ~len 0 in
     for i = 0 to bootstrap_trials - 1 do
       sample_with_replacement selected_indexes ~samples:len ~max:len;
-      let v, err = Rstats.slope_and_stderr ~len
+      let v, err = Rstats.slope_and_r_square ~len
         ~get_x:(fun i -> stats.(selected_indexes.(i)).runs)
         ~get_y:(fun i -> field stats.(selected_indexes.(i))) in
       est.(i) <- v;
-      est_stderr.(i) <- err;
+      est_err.(i) <- err;
     done;
     if debug then begin
       printf "Saving bootstrap data to: %s\n%!" save_file;
@@ -236,29 +238,17 @@ module Test_metrics = struct
     let low, high =
       quantile_of_array est ~len:bootstrap_trials
         ~low_quantile:0.025 ~high_quantile:0.975 in
-    let low_stderr, high_stderr =
-      quantile_of_array est_stderr ~len:bootstrap_trials
+    let low_err, high_err =
+      quantile_of_array est_err ~len:bootstrap_trials
         ~low_quantile:0.025 ~high_quantile:0.975 in
-    ((low, high), (low_stderr, high_stderr))
+    ((low, high), (low_err, high_err))
 end
 
 (***************************************************************************************)
 (* Printing functions : all of these functions are related to the table display which is
    the main output of bench. *)
 
-let float_to_string n =
-  if n < 1000.0
-  then sprintf "%.2f" n
-  else Int.to_string_hum (Float.iround_towards_zero_exn n)
-
-let float_opt_to_string n_opt =
-  match n_opt with
-  | None -> "?"
-  | Some n -> float_to_string n
-
-let format_tuple (low, high) =
-  sprintf "%s-%s" (float_to_string low) (float_to_string high)
-
+(* Memoize *)
 let memoize_by_test_id f =
   let cache = Test.Id.Table.create () in
   (fun (test, results, len) ->
@@ -269,19 +259,24 @@ let memoize_by_test_id f =
       Hashtbl.set cache ~key:test.Test.test_id ~data:v;
       v)
 
-let make_slope ~field =
+(* Get the value of each column type and format *)
+let get_slope ~field =
   memoize_by_test_id (fun (_test, results, len) ->
-    float_to_string (Test_metrics.slope ~field ~len results))
+    (Test_metrics.slope ~field ~len results))
 
-let make_gc_free_slope ~field =
+let get_slope_1k ~field =
   memoize_by_test_id (fun (_test, results, len) ->
-    float_opt_to_string (Test_metrics.gc_free_slope ~field ~len results))
+    (Test_metrics.slope ~field ~len results) *. 1000.0)
 
-let get_value_and_stderr field =
+let get_gc_free_slope ~field =
   memoize_by_test_id (fun (_test, results, len) ->
-    Test_metrics.slope_and_stderr ~field ~len results)
+    (Test_metrics.gc_free_slope ~field ~len results))
 
-let get_value_and_stderr_ci95 field fieldname =
+let get_value_and_r_square field =
+  memoize_by_test_id (fun (_test, results, len) ->
+    Test_metrics.slope_and_r_square ~field ~len results)
+
+let get_value_and_r_square_ci95 field fieldname =
   memoize_by_test_id (fun (test, results, len) ->
     let save_file = Test.name_or_unknown test ^ "-" ^ fieldname ^ "-bootstrap.txt" in
     Test_metrics.bootstrap ~save_file ~field ~len results)
@@ -299,46 +294,63 @@ let make_samples =
     sprintf "%s/%s" max_runs samples)
 
 (* formatting functions for gc and memory related stats *)
-let make_minor_allocated   = make_slope ~field:Test_metrics.minor_allocated
-let make_major_allocated   = make_slope ~field:Test_metrics.major_allocated
-let make_promoted          = make_slope ~field:Test_metrics.promoted
-let make_minor_collections = make_slope ~field:Test_metrics.minor_collections
-let make_major_collections = make_slope ~field:Test_metrics.major_collections
+let make_minor_allocated   = compose_float_to_string
+  (get_slope ~field:Test_metrics.minor_allocated)
+let make_major_allocated   = compose_float_to_string
+  (get_slope ~field:Test_metrics.major_allocated)
+let make_promoted          = compose_float_to_string
+  (get_slope ~field:Test_metrics.promoted)
+let make_minor_collections = compose_float_to_string
+  (get_slope_1k ~field:Test_metrics.minor_collections)
+let make_major_collections = compose_float_to_string
+  (get_slope_1k ~field:Test_metrics.major_collections)
 
 (* formatting functions for nominal timing *)
-let make_nominal_cycles = make_gc_free_slope ~field:Test_metrics.cycles
-let make_nominal_nanos = make_gc_free_slope ~field:Test_metrics.nanos
+let make_nominal_cycles = compose_float_opt_to_string
+  (get_gc_free_slope ~field:Test_metrics.cycles)
+let make_nominal_nanos = compose_float_opt_to_string
+  (get_gc_free_slope ~field:Test_metrics.nanos)
 
-(* formatting functions for total timing *)
-let get_value_and_stderr_cycles = get_value_and_stderr Test_metrics.cycles
-let get_value_and_stderr_95ci_cycles = get_value_and_stderr_ci95 Test_metrics.cycles "cycles"
+
+let make_spread ~low_high:(low, high) ~mid =
+  format_plus_or_minus (high -. mid, low -. mid)
+
+(* formatting functions for total timing in terms of cycles *)
+let get_value_and_r_square_cycles = get_value_and_r_square Test_metrics.cycles
+let get_value_and_r_square_95ci_cycles = get_value_and_r_square_ci95 Test_metrics.cycles "cycles"
 
 let make_cycles arg =
-  float_to_string (fst (get_value_and_stderr_cycles arg))
+  float_to_string (fst (get_value_and_r_square_cycles arg))
 let make_cycles_95ci arg =
-  format_tuple (fst (get_value_and_stderr_95ci_cycles arg))
+  make_spread ~mid:(fst (get_value_and_r_square_cycles arg))
+    ~low_high:(fst (get_value_and_r_square_95ci_cycles arg))
+let make_cycles_error arg =
+  float_to_string (snd (get_value_and_r_square_cycles arg))
+let make_cycles_error_95ci arg =
+  make_spread ~mid:(snd (get_value_and_r_square_cycles arg))
+    ~low_high:(snd (get_value_and_r_square_95ci_cycles arg))
 
-let get_value_and_stderr_nanos = get_value_and_stderr Test_metrics.nanos
-let get_value_and_stderr_95ci_nanos = get_value_and_stderr_ci95 Test_metrics.nanos "nanos"
+
+(* formatting functions for total timing in terms of time in nanos *)
+let get_value_and_r_square_nanos = get_value_and_r_square Test_metrics.nanos
+let get_value_and_r_square_95ci_nanos = get_value_and_r_square_ci95 Test_metrics.nanos "nanos"
 
 let make_nanos arg =
-  float_to_string (fst (get_value_and_stderr_nanos arg))
+  float_to_string (fst (get_value_and_r_square_nanos arg))
 let make_nanos_95ci arg =
-  format_tuple (fst (get_value_and_stderr_95ci_nanos arg))
+  make_spread ~mid:(fst (get_value_and_r_square_nanos arg))
+    ~low_high:(fst (get_value_and_r_square_95ci_nanos arg))
+let make_nanos_error arg =
+  float_to_string (snd (get_value_and_r_square_nanos arg))
+let make_nanos_error_95ci arg =
+  make_spread ~mid:(snd (get_value_and_r_square_nanos arg))
+    ~low_high:(snd (get_value_and_r_square_95ci_nanos arg))
 
-(* the error functions are somewhat meaningless for now *)
-let _make_cycles_error arg =
-  float_to_string (snd (get_value_and_stderr_cycles arg))
-let _make_cycles_error_95ci arg =
-  format_tuple (snd (get_value_and_stderr_95ci_cycles arg))
-let _make_nanos_error arg =
-  float_to_string (snd (get_value_and_stderr_nanos arg))
-let _make_nanos_error_95ci arg =
-  format_tuple (snd (get_value_and_stderr_95ci_nanos arg))
+
 
 (* formatting functions for reporting relative speed *)
 let get_cycles args =
-  fst (get_value_and_stderr_cycles args)
+  fst (get_value_and_r_square_cycles args)
 
 let make_percentage max_cycles args =
   let cycles = get_cycles args in
@@ -372,14 +384,14 @@ module Column = struct
   let name_desc_assoc_list =
     [("name"      , `Name            , "Name of the test.");
      ("cycles"    , `Cycles          , "Number of CPU cycles (RDTSC) taken.");
-     ("cycles95ci", `Bootstrap_cycles, "95% confidence interval and error for cycles.");
+     ("cycles-err", `Bootstrap_cycles, "95% confidence interval and R^2 error for cycles.");
      ("~cycles"   , `Nominal_cycles  , "Cycles taken excluding major GC costs.");
      ("time"      , `Nanos           , "Number of nano secs taken.");
-     ("time95ci"  , `Bootstrap_nanos , "95% confidence interval and error for time (ns).");
+     ("time-err"  , `Bootstrap_nanos , "95% confidence interval and R^2 error for time.");
      ("~time"     , `Nominal_nanos   , "Time (ns) taken excluding major GC costs.");
-     ("allocated" , `Allocated       , "Allocation of major, minor and promoted words.");
+     ("alloc"     , `Allocated       , "Allocation of major, minor and promoted words.");
+     ("gc"        , `GC              , "Show major and minor collections per 1000 runs.");
      ("percentage", `Percentage      , "Relative execution time as a percentage.");
-     ("gc"        , `GC              , "Show major and minor collections.");
      ("speedup"   , `Speedup         , "Relative execution cost as a speedup.");
      ("samples"   , `Samples         , "Number of samples collected for profiling.");
     ]
@@ -417,7 +429,7 @@ module Column = struct
     then `If_not_empty col
     else col
 
-  let arg = Command.Spec.Arg_type.of_alist_exn name_assoc_list
+  let arg = Command.Spec.Arg_type.create of_string
 end
 
 module CMap = Map.Make (struct
@@ -457,14 +469,14 @@ let print
   let columns = [
     col `Name "Name" make_name left;
     col `Cycles "Cycles" make_cycles right;
-    col `Bootstrap_cycles "Cycles 95ci" make_cycles_95ci right;
-    (* col `Bootstrap_cycles "Cycles Error" make_cycles_error right;
-     * col `Bootstrap_cycles "Cycles Error 95ci" make_cycles_error_95ci right; *)
+    col `Bootstrap_cycles "95% ci" make_cycles_95ci right;
+    col `Bootstrap_cycles "Cycles R^2" make_cycles_error right;
+    col `Bootstrap_cycles "95% ci" make_cycles_error_95ci right;
     col `Nominal_cycles "~Cycles" make_nominal_cycles right;
     col `Nanos "Time (ns)" make_nanos right;
-    col `Bootstrap_nanos "Time 95ci" make_nanos_95ci right;
-    (* col `Bootstrap_nanos "Time Error" make_nanos_error right;
-     * col `Bootstrap_nanos "Time Error 95ci" make_nanos_error_95ci right; *)
+    col `Bootstrap_nanos "95% ci" make_nanos_95ci right;
+    col `Bootstrap_nanos "Time R^2" make_nanos_error right;
+    col `Bootstrap_nanos "95% ci" make_nanos_error_95ci right;
     col `Nominal_nanos "~Time" make_nominal_nanos right;
     col `Allocated "Minor" make_minor_allocated right;
     col `Allocated "Major" make_major_allocated right;
@@ -472,7 +484,7 @@ let print
     col `GC "Minor GCs" make_minor_collections right;
     col `GC "Major GCs" make_major_collections right;
     col `Samples "Runs/Samples" make_samples right;
-    col `Percentage "Percentage" (make_percentage max_cycles) right;
+    col `Percentage "% of max" (make_percentage max_cycles) right;
     col `Speedup "Speedup" (make_speedup max_cycles) right;
   ] in
   Ascii_table.output ?display ~oc:stdout ?limit_width_to columns data
@@ -482,8 +494,10 @@ let print
 let write_data_array filename ~results max_used =
   let ls = List.rev (Array.foldi results ~init:[] ~f:(fun i ls _ ->
     if i < max_used then
-      let line = sprintf "%d %d"
+      let line = sprintf "%d %d %d %d"
         results.(i).Test_metrics.runs
+        results.(i).Test_metrics.minor_collections
+        results.(i).Test_metrics.major_collections
         results.(i).Test_metrics.nanos
         (* add more fields here on a need basis *)
       in
@@ -541,8 +555,17 @@ let bench_basic =
     let current_runs = !runs in
     let current_index = !index in
 
-    (* stabilize gc if required *)
-    if stabilize_gc_between_runs then
+    (* Stabilize gc if required.
+
+       We stabilize the gc through the first pass through this loop anyway. If we don't do
+       this the incoming GC state (some data may be on the minor heap that is partly full)
+       will cause an early collection or two which will not happen subsequently. These
+       early collections are just noise.
+
+       While benchmarking functions that do not allocate any memory this early noise is
+       the only significant input. In these cases, these spurious early collections will
+       give the allocation stats (major and promoted words) a slight negative value. *)
+    if stabilize_gc_between_runs || current_runs = 0 then
       stabilize_gc ();
 
     (* make any Gc changes required. *)
@@ -623,7 +646,6 @@ module Defaults = struct
   let columns_as_string = [
     "+name";
     "time";
-    "time95ci";
     "percentage";
   ]
   let columns = List.map ~f:Column.of_string columns_as_string
@@ -742,6 +764,14 @@ module Command = struct
   let readme () = sprintf "\
 Columns that can be specified are:
 \t%s
+
+R^2 error indicates how noisy the benchmark data is. A value of
+1.0 means the amortized cost of benchmark is almost exactly predicated
+and 0.0 means the reported values are not reliable at all.
+Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination
+
+Major and Minor GC stats indicate how many collections happen per 1000
+runs of the benchmarked function.
 
 The following columns will be displayed by default:
 \t%s
