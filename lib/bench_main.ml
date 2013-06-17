@@ -4,6 +4,8 @@ module Ascii_table = Textutils.Ascii_table
 open To_string
 
 
+let debug = false
+
 let map_array_to_list arr ~len ~f =
   List.rev (Array.foldi arr ~init:[] ~f:(fun i ls x ->
     if i < len
@@ -17,22 +19,6 @@ let map_array_to_list arr ~len ~f =
 module Cycles = struct
   external now : unit -> int = "bench_rdtsc" "noalloc"
 end
-
-(*************************************************************)
-(* Debug routines                                            *)
-
-let debug = false
-
-let _ftrace str f =
-  if debug
-  then printf "%s = %f\n%!" str f;
-  f
-
-let _itrace str i =
-  if debug
-  then printf "%s = %d\n%!" str i;
-  i
-;;
 
 (*************************************************************)
 (* Verbosity control                                         *)
@@ -304,6 +290,8 @@ let make_minor_collections = compose_float_to_string
   (get_slope_1k ~field:Test_metrics.minor_collections)
 let make_major_collections = compose_float_to_string
   (get_slope_1k ~field:Test_metrics.major_collections)
+let make_compactions = compose_float_to_string
+  (get_slope_1k ~field:Test_metrics.compactions)
 
 (* formatting functions for nominal timing *)
 let make_nominal_cycles = compose_float_opt_to_string
@@ -483,6 +471,7 @@ let print
     col `Allocated "Promoted" make_promoted right;
     col `GC "Minor GCs" make_minor_collections right;
     col `GC "Major GCs" make_major_collections right;
+    col `GC "Compactions" make_compactions right;
     col `Samples "Runs/Samples" make_samples right;
     col `Percentage "% of max" (make_percentage max_cycles) right;
     col `Speedup "Speedup" (make_speedup max_cycles) right;
@@ -602,6 +591,8 @@ let bench_basic =
       (gc2.Gc.Stat.major_words -. gc1.Gc.Stat.major_words);
     s.Test_metrics.promoted <- Float.iround_towards_zero_exn
       (gc2.Gc.Stat.promoted_words -. gc1.Gc.Stat.promoted_words);
+    s.Test_metrics.compactions <-
+      (gc2.Gc.Stat.compactions - gc1.Gc.Stat.compactions);
     s.Test_metrics.major_collections <-
       (gc2.Gc.Stat.major_collections - gc1.Gc.Stat.major_collections);
     s.Test_metrics.minor_collections <-
@@ -711,9 +702,6 @@ let run_benchmarks
 
 (*****************************************************************************)
 (* User facing bench function                                                *)
-
-(* ?gc_prefs       (\* unused *\) *)
-
 
 let bench
     (* printing parameters *)
