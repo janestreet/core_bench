@@ -12,16 +12,16 @@ let main () =
     for i = 0 to Array.length arr2 - 1 do
       arr2.(i) <- 10;
     done) in
-  let t3_1 = Bench.Test.create ~name:"ArrayCreateInt1" (fun () ->
-    ignore (Array.create ~len:200 0);
-  ) in
-  let t3_2 = Bench.Test.create ~name:"ArrayCreateInt2" (fun () ->
-    ignore (Array.create ~len:300 0);
-  ) in
+  let t3 = Bench.Test.create_indexed ~name:"ArrayCreateInt"
+    ~args:[100;200;300;400]
+    (fun len -> Staged.stage
+      (fun () ->
+        ignore (Array.create ~len 0)))
+  in
   let t4 = Bench.Test.create ~name:"Id" (fun () -> ()) in
   let t5 = Bench.Test.create ~name:"TimeNow" (fun () ->
     ignore (Time.now ())) in
-  Command.run (Bench.make_command [t1; t2; t3_1; t3_2; t4; t5])
+  Command.run (Bench.make_command [t1; t2; t3; t4; t5])
 
 
 let () = main ()

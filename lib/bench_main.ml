@@ -123,19 +123,30 @@ let quantile_of_array arr ~len ~low_quantile ~high_quantile =
 (************************************************************)
 module Test = struct
   module Id : Unique_id.Id = Unique_id.Int(Unit)
+  module Basic_test = struct
+    type t = {
+      test_id : Id.t;
+      name    : string;
+      f       : unit -> unit;
+    } with fields
+  end
 
   type t = {
-    test_id : Id.t;
-    name    : string option;
-    f       : unit -> unit;
+    name : string;
+    tests: Basic_test.t list
+  } with fields
+
+  let create ~name bm = {
+    name;
+    tests = [{ Basic_test. name; f = bm; test_id = Id.create () }]
   }
 
-  let create ?name f =
-    { name; f; test_id = Id.create () }
-
-  let name t = t.name
-  let name_or_unknown t =
-    Option.value ~default:"unknown" t.name
+  let create_indexed ~name ~args bm = {
+    name;
+    tests = List.map args ~f:(fun n ->
+      let name = name ^ ":" ^ (Int.to_string n) in
+      { Basic_test. name = name; f = Staged.unstage (bm n); test_id = Id.create () })
+  }
 end
 
 (************************************************************)
@@ -238,11 +249,11 @@ end
 let memoize_by_test_id f =
   let cache = Test.Id.Table.create () in
   (fun (test, results, len) ->
-    match Hashtbl.find cache test.Test.test_id with
+    match Hashtbl.find cache test.Test.Basic_test.test_id with
     | Some v -> v
     | None ->
       let v = f (test, results, len) in
-      Hashtbl.set cache ~key:test.Test.test_id ~data:v;
+      Hashtbl.set cache ~key:test.Test.Basic_test.test_id ~data:v;
       v)
 
 (* Get the value of each column type and format *)
@@ -264,12 +275,13 @@ let get_value_and_r_square field =
 
 let get_value_and_r_square_ci95 field fieldname =
   memoize_by_test_id (fun (test, results, len) ->
-    let save_file = Test.name_or_unknown test ^ "-" ^ fieldname ^ "-bootstrap.txt" in
+    let save_file = Test.Basic_test.name test ^ "-"
+      ^ fieldname ^ "-bootstrap.txt" in
     Test_metrics.bootstrap ~save_file ~field ~len results)
 
 (* formatting functions for displaying different columns *)
 let make_name (test, _results, _len) =
-  Test.name_or_unknown test
+  Test.Basic_test.name test
 
 let make_samples =
   memoize_by_test_id (fun (_test, results, len) ->
@@ -481,19 +493,24 @@ let print
 (**************************************************************)
 
 let write_data_array filename ~results max_used =
+  let header =
+    "# runs; time in nanos; minor collections; major collections; compactions; tsc cycles"
+  in
   let ls = List.rev (Array.foldi results ~init:[] ~f:(fun i ls _ ->
     if i < max_used then
-      let line = sprintf "%d %d %d %d"
+      let line = sprintf "%d %d %d %d %d %d"
         results.(i).Test_metrics.runs
+        results.(i).Test_metrics.nanos
         results.(i).Test_metrics.minor_collections
         results.(i).Test_metrics.major_collections
-        results.(i).Test_metrics.nanos
+        results.(i).Test_metrics.compactions
+        results.(i).Test_metrics.cycles
         (* add more fields here on a need basis *)
       in
       line :: ls
     else
       ls)) in
-  Out_channel.write_lines filename ls
+  Out_channel.write_lines filename (header :: ls)
 
 
 let stabilize_gc () =
@@ -525,7 +542,7 @@ let bench_basic =
     test
   ->
   (* test function *)
-  let f = test.Test.f in
+  let f = test.Test.Basic_test.f in
 
   (* the samples *)
   let max_samples = 3_000 in
@@ -617,14 +634,14 @@ let bench_basic =
   let total_samples = !index in
   let largest_run = !runs in
   print_high "%s: Total time taken %s (%d samples, max runs %d).\n%!"
-    (Test.name_or_unknown test)
+    (Test.Basic_test.name test)
     (Time.Span.to_string (Time.diff end_time init_t1))
     total_samples
     largest_run;
   if save_sample_data then begin
-    let filename = Option.value_exn test.Test.name ^ ".txt" in
+    let filename = test.Test.Basic_test.name ^ ".txt" in
     print_high "%s: Writing %d samples to file: %s.%!\n"
-      (Test.name_or_unknown test) total_samples filename;
+      (Test.Basic_test.name test) total_samples filename;
     write_data_array filename ~results total_samples;
   end;
   results, total_samples
@@ -716,6 +733,7 @@ let bench
     ?sampling_type
     ?stabilize_gc_between_runs
     tests =
+  let tests = List.concat (List.map ~f:Test.tests tests) in
   print ~limit_width_to ~columns ~display
     (run_benchmarks
        ?verbosity
@@ -769,11 +787,16 @@ prefix the column name with a '+'."
     Column.column_description_table
     (String.concat ~sep:" " Defaults.columns_as_string)
 
-  let make tests =
+  let make (tests : Test.t list) =
     Command.basic
-      ~summary:(sprintf "Benchmark for %s"
-                  (String.concat ~sep:", "
-                     (List.map tests ~f:Test.name_or_unknown)))
+      ~summary:(
+        sprintf "Benchmark for %s"
+          (String.concat ~sep:", "
+             (List.map tests ~f:(fun test ->
+               let len = List.length (Test.tests test) in
+               if len = 1
+               then Test.name test
+               else sprintf "%s (%d tests)" (Test.name test) len))))
       ~readme
       Command.Spec.(
         (* flags *)

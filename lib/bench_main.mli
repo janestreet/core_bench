@@ -25,8 +25,9 @@ open Core.Std
 
 module Test : sig
   type t
-  val create : ?name:string -> (unit -> unit) -> t
-  val name : t -> string option
+  val create : name:string -> (unit -> unit) -> t
+  val create_indexed :
+    name:string -> args:int list -> (int -> (unit -> unit) Staged.t) -> t
 end
 
 module Column : sig
