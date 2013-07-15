@@ -4,9 +4,11 @@ open Core.Std
 let float_to_string n =
   if Float.abs n < 0.01
   then ""
-  else if n < 1000.0
+  else if n < 100.0
   then sprintf "%.2f" n
-  else Int.to_string_hum (Float.iround_towards_zero_exn n)
+  else Option.value_map (Float.iround_nearest n)
+    ~default:"?"
+    ~f:Int.to_string_hum
 
 let float_opt_to_string n_opt =
   Option.value_map n_opt ~default:"?" ~f:float_to_string

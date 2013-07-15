@@ -494,17 +494,20 @@ let print
 
 let write_data_array filename ~results max_used =
   let header =
-    "# runs; time in nanos; minor collections; major collections; compactions; tsc cycles"
+    "# runs; time in nanos; minor collections; major collections; compactions; \
+      tsc cycles; minor words; major words;"
   in
   let ls = List.rev (Array.foldi results ~init:[] ~f:(fun i ls _ ->
     if i < max_used then
-      let line = sprintf "%d %d %d %d %d %d"
+      let line = sprintf "%d %d %d %d %d %d %d %d"
         results.(i).Test_metrics.runs
         results.(i).Test_metrics.nanos
         results.(i).Test_metrics.minor_collections
         results.(i).Test_metrics.major_collections
         results.(i).Test_metrics.compactions
         results.(i).Test_metrics.cycles
+        results.(i).Test_metrics.minor_allocated
+        results.(i).Test_metrics.major_allocated
         (* add more fields here on a need basis *)
       in
       line :: ls
