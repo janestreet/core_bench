@@ -35,7 +35,7 @@ Library core_bench
 Executable test_bench
   Path:               lib_test
   MainIs:             test_bench.ml
-  #Build$:            flag(tests)
+  Build$:             flag(tests)
   Custom:             true
   CompiledObject:     best
   Install:            false
