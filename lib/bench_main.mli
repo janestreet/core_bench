@@ -1,3 +1,4 @@
+
 open Core.Std
 
 (** Simple example of using bench:
