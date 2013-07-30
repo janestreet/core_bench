@@ -56,6 +56,7 @@ val bench
   :  ?limit_width_to:int
   -> ?columns:[ Column.t | `If_not_empty of Column.t ] list
   -> ?display:Textutils.Ascii_table.Display.t
+  -> ?ascii_table:bool
   -> ?verbosity:[ `High | `Low ]
   -> ?no_compactions:bool
   -> ?save_sample_data:bool

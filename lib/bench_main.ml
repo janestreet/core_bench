@@ -441,6 +441,7 @@ end)
 let print
     ?limit_width_to
     ?display
+    ?(ascii_table=false)
     ~columns
     data =
   let left, right = Ascii_table.Align.(left, right) in
@@ -467,6 +468,11 @@ let print
     in
     Ascii_table.Column.create name make ~align ~show
   in
+  let bars =
+    if ascii_table
+    then `Ascii
+    else `Unicode
+  in
   let columns = [
     col `Name "Name" make_name left;
     col `Cycles "Cycles" make_cycles right;
@@ -489,7 +495,7 @@ let print
     col `Percentage "% of max" (make_percentage max_cycles) right;
     col `Speedup "Speedup" (make_speedup max_cycles) right;
   ] in
-  Ascii_table.output ?display ~oc:stdout ?limit_width_to columns data
+  Ascii_table.output ?display ~oc:stdout ~bars ?limit_width_to columns data
 
 (**************************************************************)
 
@@ -686,6 +692,7 @@ module Defaults = struct
     | "tall"  -> Display.tall_box
     | "line"  -> Display.line
     | "blank" -> Display.blank
+    | "column" -> Display.column_titles
     | s -> failwithf "Invalid display name: %s" s ()
   let display = string_to_display display_as_string
 end
@@ -729,6 +736,7 @@ let bench
     ?(limit_width_to=Defaults.limit_width_to)
     ?(columns=Defaults.columns)
     ?(display=Defaults.display)
+    ?(ascii_table=false)
     (* benchmarking parameters *)
     ?verbosity
     ?no_compactions
@@ -738,7 +746,7 @@ let bench
     ?stabilize_gc_between_runs
     tests =
   let tests = List.concat (List.map ~f:Test.tests tests) in
-  print ~limit_width_to ~columns ~display
+  print ~limit_width_to ~columns ~display ~ascii_table
     (run_benchmarks
        ?verbosity
        ?no_compactions
@@ -761,6 +769,7 @@ module Command = struct
     :  ?limit_width_to:int
     -> ?columns:[ Column.t | `If_not_empty of Column.t ] list
     -> ?display:Ascii_table.Display.t
+    -> ?ascii_table:bool
     -> ?verbosity:[ `High | `Low ]
     -> ?no_compactions:bool
     -> ?save_sample_data:bool
@@ -809,7 +818,7 @@ prefix the column name with a '+'."
           ~doc:(sprintf "WIDTH width limit on column display (default %d)."
                   Defaults.limit_width_to)
         +> flag "-display" (optional_with_default Defaults.display_as_string string)
-          ~doc:(sprintf "STYLE Table style (short, tall, line or blank). Default %s."
+          ~doc:(sprintf "STYLE Table style (short, tall, line, blank or column). Default %s."
                   Defaults.display_as_string)
         +> flag "-v" no_arg ~doc:" High verbosity level."
         +> flag "-quota" (optional_with_default Defaults.time_quota_float float)
@@ -832,15 +841,21 @@ prefix the column name with a '+'."
           ~doc:(sprintf "SCALE Use geometric sampling. (default %0.2f)"
                   Defaults.geometric_scale)
         +> flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files."
+        +> flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
         +> flag "-stabilize-gc" no_arg ~doc:" Stabilize GC between each sample capture."
         +> flag "-clear-columns" no_arg ~doc:" Don't display default columns. Only show \
         user specified ones."
         +> anon (sequence ("COLUMN" %: Column.arg))
       )
-      (fun limit_width_to display verbosity time_quota no_compactions ~sampling_type
-          save_sample_data stabilize_gc_between_runs
+      (fun limit_width_to display_style verbosity time_quota no_compactions ~sampling_type
+          save_sample_data minimal_tables stabilize_gc_between_runs
           clear_columns anon_columns () ->
-        let display = Defaults.string_to_display display in
+        let display = Defaults.string_to_display display_style in
+        let display, ascii_table =
+          if minimal_tables
+          then Ascii_table.Display.column_titles, true
+          else display, false
+        in
         let verbosity =
           if verbosity
           then `High
@@ -856,6 +871,7 @@ prefix the column name with a '+'."
           ~limit_width_to
           ~columns
           ~display
+          ~ascii_table
           ~verbosity
           ~time_quota:(Time.Span.of_float time_quota)
           ~sampling_type
