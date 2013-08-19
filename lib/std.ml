@@ -1,1 +1,2 @@
-module Bench = Bench_main
+
+module Bench = Bench

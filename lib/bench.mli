@@ -3,6 +3,9 @@ open Core.Std
 
 (** Simple example of using bench:
     [{
+      open Core.Std
+      open Core_bench.Std
+
       let main () =
         let t1 =
           Bench.Test.create ~name:"ArrayCreateInt1" (fun () ->
@@ -38,16 +41,37 @@ module Column : sig
     [ `Name
     | `Cycles
     | `Nanos
-    | `Nominal_cycles
-    | `Nominal_nanos
-    | `Bootstrap_cycles
-    | `Bootstrap_nanos
+    | `Confidence
     | `Allocated
     | `Percentage
     | `GC
     | `Speedup
     | `Samples
     ] with sexp
+end
+
+
+(* Note: Major_collections are not very good predictors for couple of reasons:
+
+   (1) They are not discrete events, but happen per minor GC. Consequently the time at
+   which the major GC counter is incremented does not correspond to a latency event in the
+   runtime.
+
+   (2) Also, they are strongly correlated with compactions and compactions are discrete
+   events. *)
+module Variable : sig
+  type t =
+  [ `Runs
+  | `Cycles
+  | `Nanos
+  | `Compactions
+  | `Minor_collections
+  | `Major_collections
+  | `Promoted
+  | `Minor_allocated
+  | `Major_allocated
+  | `One (* the "variable" that is always 1 *)
+  ] with sexp
 end
 
 (** The documentation for all of these arguments is in the implementation, as
@@ -57,12 +81,15 @@ val bench
   -> ?columns:[ Column.t | `If_not_empty of Column.t ] list
   -> ?display:Textutils.Ascii_table.Display.t
   -> ?ascii_table:bool
+  -> ?ci_absolute:bool
   -> ?verbosity:[ `High | `Low ]
   -> ?no_compactions:bool
   -> ?save_sample_data:bool
   -> ?time_quota:Time.Span.t
   -> ?sampling_type:[`Geometric of float | `Linear of int]
   -> ?stabilize_gc_between_runs:bool
+  -> ?predictors:Variable.t list
+  -> ?fork_each_benchmark:bool
   -> Test.t list
   -> unit
 
