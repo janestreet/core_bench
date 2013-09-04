@@ -7,6 +7,13 @@ module Basic_test = struct
     name    : string;
     f       : unit -> unit;
   } with fields
+
+  let create ~name f =
+    { name; f; test_id = Id.create () }
+
+  let make_filename t =
+    let name = String.tr ~target:' ' ~replacement:'-' t.name in
+    name ^ ".txt"
 end
 
 type t = {
@@ -16,7 +23,7 @@ type t = {
 
 let create ~name bm = {
   name;
-  tests = [{ Basic_test. name; f = bm; test_id = Id.create () }]
+  tests = [Basic_test.create ~name bm];
 }
 
 let create_indexed ~name ~args bm = {
@@ -25,3 +32,6 @@ let create_indexed ~name ~args bm = {
     let name = name ^ ":" ^ (Int.to_string n) in
     { Basic_test. name = name; f = Staged.unstage (bm n); test_id = Id.create () })
 }
+
+
+

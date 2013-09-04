@@ -50,8 +50,8 @@ let column_description_table =
 let of_string col : [ t | `If_not_empty of t ] =
   let col, non_empty =
     match String.chop_prefix col ~prefix:"+" with
-    | Some col -> col, true
-    | None -> col, false
+    | Some col -> col, false
+    | None -> col, true
   in
   let col =
     match (List.Assoc.find ~equal:String.equal name_assoc_list col) with

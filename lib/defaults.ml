@@ -3,9 +3,9 @@ module Ascii_table = Textutils.Ascii_table
 
 (* default columns *)
 let columns_as_string = [
-  "+name";
-  "+time";
-  "percentage";
+  "name";
+  "time";
+  "+percentage";
 ]
 let columns = List.map ~f:Column.of_string columns_as_string
 

@@ -82,15 +82,25 @@ val bench
   -> ?display:Textutils.Ascii_table.Display.t
   -> ?ascii_table:bool
   -> ?ci_absolute:bool
+  -> ?predictors:Variable.t list
   -> ?verbosity:[ `High | `Low ]
   -> ?no_compactions:bool
   -> ?save_sample_data:bool
   -> ?time_quota:Time.Span.t
   -> ?sampling_type:[`Geometric of float | `Linear of int]
   -> ?stabilize_gc_between_runs:bool
-  -> ?predictors:Variable.t list
   -> ?fork_each_benchmark:bool
   -> Test.t list
+  -> unit
+
+val analyze
+  :  ?limit_width_to:int
+  -> ?columns:[ Column.t | `If_not_empty of Column.t ] list
+  -> ?display:Textutils.Ascii_table.Display.t
+  -> ?ascii_table:bool
+  -> ?ci_absolute:bool
+  -> ?predictors:Variable.t list
+  -> saved_files:string list
   -> unit
 
 val make_command : Test.t list -> Command.t

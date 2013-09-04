@@ -12,6 +12,7 @@ let bench
     ?(display=Defaults.display)
     ?(ascii_table=false)
     ?(ci_absolute=false)
+    ?(predictors=Defaults.predictors)
     (* benchmarking parameters *)
     ?verbosity
     ?no_compactions
@@ -19,7 +20,6 @@ let bench
     ?time_quota
     ?sampling_type
     ?stabilize_gc_between_runs
-    ?(predictors=Defaults.predictors)
     ?fork_each_benchmark
     tests =
   let tests = List.concat (List.map ~f:Test.tests tests) in
@@ -35,7 +35,23 @@ let bench
        tests)
 ;;
 
-let make_command tests = Bench_command.make bench tests
+
+let analyze
+    (* printing parameters *)
+    ?(limit_width_to=Defaults.limit_width_to)
+    ?(columns=Defaults.columns)
+    ?(display=Defaults.display)
+    ?(ascii_table=false)
+    ?(ci_absolute=false)
+    ?(predictors=Defaults.predictors)
+    (* benchmarking parameters *)
+    ~saved_files =
+  Bench_table.print ~limit_width_to ~columns ~display ~ascii_table ~ci_absolute ~predictors
+    (List.map saved_files ~f:Test_metrics.load)
+;;
+
+
+let make_command tests = Bench_command.make bench analyze tests
 
 
 

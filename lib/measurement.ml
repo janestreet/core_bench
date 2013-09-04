@@ -8,30 +8,6 @@ module Cycles = struct
   external now : unit -> int = "bench_rdtsc" "noalloc"
 end
 
-let save_results_to_file filename ~results max_used =
-  let header =
-    "# runs; time in nanos; minor collections; major collections; compactions; \
-      tsc cycles; minor words; major words;"
-  in
-  let ls = List.rev (Array.foldi results ~init:[] ~f:(fun i ls _ ->
-    if i < max_used then
-      let line = sprintf "%d %d %d %d %d %d %d %d"
-        results.(i).Test_metrics.runs
-        results.(i).Test_metrics.nanos
-        results.(i).Test_metrics.minor_collections
-        results.(i).Test_metrics.major_collections
-        results.(i).Test_metrics.compactions
-        results.(i).Test_metrics.cycles
-        results.(i).Test_metrics.minor_allocated
-        results.(i).Test_metrics.major_allocated
-        (* add more fields here on a need basis *)
-      in
-      line :: ls
-    else
-      ls)) in
-  Out_channel.write_lines filename (header :: ls)
-
-
 let stabilize_gc () =
   let rec loop failsafe last_heap_live_words =
     if failsafe <= 0 then
@@ -155,12 +131,8 @@ let run_one_benchmark =
     (Time.Span.to_string (Time.diff end_time init_t1))
     total_samples
     largest_run;
-  if save_sample_data then begin
-    let filename = test.Test.Basic_test.name ^ ".txt" in
-    Verbosity.print_high "%s: Writing %d samples to file: %s.%!\n"
-      (Test.Basic_test.name test) total_samples filename;
-    save_results_to_file filename ~results total_samples;
-  end;
+  if save_sample_data
+  then Test_metrics.save test ~results total_samples;
   results, total_samples
 
 

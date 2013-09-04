@@ -15,15 +15,25 @@ type callback_bench
   -> ?display:Ascii_table.Display.t
   -> ?ascii_table:bool
   -> ?ci_absolute:bool
+  -> ?predictors:Test_metrics.Variable.t list
   -> ?verbosity:[ `High | `Low ]
   -> ?no_compactions:bool
   -> ?save_sample_data:bool
   -> ?time_quota:Time.Span.t
   -> ?sampling_type:[`Geometric of float | `Linear of int]
   -> ?stabilize_gc_between_runs:bool
-  -> ?predictors:Test_metrics.Variable.t list
   -> ?fork_each_benchmark:bool
   -> Test.t list
+  -> unit
+
+type callback_analyze
+  =  ?limit_width_to:int
+  -> ?columns:[ Column.t | `If_not_empty of Column.t ] list
+  -> ?display:Ascii_table.Display.t
+  -> ?ascii_table:bool
+  -> ?ci_absolute:bool
+  -> ?predictors:Test_metrics.Variable.t list
+  -> saved_files:string list
   -> unit
 
 
@@ -31,24 +41,30 @@ let readme () = sprintf "\
 Columns that can be specified are:
 \t%s
 
-R^2 error indicates how noisy the benchmark data is. A value of
-1.0 means the amortized cost of benchmark is almost exactly predicated
-and 0.0 means the reported values are not reliable at all.
+R^2 is the fraction of the variance of the responder (such as runtime)
+that is accounted for by the predictors (such as number of runs).
+More informally, it describes how good a fit we're getting, with
+R^2 = 1 indicating a perfect fit and R^2 = 0 indicating a horrible
+fit.  Because we expect runtime to be very highly correlated with our
+predictors, values very close to 1 are typical; a value less than 0.99
+should cause some suspicion, and a value less than 0.9 probably
+indicates either a shortage of data or that the data is erroneous or
+peculiar in some way.
 Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination
 
-Major and Minor GC stats indicate how many collections happen per 1000
+GC stats indicate how many collections or compactions happen per 1000
 runs of the benchmarked function.
 
 The following columns will be displayed by default:
 \t%s
 
-To specify that a column should be displayed only if it has a non-trivial value,
-prefix the column name with a '+'.
+By default, columns that have no values are suppressed. To force
+displaying empty columns, prefix the column name with a '+'.
 
 Experimental feature: Internally, the library does a linear
 regression between the time taken as the predicted value and the
 number of runs as the predictor.  This can be changed to include
-one or more the additional predictors below, using the
+one or more of the additional predictors below, using the
 flag called \"-predictors\":
   m : the number of minor collections
   c : the number of compactions
@@ -57,7 +73,7 @@ flag called \"-predictors\":
   Column.column_description_table
   (String.concat ~sep:" " Defaults.columns_as_string)
 
-let make (bench : callback_bench) (tests : Test.t list) =
+let make (bench : callback_bench) (analyze : callback_analyze) (tests : Test.t list) =
   Command.basic
     ~summary:(
       sprintf "Benchmark for %s"
@@ -106,11 +122,13 @@ let make (bench : callback_bench) (tests : Test.t list) =
       +> flag "-stabilize-gc" no_arg ~doc:" Stabilize GC between each sample capture."
       +> flag "-clear-columns" no_arg ~doc:" Don't display default columns. Only show \
         user specified ones."
+      +> flag "-load" (listed file) ~doc:"FILE Analyze previously saved data files and
+        don't run tests. [-load] can be specified multiple times."
       +> anon (sequence ("COLUMN" %: Column.arg))
     )
     (fun limit_width_to display_style verbosity predictors time_quota no_compactions
       fork_each_benchmark ~sampling_type save_sample_data minimal_tables ci_absolute
-      stabilize_gc_between_runs clear_columns anon_columns () ->
+      stabilize_gc_between_runs clear_columns analyze_files anon_columns () ->
         let display = Defaults.string_to_display display_style in
         let display, ascii_table =
           if minimal_tables
@@ -141,21 +159,32 @@ let make (bench : callback_bench) (tests : Test.t list) =
           else Defaults.columns
         in
         let columns = columns @ anon_columns in
-        bench
-          ~limit_width_to
-          ~columns
-          ~display
-          ~ascii_table
-          ~ci_absolute
-          ~verbosity
-          ~time_quota:(Time.Span.of_float time_quota)
-          ~sampling_type
-          ~save_sample_data
-          ~stabilize_gc_between_runs
-          ~no_compactions
-          ~fork_each_benchmark
-          ~predictors
-          tests
+        match analyze_files with
+        | [] ->
+          bench
+            ~limit_width_to
+            ~columns
+            ~display
+            ~ascii_table
+            ~ci_absolute
+            ~verbosity
+            ~time_quota:(Time.Span.of_float time_quota)
+            ~sampling_type
+            ~save_sample_data
+            ~stabilize_gc_between_runs
+            ~no_compactions
+            ~fork_each_benchmark
+            ~predictors
+            tests
+        | saved_files ->
+          analyze
+            ~limit_width_to
+            ~columns
+            ~display
+            ~ascii_table
+            ~ci_absolute
+            ~predictors
+            ~saved_files
     )
 
 

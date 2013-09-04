@@ -11,5 +11,3 @@ val run_benchmarks
   -> ?fork_each_benchmark:bool
   -> Test.Basic_test.t list
   -> (Test.Basic_test.t * Test_metrics.t array * int) list
-
-
