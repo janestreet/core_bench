@@ -5,6 +5,7 @@ let main () =
                  ~summary:"Several benchmarks"
                  [
                    "basic"     , Basic_tests.     command;
+                   "tsc"       , Tsc.             command;
                    "gc"        , Gc_tests.        command;
                    "exceptions", Exception_tests. command;
                    "tuple"     , Tuple_tests.     command;

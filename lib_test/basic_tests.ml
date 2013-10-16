@@ -1,3 +1,4 @@
+open Core.Std
 open Core_bench.Std
 open Core_extended.Std
 
@@ -6,30 +7,46 @@ let get_float () =
   then 10.0
   else 10.0
 
+let get_int () = Random.int 200000
+
 let get_int64 () =
   if Random.bool ()
   then Int64.of_int 10
   else 10L
 
+let scale t mul = Pervasives.int_of_float ((Pervasives.float_of_int t) *. mul)
+
 let t1 = Bench.Test.create ~name:"Id"
   (fun () -> ())
 
-let t2 = Bench.Test.create ~name:"TimeNow"
-  (fun () -> ignore (Time.now ()))
+let t2 =
+  let n = get_int () in
+  let fl = get_float () in
+  Bench.Test.create ~name:"integer scaling"
+  (fun () ->
+    ignore (scale n fl))
 
-let t3 = Bench.Test.create ~name:"RDTSC"
-  (fun () -> ignore (Time_stamp_counter.Cycles.now ()))
-
-let t4 = Bench.Test.create ~name:"int64_of_float"
+let t3 = Bench.Test.create ~name:"Int64.bits_of_float"
   (let fl = get_float () in
-   (fun () -> ignore (Int64.of_float fl)))
+   (fun () -> ignore (Int64.bits_of_float fl)))
 
-let t5 = Bench.Test.create ~name:"int64_to_float"
+let t4 = Bench.Test.create ~name:"Int64.float_of_bits"
   (let fl = get_int64 () in
-   (fun () -> ignore (Int64.to_float fl)))
+   (fun () -> ignore (Int64.float_of_bits fl)))
 
-let tests = [ t1; t2; t3; t4; t5 ]
+let t5 =
+  let f1 = Random.float 1.0 in
+  let f2 = Random.float 1.0 in
+  Bench.Test.create ~name:"Float.*"
+    (fun () -> ignore (f1 *. f2))
 
+let t6 =
+  let f1 = Random.int 5000 in
+  let f2 = Random.int 5000 in
+  Bench.Test.create ~name:"Int.*"
+    (fun () -> ignore (f1 * f2))
+
+let tests = [ t1; t2; t3; t4; t5; t6 ]
 
 let command = Bench.make_command tests
 
