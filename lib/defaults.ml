@@ -1,13 +1,16 @@
 open Core.Std
 module Ascii_table = Textutils.Ascii_table
 
-(* default columns *)
+(* default columns for command *)
 let columns_as_string = [
-  "name";
   "time";
-  "+percentage";
+  "alloc";
+  "percentage";
 ]
-let columns = List.map ~f:Column.of_string columns_as_string
+let command_columns = List.map ~f:Bench_command_column.of_string columns_as_string
+
+(* default columns *)
+let columns = [ `Name ]
 
 (* how to measure *)
 let geometric_scale   = 1.01
@@ -22,10 +25,14 @@ let time_quota       = Time.Span.of_sec time_quota_float
 let save_sample_data = false
 
 (* width of the output table *)
-let limit_width_to = 170
+let limit_width_to = 200
 
 (* Fork each benchmark and run in separate process *)
 let fork_each_benchmark = false
+
+(* Bootstrapping iterations *)
+let bootstrap_trials = 3000
+let boostrap_reduced_trials = 300
 
 (* Predictors to use for mv-regression *)
 let predictors = [ `Runs ]

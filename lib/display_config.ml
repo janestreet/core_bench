@@ -1,0 +1,35 @@
+open Textutils
+
+type t = {
+  don't_display_table : bool;
+  limit_width_to      : int;
+  display             : Ascii_table.Display.t;
+  ascii_table         : bool;
+  show_absolute_ci    : bool;
+  show_percentage     : bool;
+  show_speedup        : bool;
+  show_samples        : bool;
+  show_all_values     : bool;
+} with fields
+
+let create
+    ?(don't_display_table=false)
+    ?(limit_width_to=Defaults.limit_width_to)
+    ?(display=Defaults.display)
+    ?(ascii_table=false)
+    ?(show_absolute_ci=false)
+    ?(show_percentage=false)
+    ?(show_speedup=false)
+    ?(show_samples=false)
+    ?(show_all_values=false)
+    () =
+  { don't_display_table;
+    limit_width_to;
+    display;
+    ascii_table;
+    show_absolute_ci;
+    show_percentage;
+    show_samples;
+    show_speedup;
+    show_all_values;
+  }

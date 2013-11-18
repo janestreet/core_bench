@@ -1,13 +1,20 @@
 open Core.Std
 
+type t with sexp
 
-val run_benchmarks
-  :  ?verbosity:[ `High | `Low ]
-  -> ?no_compactions:bool
-  -> ?save_sample_data:bool
-  -> ?time_quota:Time.Span.t
-  -> ?sampling_type:[`Geometric of float | `Linear of int]
-  -> ?stabilize_gc_between_runs:bool
-  -> ?fork_each_benchmark:bool
-  -> Test.Basic_test.t list
-  -> (Test.Basic_test.t * Test_metrics.t array * int) list
+val name         : t -> string
+val largest_run  : t -> int
+val sample_count : t -> int
+val samples      : t -> Measurement_sample.t array
+
+val create
+  :  name:string
+  -> largest_run:int
+  -> sample_count:int
+  -> samples:Measurement_sample.t array
+  -> t
+
+
+val save : t -> filename:string -> unit
+val load : string -> t
+
