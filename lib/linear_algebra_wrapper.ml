@@ -1,5 +1,7 @@
 open Core.Std
 
+let debug = false
+
 let random_indices_in_place ~max arr =
   let len = Array.length arr in
   for i = 0 to len - 1 do
@@ -26,6 +28,14 @@ let quantile_of_array arr ?(failures=0) ~len ~low_quantile ~high_quantile =
   let right_endpoint = extended_get (Int.max (index high_quantile) failures) in
   Analysis_result.Ci95.create  ~left_endpoint ~right_endpoint
 
+let debug_print pred_matrix resp_vector =
+  for i = 0 to (Array.length pred_matrix - 1) do
+    printf "(%4d) " i;
+    for j = 0 to (Array.length pred_matrix.(0) - 1) do
+      printf "%3g " pred_matrix.(i).(j);
+    done;
+    printf "| %3g\n%!" resp_vector.(i);
+  done
 
 (* val ols : Measurement.t -> responder -> predictors -> float array *)
 let make_lr_inputs ?indices meas ~resp ~preds =
@@ -37,15 +47,24 @@ let make_lr_inputs ?indices meas ~resp ~preds =
   let pred_matrix, resp_vector =
     match indices with
     | Some indices ->
-      Array.mapi indices ~f:(fun i _ -> make_pred_values mss.(indices.(i))),
-      Array.mapi indices ~f:(fun i _ -> resp_acc mss.(indices.(i)))
+      Array.map indices ~f:(fun i -> make_pred_values mss.(i)),
+      Array.map indices ~f:(fun i -> resp_acc mss.(i))
     | None ->
-      Array.map mss ~f:make_pred_values,
-      Array.map mss ~f:resp_acc
+      Array.init (Measurement.sample_count meas) ~f:(fun i ->
+        make_pred_values mss.(i)),
+      Array.init (Measurement.sample_count meas) ~f:(fun i ->
+        resp_acc mss.(i))
   in
+  if debug
+  then debug_print pred_matrix resp_vector;
   pred_matrix, resp_vector
 
 let ols meas ~resp ~preds =
+  if debug then begin
+    Array.iteri preds ~f:(fun i pred ->
+      printf "(%d) %s " i (Variable.to_string pred));
+    printf "\n%!";
+  end;
   let matrix, vector = make_lr_inputs meas ~resp ~preds in
   match Linear_algebra.ols ~in_place:true matrix vector with
   | Ok _ as x -> x
@@ -137,7 +156,7 @@ let bootstrap ~trials meas ~resp ~preds =
   | Some err -> Error err
   | None ->
     let bootstrap_fails = ref 0 in
-    let indices = Array.create ~len:trials 0 in
+    let indices = Array.create ~len:(Measurement.sample_count meas) 0 in
     let bootstrap_coeffs =
       Array.init num_preds ~f:(fun _ -> Array.create ~len:trials 0.0)
     in
