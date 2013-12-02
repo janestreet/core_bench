@@ -1,5 +1,5 @@
-Micro-bencharking with Core_bench
-=================================
+Core_bench
+==========
 
 Core_bench is a micro-benchmarking library for OCaml that can
 measure execution costs of operations that take 1ns to about
@@ -12,15 +12,11 @@ Micro-benchmarking enables programmers make informed choices when
 writing performance sensitive code. In the words of Michael
 Abrash from the old "Zen and the Art of Code Optimization":
 
-<cite>
-
- Assume nothing. I cannot emphasize this strongly enough-when you
- care about performance, do your best to improve the code and
- then measure the improvement. If you don't measure performance,
- you're just guessing, and if you're guessing, you're not very
- likely to write top-notch code
-
-</cite>
+> Assume nothing. I cannot emphasize this strongly enough-when you
+> care about performance, do your best to improve the code and
+> then measure the improvement. If you don't measure performance,
+> you're just guessing, and if you're guessing, you're not very
+> likely to write top-notch code
 
 Core_bench shares some similarities with Haskell's Criterion,
 though there are significant differences in the underlying
@@ -33,3 +29,5 @@ opam install core_bench
 
 To get started see:
 https://github.com/janestreet/core_bench/wiki/Getting-Started-with-Core_bench
+
+
