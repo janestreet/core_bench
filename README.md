@@ -6,7 +6,9 @@ measure execution costs of operations that take 1ns to about
 100ms. Core_bench tries to measure execution costs of such
 short-lived computations precisely while trying to account for
 delayed GC costs and noise introduced by other activity on the
-system.
+system. It shares some similarities with Haskell's Criterion,
+though there are significant differences in the underlying
+approach.
 
 Micro-benchmarking enables programmers make informed choices when
 writing performance sensitive code. In the words of Michael
@@ -18,9 +20,6 @@ Abrash from the old "Zen and the Art of Code Optimization":
 > you're just guessing, and if you're guessing, you're not very
 > likely to write top-notch code
 
-Core_bench shares some similarities with Haskell's Criterion,
-though there are significant differences in the underlying
-approach.
 
 Install using:
 <pre>
