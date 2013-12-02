@@ -12,12 +12,15 @@ Micro-benchmarking enables programmers make informed choices when
 writing performance sensitive code. In the words of Michael
 Abrash from the old "Zen and the Art of Code Optimization":
 
-      Assume nothing. I cannot emphasize this strongly
-      enough-when you care about performance, do your best to
-      improve the code and then measure the improvement. If you
-      don't measure performance, you're just guessing, and if
-      you're guessing, you're not very likely to write top-notch
-      code
+<cite>
+
+ Assume nothing. I cannot emphasize this strongly enough-when you
+ care about performance, do your best to improve the code and
+ then measure the improvement. If you don't measure performance,
+ you're just guessing, and if you're guessing, you're not very
+ likely to write top-notch code
+
+</cite>
 
 Core_bench shares some similarities with Haskell's Criterion,
 though there are significant differences in the underlying
