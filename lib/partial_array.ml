@@ -1,4 +1,6 @@
-(** Arrays in which only some initial segment is meaningful. *)
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+   Arrays in which only some initial segment is meaningful. *)
 open Core.Std
 
 type 'a t ={

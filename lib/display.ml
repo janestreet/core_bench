@@ -5,6 +5,27 @@ module R = Analysis_result.Regression
 module C = Analysis_result.Coefficient
 module Magnitude = Display_units.Magnitude
 
+module Warnings = struct
+  let long_running_benchmark_time_limit_nanos = 1E8
+  let has_long_running_benchmarks = ref false
+
+  let check_for_long_running_benchmarks ~(resp:Variable.t) ~(pred:Variable.t) est =
+    match (resp, pred) with
+    | (`Nanos, `Runs) ->
+      if est >= long_running_benchmark_time_limit_nanos
+      then has_long_running_benchmarks := true;
+    | (_, _) -> ()
+
+  let display () =
+    if !has_long_running_benchmarks
+    then printf
+           "Benchmarks that take 1ns to %s can be estimated precisely. For more reliable \n\
+            estimates, redesign your benchmark to have a shorter execution time.\n%!"
+           (Time.Span.to_string
+              (Time.Span.of_ns
+                 long_running_benchmark_time_limit_nanos))
+end
+
 module Regr = struct
   module Coeff = struct
     type t = {
@@ -72,7 +93,7 @@ module Regr = struct
          | None -> ([], "?")
          | Some regr -> f regr)
 
-  let make_columns ~show_absolute_ci ~show_all_values t =
+  let make_columns ~show_absolute_ci ~show_all_values ~show_overheads t =
     let append_name ~est col =
       match t.regression_name,  est && (Array.length t.coeffs = 1) with
       | Some name, true -> name
@@ -106,45 +127,53 @@ module Regr = struct
         cols
     in
     List.rev (Array.foldi t.coeffs ~init:cols ~f:(fun i acc coeff ->
-      let mag = coeff.Coeff.magnitude in
-      (* Display Estimates *)
-      let est_col =
-        create_col t
-          (append_name (Variable.make_col_name t.responder coeff.Coeff.predictor) ~est:false)
-          ~f:(fun regr ->
-            let est = (R.coefficients regr).(i) in
-            Display_units.to_string ~show_all_values unit mag (C.estimate est))
-      in
-      (* Display confidence intervals *)
-      if coeff.Coeff.has_ci then
-        let est_ci_col =
-          create_col t (append_name "95ci" ~est:false)
+      if coeff.Coeff.predictor = `One && (not show_overheads)
+      then acc
+      else begin
+        let mag = coeff.Coeff.magnitude in
+        (* Display Estimates *)
+        let est_col =
+          create_col t
+            (append_name (Variable.make_col_name t.responder coeff.Coeff.predictor) ~est:false)
             ~f:(fun regr ->
               let est = (R.coefficients regr).(i) in
-              match C.ci95 est with
-              | None -> ([], "")
-              | Some ci ->
-                (* Suppress the ci if the estimate has been suppressed. *)
-                let non_triv = C.has_non_trivial_estimate est
-                                 ~show_all_values:false
-                                 ~responder:t.responder
-                in
-                if non_triv || show_all_values then
-                  let attr, str =
-                    if show_absolute_ci then
-                      Display_units.to_ci_string ~show_all_values unit mag
-                        (Analysis_result.Ci95.ci95_abs_err ci ~estimate:(C.estimate est))
-                    else
-                      Display_units.to_ci_string ~show_all_values
-                        Display_units.Percentage mag
-                        (Analysis_result.Ci95.ci95_rel_err ci ~estimate:(C.estimate est))
+              Warnings.check_for_long_running_benchmarks
+                ~resp:t.responder
+                ~pred:coeff.Coeff.predictor
+                (C.estimate est);
+              Display_units.to_string ~show_all_values unit mag (C.estimate est))
+        in
+        (* Display confidence intervals *)
+        if coeff.Coeff.has_ci then
+          let est_ci_col =
+            create_col t (append_name "95ci" ~est:false)
+              ~f:(fun regr ->
+                let est = (R.coefficients regr).(i) in
+                match C.ci95 est with
+                | None -> ([], "")
+                | Some ci ->
+                  (* Suppress the ci if the estimate has been suppressed. *)
+                  let non_triv = C.has_non_trivial_estimate est
+                                   ~show_all_values:false
+                                   ~responder:t.responder
                   in
-                  let attr = if show_all_values then (`Dim :: attr) else attr in
-                  (attr, str)
-                else ([], ""))
-        in est_ci_col :: est_col :: acc
-      else
-        est_col :: acc))
+                  if non_triv || show_all_values then
+                    let attr, str =
+                      if show_absolute_ci then
+                        Display_units.to_ci_string ~show_all_values unit mag
+                          (Analysis_result.Ci95.ci95_abs_err ci ~estimate:(C.estimate est))
+                      else
+                        Display_units.to_ci_string ~show_all_values
+                          Display_units.Percentage mag
+                          (Analysis_result.Ci95.ci95_rel_err ci ~estimate:(C.estimate est))
+                    in
+                    let attr = if show_all_values then (`Dim :: attr) else attr in
+                    (attr, str)
+                  else ([], ""))
+          in est_ci_col :: est_col :: acc
+        else
+          est_col :: acc
+      end))
 
 end
 
@@ -222,9 +251,10 @@ let make_columns_for_regressions display_config results =
   in
   let show_absolute_ci = display_config.Display_config.show_absolute_ci in
   let show_all_values = display_config.Display_config.show_all_values in
+  let show_overheads = display_config.Display_config.show_overheads in
   let cols =
     List.fold ~init:[] regressions ~f:(fun acc (_key, data) ->
-      acc @ Regr.make_columns ~show_absolute_ci ~show_all_values data)
+      acc @ Regr.make_columns ~show_absolute_ci ~show_all_values ~show_overheads data)
   in
   cols @ (make_speed_and_percentage_columns display_config tbl)
 
@@ -256,6 +286,7 @@ let make_columns display_config results =
   in
   cols
 
+
 let display ~display_config results =
   let cols = make_columns display_config results in
   Ascii_table.output
@@ -266,5 +297,6 @@ let display ~display_config results =
            else `Unicode)
     ~display:(Display_config.display display_config)
     cols
-    results
+    results;
+  Warnings.display ();
 

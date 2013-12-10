@@ -1,4 +1,5 @@
- open Core.Std
+(** A module internal to [Core_bench]. Please look at {!Bench}. *)
+open Core.Std
 
 type t = {
   regression_name  : string option;
@@ -14,15 +15,16 @@ let create ~responder ~predictors
 }
 
 let vs_runs responder () = create ~responder ~predictors:[`Runs] ()
+let vs_runs_overhead responder () = create ~responder ~predictors:[`Runs; `One] ()
 
 let nanos_vs_runs = vs_runs `Nanos ()
 
 let cycles_vs_runs = vs_runs `Cycles ()
 
 let allocations_vs_runs = [
-  vs_runs `Minor_allocated ();
-  vs_runs `Major_allocated ();
-  vs_runs `Promoted ();
+  vs_runs_overhead `Minor_allocated ();
+  vs_runs_overhead `Major_allocated ();
+  vs_runs_overhead `Promoted ();
 ]
 
 let gc_vs_runs = [
@@ -37,7 +39,10 @@ let cycles  ~predictors = create ~responder:`Cycles ~predictors ()
 (* This includes a lot of things. *)
 let default = [ nanos_vs_runs ] @ allocations_vs_runs @ gc_vs_runs
 
-let with_error_estimation t ~bootstrap_trials =
+let default_bootstrap_trials = 3000
+let default_reduced_bootstrap_trials = 300
+
+let with_error_estimation ?(bootstrap_trials=default_bootstrap_trials) t =
   { t with bootstrap_trials; r_square=true }
 
 let reduce_bootstrap t ~bootstrap_trials =
@@ -50,9 +55,6 @@ let make_key t =
   (List.fold ~init t.predictors ~f:(fun acc pred ->
      (1 lsl (Variable.to_int pred)) + acc))
 
-
-let default_bootstrap_trials = 3000
-let default_reduced_bootstrap_trials = 300
 
 let parse ?regression_name str =
   let str, bootstrap_trials, r_square =

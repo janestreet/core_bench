@@ -1,3 +1,6 @@
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+   Abstract set of variables used for specifying regressions. *)
 open Core.Std
 
 type t =

@@ -1,3 +1,6 @@
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+   Column specifications used by the command line interface. *)
 open Core.Std
 
 type t =

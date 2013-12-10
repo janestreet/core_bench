@@ -1,6 +1,8 @@
-(** Some basic linear algebra code, so that basic operations can be done
-    without introducing a dependency on Lacaml/LAPACK.  Currently only
-    has the minimum needed to do ordinary least squares.
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+    Some basic linear algebra code, so that basic operations can be done without
+    introducing a dependency on Lacaml/LAPACK.  Currently only has the minimum needed to
+    do ordinary least squares.
 
     Matrices are represented via [float array array], in row-major order.
 *)
@@ -50,22 +52,16 @@ val qr : ?in_place:bool -> Mat.t -> Mat.t * Mat.t
     and [b] is an m x 1 column vector.  *)
 val triu_solve : Mat.t -> Vec.t -> Vec.t Or_error.t
 
-(** [mul A B] computes the matrix product [A * B].  If [transa] (default: [false])
-    is [true], then we compute A' * B where A' denotes the transpose of A. *)
-(* val mul : ?transa:bool -> Mat.t -> Mat.t -> Mat.t *)
-
 (** [mul_mv A x] computes the product [A * x] (where [M] is a matrix and [x] is
     a column vector). *)
 val mul_mv : ?transa:bool -> Mat.t -> Vec.t -> Vec.t
 
-(** [ols A b] computes the ordinary least-squares solution to A x = b.
-    [A] must have at least as many rows as columns and have full rank.
+(** [ols A b] computes the ordinary least-squares solution to A x = b.  [A] must have at
+    least as many rows as columns and have full rank.
 
-    This can be used to compute solutions to non-singular square systems,
-    but is somewhat sub-optimal for that purpose.
-
-    The algorithm is to factor A = Q * R and solve R x = Q' b where Q' denotes
-    the transpose of Q.
+    This can be used to compute solutions to non-singular square systems, but is somewhat
+    sub-optimal for that purpose.  The algorithm is to factor A = Q * R and solve R x = Q'
+    b where Q' denotes the transpose of Q.
 
     If [in_place] (default: [false]) is [true], then [A] will be destroyed.
 *)

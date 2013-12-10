@@ -24,7 +24,7 @@ let save t ~filename =
     else ls)) in
   Out_channel.write_lines filename (header1 :: header2 :: ls)
 
-let load filename =
+let load ~filename =
   match In_channel.read_lines filename with
   | header1 :: _header2 :: data -> begin
       let name = String.subo ~pos:2 header1 in

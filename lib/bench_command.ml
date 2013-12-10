@@ -35,6 +35,8 @@ let spec () =
     +> flag "-fork" no_arg ~doc:" Fork and run each benchmark in separate child-process"
     +> flag "-all-values" no_arg ~doc:" Show all column values, including very small ones."
     +> flag "-no-compactions" no_arg ~doc:" Disable GC compactions."
+    ++ step (fun m x -> m ~show_overheads:x)
+    +> flag "-overheads" no_arg ~doc:" Show measurement overheads, when applicable."
     ++ step (fun m linear geometric ->
       let sampling_type =
         match linear, geometric with
@@ -80,6 +82,7 @@ let parse_commandline_args
       fork_each_benchmark
       show_all_values
       no_compactions
+      ~show_overheads
       ~sampling_type
       save_sample_data
       minimal_tables
@@ -123,7 +126,10 @@ let parse_commandline_args
     let to_name i = sprintf " [%d]" (i+1) in
     analysis_configs @
     (List.mapi regressions
-       ~f:(fun i reg ->  Analysis_config.parse reg ~regression_name:(to_name i)))
+       ~f:(fun i reg ->
+         let regression_name = to_name i in
+         printf "Regression%s = %s\n%!" regression_name reg;
+         Analysis_config.parse reg ~regression_name))
   in
   let analysis_configs =
     if reduced_bootstrap
@@ -166,6 +172,7 @@ let parse_commandline_args
       ~show_speedup:(List.mem columns `Speedup)
       ~show_all_values
       ~show_absolute_ci
+      ~show_overheads
       ~display
       ~ascii_table
       ()
@@ -178,23 +185,6 @@ let parse_commandline_args
       (analysis_configs, display_config, `From_file filenames)
   in
   f configs
-
-
-
-  (* match analyze_files with
-   * | [] ->
-   *   bench
-   *     ~run_config
-   *     ~analysis_configs
-   *     ~display_config
-   *     ?save
-   *     tests
-   * | filenames ->
-   *   analyze
-   *     ~filenames
-   *     ~display_config
-   *     ~analysis_configs
-   *     () *)
 
 let readme () = sprintf "\
 Columns that can be specified are:
@@ -296,4 +286,3 @@ let make
           ~display_config
           ~filenames
           ())
-

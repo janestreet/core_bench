@@ -6,7 +6,9 @@ let t1 = Bench.Test.create_indexed
   ~args:[100;200;300;400;1000;10000]
   (fun len -> Staged.stage
     (fun () ->
-      ignore (Array.create ~len 0)))
+      for _i = 0 to 2000 do
+        ignore (Array.create ~len 0)
+      done))
 
 let tests = [ t1 ]
 

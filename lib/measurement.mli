@@ -1,3 +1,6 @@
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+   Contains the measurements of several runs of one benchmark. *)
 open Core.Std
 
 type t with sexp
@@ -14,7 +17,6 @@ val create
   -> samples:Measurement_sample.t array
   -> t
 
-
 val save : t -> filename:string -> unit
-val load : string -> t
+val load : filename:string -> t
 

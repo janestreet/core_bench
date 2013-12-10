@@ -1,3 +1,6 @@
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+    A [Test.t] represents a user specified benchmark. *)
 open Core.Std
 
 module Id : Unique_id.Id = Unique_id.Int(Unit)
@@ -17,6 +20,7 @@ module Basic_test = struct
   let make_filename t =
     let name = String.tr ~target:' ' ~replacement:'-' t.name in
     name ^ ".txt"
+
 end
 
 type t = {
@@ -46,4 +50,13 @@ let create_indexed ~name ~args ?(key=0) bm = {
 
 let expand ts =
   List.concat (List.map ~f:tests ts)
+
+let create_group ~name ts =
+  let ts = expand ts in
+  {
+    name;
+    tests = List.map ts ~f:(fun test ->
+      let name = name ^ "/" ^ test.Basic_test.name in
+      { test with Basic_test.name = name });
+}
 

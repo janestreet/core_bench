@@ -1,3 +1,6 @@
+(** A module internal to [Core_bench]. Please look at {!Bench}.
+
+   Convert measurement and analysis specifications to [Linear_algebra] calls. *)
 open Core.Std
 
 val ols

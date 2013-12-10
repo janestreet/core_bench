@@ -12,7 +12,7 @@ module Analysis_config = Analysis_config
 
 
 let load_measurements ~filenames =
-  List.map ~f:Measurement.load filenames
+  List.map ~f:(fun filename -> Measurement.load ~filename) filenames
 
 let save_measurements measurements ~to_filename =
   List.iter measurements ~f:(fun m ->

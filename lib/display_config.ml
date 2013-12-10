@@ -1,3 +1,4 @@
+(** A module internal to [Core_bench]. Please look at {!Bench}. *)
 open Textutils
 
 type t = {
@@ -10,6 +11,7 @@ type t = {
   show_speedup        : bool;
   show_samples        : bool;
   show_all_values     : bool;
+  show_overheads      : bool;
 } with fields
 
 let create
@@ -22,6 +24,7 @@ let create
     ?(show_speedup=false)
     ?(show_samples=false)
     ?(show_all_values=false)
+    ?(show_overheads=false)
     () =
   { don't_display_table;
     limit_width_to;
@@ -32,4 +35,5 @@ let create
     show_samples;
     show_speedup;
     show_all_values;
+    show_overheads;
   }
