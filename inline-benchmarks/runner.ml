@@ -70,7 +70,8 @@ let run_benchmarks
       ~run_config
       ~display_config
       ~analysis_configs
-      ~save:_
+      ?save_to_file
+      ()
   =
   let _tbl, tests = get_matching_tests ~libname test_locations in
   if List.is_empty tests
@@ -80,6 +81,7 @@ let run_benchmarks
       ~run_config
       ~analysis_configs
       ~display_config
+      ?save_to_file
       tests
 
 let spec () =
@@ -103,7 +105,7 @@ let main ~libname =
         if not benchmarks_runner
         then failwith "Don't run directly, run using the benchmarks_runner script.";
         match args with
-        | (analysis_configs, display_config, `Run (save, run_config)) ->
+        | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
           run_benchmarks
             ~libname
             ~test_locations
@@ -111,7 +113,8 @@ let main ~libname =
             ~run_config
             ~display_config
             ~analysis_configs
-            ~save
+            ?save_to_file
+            ()
         | (_analysis_configs, _display_config, `From_file _filenames) ->
           failwith "Loading saved files is not supported for inline executables."
       )

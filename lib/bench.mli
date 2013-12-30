@@ -234,11 +234,13 @@ val make_command : Test.t list -> Command.t
 
 (** [bench tests] will run, analyze and display the specified [tests]. Use this when one
     needs more control over the execution parameters that what is exposed through
-    [make_command]. *)
+    [make_command]. [bench] can also save the measurements of each test to the filename
+    returned by [save_to_file]. *)
 val bench
   :  ?run_config:Run_config.t
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
+  -> ?save_to_file:(Measurement.t -> string)
   -> Test.t list
   -> unit
 

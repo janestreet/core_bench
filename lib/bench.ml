@@ -38,19 +38,17 @@ let analyze_and_display ~measurements ?analysis_configs ?display_config () =
   in
   display ?display_config results
 
-let bench ?run_config ?analysis_configs ?display_config tests =
+let bench ?run_config ?analysis_configs ?display_config ?save_to_file tests =
   let measurements = measure ?run_config tests in
+  begin match save_to_file with
+  | Some to_filename -> save_measurements measurements ~to_filename
+  | None -> ()
+  end;
   analyze_and_display ~measurements ?analysis_configs ?display_config ()
 
 let make_command tests =
   Bench_command.make
-    ~bench:(fun ?run_config ?analysis_configs ?display_config ?save tests ->
-      let measurements = measure ?run_config tests in
-      begin match save with
-      | Some to_filename -> save_measurements measurements ~to_filename
-      | None -> ()
-      end;
-      analyze_and_display ~measurements ?analysis_configs ?display_config ())
+    ~bench
     ~analyze:(fun ~filenames ?analysis_configs ?display_config () ->
       let measurements = load_measurements ~filenames in
       analyze_and_display ~measurements ?analysis_configs ?display_config ())

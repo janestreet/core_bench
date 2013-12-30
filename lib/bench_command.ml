@@ -7,7 +7,7 @@ type callback_bench
   = ?run_config:Run_config.t
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
-  -> ?save:(Measurement.t -> string)
+  -> ?save_to_file:(Measurement.t -> string)
   -> Test.t list
   -> unit
 
@@ -273,12 +273,12 @@ let make
     ~extra_spec:Command.Spec.empty
     ~f:(fun args () ->
       match args with
-      | (analysis_configs, display_config, `Run (save, run_config)) ->
+      | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
         bench
           ~analysis_configs
           ~display_config
           ~run_config
-          ?save
+          ?save_to_file
           tests
       | (analysis_configs, display_config, `From_file filenames) ->
         analyze
