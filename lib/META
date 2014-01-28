@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 932ce7bc75c1690d35e0ba3847be04c5)
-version = "109.58.00"
+# DO NOT EDIT (digest: fe12bd56f1f10ba921beb22ce38429a9)
+version = "109.58.01"
 description = "Benchmark library"
 requires = "core textutils threads pa_ounit"
 archive(byte) = "core_bench.cma"
@@ -9,7 +9,7 @@ archive(native) = "core_bench.cmxa"
 archive(native, plugin) = "core_bench.cmxs"
 exists_if = "core_bench.cma"
 package "inline_benchmarks" (
- version = "109.58.00"
+ version = "109.58.01"
  description = "Benchmark library"
  requires = "core_bench"
  archive(byte) = "inline_benchmarks.cma"
