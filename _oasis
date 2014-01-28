@@ -84,11 +84,3 @@ Executable test_bench
                       fieldslib.syntax,
                       comparelib.syntax,
                       threads
-
-Document "core_bench"
-  Title:                Benchmark library
-  Type:                 ocamlbuild (0.3)
-  BuildTools+:          ocamldoc
-  XOCamlbuildPath:      lib
-  XOCamlbuildLibraries: core_bench
-
