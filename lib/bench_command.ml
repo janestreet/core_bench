@@ -50,7 +50,7 @@ let spec () =
     +> flag "-linear" (optional int)
          ~doc:"INCREMENT Use linear sampling to explore number of runs, example 1."
     +> flag "-geometric" (optional float)
-         ~doc:(sprintf "SCALE Use geometric sampling. (default %0.2f)"
+         ~doc:(sprintf "SCALE Use geometric sampling. (default %.2f)"
                  Defaults.geometric_scale)
     +> flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files."
     +> flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
