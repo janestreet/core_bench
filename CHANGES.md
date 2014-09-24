@@ -1,3 +1,7 @@
+## 112.01.00
+
+- fixed legacy format string
+
 ## 109.58.00
 
 - Added support for saving inline benchmark measurements to tabular
