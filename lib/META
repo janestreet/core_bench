@@ -1,0 +1,22 @@
+# OASIS_START
+# DO NOT EDIT (digest: 0ce7b8a219496a0db641a54aa424ca1e)
+version = "112.01.00"
+description = "Benchmark library"
+requires = "core textutils threads pa_ounit"
+archive(byte) = "core_bench.cma"
+archive(byte, plugin) = "core_bench.cma"
+archive(native) = "core_bench.cmxa"
+archive(native, plugin) = "core_bench.cmxs"
+exists_if = "core_bench.cma"
+package "inline_benchmarks" (
+ version = "112.01.00"
+ description = "Benchmark library"
+ requires = "core_bench"
+ archive(byte) = "inline_benchmarks.cma"
+ archive(byte, plugin) = "inline_benchmarks.cma"
+ archive(native) = "inline_benchmarks.cmxa"
+ archive(native, plugin) = "inline_benchmarks.cmxs"
+ exists_if = "inline_benchmarks.cma"
+)
+# OASIS_STOP
+
