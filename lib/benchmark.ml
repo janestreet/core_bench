@@ -30,7 +30,7 @@ let measure =
     test
   ->
   (* test function *)
-  let f = test.Test.Basic_test.f in
+  let Test.Basic_test.T f = test.Test.Basic_test.f in
 
   (* the samples *)
   let max_samples = 3_000 in
@@ -75,7 +75,7 @@ let measure =
 
     (* MEASURE A SINGLE SAMPLE *)
     for _i = 1 to current_runs do
-      f ();
+      ignore(f ());
     done;
     (* END OF MEASUREMENT *)
 

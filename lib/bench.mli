@@ -103,15 +103,18 @@ open Core.Std
 module Test : sig
   type t
 
-  (** Creates a simple benchmark. *)
-  val create : name:string -> ?key:int -> (unit -> unit) -> t
+  (** Creates a simple benchmark. Here the benchmark may return some ['a] which is then
+      ignored. One should be careful when putting calls to [ignore] in benchmarks because
+      OCaml versions 4.02 onwards can optimize away some ignored computations. *)
+  val create : name:string -> ?key:int -> (unit -> 'a) -> t
 
-  (** Creates a group of benchmarks indexed by a size. *)
+  (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
+      about the ['a] below. *)
   val create_indexed
     :  name:string
     -> args:int list
     -> ?key:int
-    -> (int -> (unit -> unit) Staged.t)
+    -> (int -> (unit -> 'a) Staged.t)
     -> t
 
   val create_group

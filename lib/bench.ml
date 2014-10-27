@@ -2,7 +2,6 @@
 open Core.Std
 
 module Test = Test
-
 module Run_config = Run_config
 module Display_column = Display_column
 module Display_config = Display_config

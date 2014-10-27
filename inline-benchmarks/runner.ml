@@ -25,8 +25,8 @@ let entry_to_bench_test entry ~key =
   let name = make_benchmark_name entry in
   match entry.Entry.test_spec with
   | Regular_thunk f ->
-    let func = f () in
-    Bench.Test.create ~name ~key func
+       let func = f () in
+       Bench.Test.create ~name ~key func
   | Indexed_thunk { arg_values; thunk; _ } ->
     Bench.Test.create_indexed
       ~name ~args:arg_values ~key

@@ -1,3 +1,8 @@
+## 112.06.00
+
+- Solved a problem in which OCaml 4.02 was optimizing away benchmarks,
+  making them meaningless.
+
 ## 112.01.00
 
 - fixed legacy format string

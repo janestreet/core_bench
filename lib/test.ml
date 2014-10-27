@@ -5,17 +5,18 @@ open Core.Std
 
 module Id : Unique_id.Id = Unique_id.Int(Unit)
 module Basic_test = struct
+  type packed_f = T : (unit -> 'a) -> packed_f
   type t = {
-    test_id : Id.t;
-    name    : string;
-    key     : int;
-    arg     : int option;
+    test_id   : Id.t;
+    name      : string;
+    key       : int;
+    arg       : int option;
     group_key : int option;
-    f       : unit -> unit;
+    f         : packed_f;
   } with fields
 
   let create ~name ?(group_key=None) ?(arg=None) ~key f =
-    { name; f; key; group_key; arg; test_id = Id.create () }
+    { name; f = T f; key; group_key; arg; test_id = Id.create () }
 
   let make_filename t =
     let name = String.tr ~target:' ' ~replacement:'-' t.name in
@@ -41,8 +42,9 @@ let create_indexed ~name ~args ?(key=0) bm = {
     { Basic_test.
       name;
       arg = Some n;
-      key=individual_key; group_key= Some key;
-      f = Staged.unstage (bm n);
+      key = individual_key;
+      group_key = Some key;
+      f = T (Staged.unstage (bm n));
       test_id = Id.create ()
     }
   )

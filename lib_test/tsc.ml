@@ -21,10 +21,10 @@ let command = Bench.make_command [
 
     (let c = Time_stamp_counter.now () in
      Bench.Test.create ~name:"TSC.to_nanos_since_epoch" (fun () ->
-       ignore (Time_stamp_counter.to_nanos_since_epoch c)));
+       ignore (Time_stamp_counter.to_time_ns c)));
 
     Bench.Test.create ~name:"TSC.to_nanos_since_epoch(TSC.now ())" (fun () ->
-      ignore (Time_stamp_counter.to_nanos_since_epoch
+      ignore (Time_stamp_counter.to_time_ns
                 (Time_stamp_counter.now ())));
   ];
 ]
