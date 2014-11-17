@@ -66,7 +66,8 @@ Library inline_benchmarks
   BuildDepends:       core_bench,
                       sexplib.syntax,
                       fieldslib.syntax,
-                      comparelib.syntax
+                      comparelib.syntax,
+                      str
   XMETARequires:      core_bench
 
 Executable test_bench
