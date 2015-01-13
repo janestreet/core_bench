@@ -1,3 +1,7 @@
+## 112.17.00
+
+- Updated code to follow some core changes
+
 ## 112.06.00
 
 - Solved a problem in which OCaml 4.02 was optimizing away benchmarks,

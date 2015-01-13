@@ -3,7 +3,7 @@
     A [Test.t] represents a user specified benchmark. *)
 open Core.Std
 
-module Id : Unique_id.Id = Unique_id.Int(Unit)
+module Id : Unique_id.Id = Unique_id.Int()
 module Basic_test = struct
   type packed_f = T : (unit -> 'a) -> packed_f
   type t = {
