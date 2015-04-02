@@ -4,9 +4,9 @@ FindlibVersion:   >= 1.3.2
 Name:             core_bench
 Version:          112.17.00
 Synopsis:         Benchmark library
-Authors:          Jane Street Capital LLC <opensource@janestreet.com>
-Copyrights:       (C) 2013 Jane Street Capital LLC <opensource@janestreet.com>
-Maintainers:      Jane Street Capital LLC <opensource@janestreet.com>
+Authors:          Jane Street Group, LLC <opensource@janestreet.com>
+Copyrights:       (C) 2013 Jane Street Group, LLC <opensource@janestreet.com>
+Maintainers:      Jane Street Group, LLC <opensource@janestreet.com>
 License:          Apache-2.0
 LicenseFile:      LICENSE.txt
 Homepage:         https://github.com/janestreet/core_bench
