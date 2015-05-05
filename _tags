@@ -1,3 +1,3 @@
 # OASIS_START
 # OASIS_STOP
-<lib{,_test}/*.ml{,i}>: syntax_camlp4o, pa_ounit_lib(core_bench)
+<{src,test}/*.ml{,i}>: syntax_camlp4o, pa_ounit_lib(core_bench)

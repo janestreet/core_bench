@@ -16,7 +16,7 @@ XStdFilesREADME:  false
 BuildTools:       ocamlbuild, camlp4o
 
 Library core_bench
-  Path:               lib
+  Path:               src
   FindlibName:        core_bench
   Pack:               true
   Modules:            Analysis,
@@ -71,7 +71,7 @@ Library inline_benchmarks
   XMETARequires:      core_bench
 
 Executable test_bench
-  Path:               lib_test
+  Path:               test
   MainIs:             test_bench.ml
   Build$:             flag(tests)
   Custom:             true
