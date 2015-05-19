@@ -101,7 +101,7 @@ open Core.Std
 
 (** [Test.t] are benchmarked by calls to bench. *)
 module Test : sig
-  type t
+  type t = Test.t
 
   (** Creates a simple benchmark. Here the benchmark may return some ['a] which is then
       ignored. One should be careful when putting calls to [ignore] in benchmarks because

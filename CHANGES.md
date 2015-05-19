@@ -1,3 +1,10 @@
+## 112.35.00
+
+- Exposed the equality of `Core_bench.Std.Bench.Test.t` with
+  `Core_bench.Test.t`, so that one can get the name of a test.
+
+    This is useful for filtering based on test name.
+
 ## 112.17.00
 
 - Updated code to follow some core changes
