@@ -1,3 +1,96 @@
 # OASIS_START
+# DO NOT EDIT (digest: 8ac7cc8b104132418ec4db569631fd8b)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library core_bench
+"src/core_bench.cmxs": use_core_bench
+"src/analysis.cmx": for-pack(Core_bench)
+"src/analysis_config.cmx": for-pack(Core_bench)
+"src/analysis_result.cmx": for-pack(Core_bench)
+"src/bench.cmx": for-pack(Core_bench)
+"src/bench_command.cmx": for-pack(Core_bench)
+"src/bench_command_column.cmx": for-pack(Core_bench)
+"src/bench_result.cmx": for-pack(Core_bench)
+"src/benchmark.cmx": for-pack(Core_bench)
+"src/defaults.cmx": for-pack(Core_bench)
+"src/display.cmx": for-pack(Core_bench)
+"src/display_column.cmx": for-pack(Core_bench)
+"src/display_config.cmx": for-pack(Core_bench)
+"src/display_units.cmx": for-pack(Core_bench)
+"src/linear_algebra.cmx": for-pack(Core_bench)
+"src/linear_algebra_wrapper.cmx": for-pack(Core_bench)
+"src/measurement.cmx": for-pack(Core_bench)
+"src/measurement_sample.cmx": for-pack(Core_bench)
+"src/partial_array.cmx": for-pack(Core_bench)
+"src/run_config.cmx": for-pack(Core_bench)
+"src/std.cmx": for-pack(Core_bench)
+"src/test.cmx": for-pack(Core_bench)
+"src/to_string.cmx": for-pack(Core_bench)
+"src/variable.cmx": for-pack(Core_bench)
+"src/verbosity.cmx": for-pack(Core_bench)
+<src/core_bench.{cma,cmxa}>: use_libcore_bench_stubs
+<src/*.ml{,i,y}>: package(comparelib.syntax)
+<src/*.ml{,i,y}>: package(core)
+<src/*.ml{,i,y}>: package(fieldslib.syntax)
+<src/*.ml{,i,y}>: package(pa_ounit)
+<src/*.ml{,i,y}>: package(pa_ounit.syntax)
+<src/*.ml{,i,y}>: package(sexplib.syntax)
+<src/*.ml{,i,y}>: package(textutils)
+<src/*.ml{,i,y}>: package(threads)
+"src/rdtsc_stubs.c": package(comparelib.syntax)
+"src/rdtsc_stubs.c": package(core)
+"src/rdtsc_stubs.c": package(fieldslib.syntax)
+"src/rdtsc_stubs.c": package(pa_ounit)
+"src/rdtsc_stubs.c": package(pa_ounit.syntax)
+"src/rdtsc_stubs.c": package(sexplib.syntax)
+"src/rdtsc_stubs.c": package(textutils)
+"src/rdtsc_stubs.c": package(threads)
+# Library inline_benchmarks
+"inline-benchmarks/inline_benchmarks.cmxs": use_inline_benchmarks
+"inline-benchmarks/runner.cmx": for-pack(Inline_benchmarks)
+<inline-benchmarks/*.ml{,i,y}>: package(comparelib.syntax)
+<inline-benchmarks/*.ml{,i,y}>: package(core)
+<inline-benchmarks/*.ml{,i,y}>: package(fieldslib.syntax)
+<inline-benchmarks/*.ml{,i,y}>: package(pa_ounit)
+<inline-benchmarks/*.ml{,i,y}>: package(pa_ounit.syntax)
+<inline-benchmarks/*.ml{,i,y}>: package(sexplib.syntax)
+<inline-benchmarks/*.ml{,i,y}>: package(str)
+<inline-benchmarks/*.ml{,i,y}>: package(textutils)
+<inline-benchmarks/*.ml{,i,y}>: package(threads)
+<inline-benchmarks/*.ml{,i,y}>: use_core_bench
+# Executable test_bench
+<test/test_bench.{native,byte}>: package(comparelib.syntax)
+<test/test_bench.{native,byte}>: package(core)
+<test/test_bench.{native,byte}>: package(core_extended)
+<test/test_bench.{native,byte}>: package(fieldslib.syntax)
+<test/test_bench.{native,byte}>: package(pa_ounit)
+<test/test_bench.{native,byte}>: package(pa_ounit.syntax)
+<test/test_bench.{native,byte}>: package(sexplib.syntax)
+<test/test_bench.{native,byte}>: package(textutils)
+<test/test_bench.{native,byte}>: package(threads)
+<test/test_bench.{native,byte}>: use_core_bench
+<test/*.ml{,i,y}>: package(comparelib.syntax)
+<test/*.ml{,i,y}>: package(core)
+<test/*.ml{,i,y}>: package(core_extended)
+<test/*.ml{,i,y}>: package(fieldslib.syntax)
+<test/*.ml{,i,y}>: package(pa_ounit)
+<test/*.ml{,i,y}>: package(pa_ounit.syntax)
+<test/*.ml{,i,y}>: package(sexplib.syntax)
+<test/*.ml{,i,y}>: package(textutils)
+<test/*.ml{,i,y}>: package(threads)
+<test/*.ml{,i,y}>: use_core_bench
+<test/test_bench.{native,byte}>: custom
 # OASIS_STOP
 <{src,test}/*.ml{,i}>: syntax_camlp4o, pa_ounit_lib(core_bench)
