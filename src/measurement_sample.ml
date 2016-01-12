@@ -13,7 +13,7 @@ type t = {
   mutable promoted          : int;
   mutable major_collections : int;
   mutable minor_collections : int;
-} with sexp, fields
+} [@@deriving sexp, fields]
 
 let create () = {
   runs              = 0;

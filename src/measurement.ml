@@ -7,7 +7,7 @@ type t = {
   largest_run  : int;
   sample_count : int;
   samples      : Measurement_sample.t array
-} with sexp, fields
+} [@@deriving sexp, fields]
 
 let create ~name ~largest_run ~sample_count ~samples = {
   name; largest_run; sample_count; samples;

@@ -13,7 +13,7 @@ module Basic_test = struct
     arg       : int option;
     group_key : int option;
     f         : packed_f;
-  } with fields
+  } [@@deriving fields]
 
   let create ~name ?(group_key=None) ?(arg=None) ~key f =
     { name; f = T f; key; group_key; arg; test_id = Id.create () }
@@ -27,7 +27,7 @@ end
 type t = {
   name : string;
   tests: Basic_test.t list
-} with fields
+} [@@deriving fields]
 
 let create ~name ?(key=0) bm = {
   name;

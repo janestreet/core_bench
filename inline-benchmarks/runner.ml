@@ -1,7 +1,7 @@
 open Core.Std
 open Core_bench.Std
 
-module Entry = Pa_bench_lib.Benchmark_accumulator.Entry
+module Entry = Ppx_bench_lib.Benchmark_accumulator.Entry
 
 let make_benchmark_name entry =
   let module_name =
@@ -40,7 +40,7 @@ let pattern_to_predicate s =
 
 let get_matching_tests ~libname patterns =
   let tbl = Int.Table.create () in
-  let entries = Pa_bench_lib.Benchmark_accumulator.lookup_lib ~libname in
+  let entries = Ppx_bench_lib.Benchmark_accumulator.lookup_lib ~libname in
   let entries =
     match patterns with
     (* if no regexes are specified not specified, run all entries *)
@@ -61,6 +61,15 @@ let get_matching_tests ~libname patterns =
   in
   tbl, tests
 
+let x_library_inlining_warning ~run_without_inlining =
+  if not Version_util.x_library_inlining then begin
+    Core.Std.printf
+      "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.\n%!";
+    if not run_without_inlining then
+      failwith "If you would like to run benchmarks, and are ok with getting inaccurate \
+                results due to lack of cross library inlining, use the \
+                -run-without-cross-library-inlining flag."
+  end
 
 (* The main function for the inline benchmarks *)
 let run_benchmarks
@@ -68,11 +77,13 @@ let run_benchmarks
       ~test_locations
       ~no_sexp:_
       ~run_config
+      ~run_without_inlining
       ~display_config
       ~analysis_configs
       ?save_to_file
       ()
   =
+  x_library_inlining_warning ~run_without_inlining;
   let _tbl, tests = get_matching_tests ~libname test_locations in
   if List.is_empty tests
   then printf "No benchmarks to run!\n%!"
@@ -93,6 +104,8 @@ let spec () =
          ~doc:"REGEX Run benchmarks matching the REGEX."
     +> flag "no-sexp" no_arg
          ~doc:" Do not generate a benchmarks.sexp file (quicker)."
+    +> flag "run-without-cross-library-inlining" no_arg
+         ~doc:" Run benchmarks even when compiled with X_LIBRARY_INLINING=false."
   )
 
 
@@ -101,7 +114,7 @@ let main ~libname =
     Bench.make_command_ext
       ~summary:(sprintf "Runs inline benchmarks in lib %s." libname)
       ~extra_spec:(spec ())
-      ~f:(fun args benchmarks_runner test_locations no_sexp () ->
+      ~f:(fun args benchmarks_runner test_locations no_sexp run_without_inlining () ->
         if not benchmarks_runner
         then failwith "Don't run directly, run using the benchmarks_runner script.";
         match args with
@@ -111,6 +124,7 @@ let main ~libname =
             ~test_locations
             ~no_sexp
             ~run_config
+            ~run_without_inlining
             ~display_config
             ~analysis_configs
             ?save_to_file

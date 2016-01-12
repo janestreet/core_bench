@@ -6,7 +6,7 @@ open Core.Std
 type 'a t ={
   values : 'a array;
   mutable len : int
-} with fields
+} [@@deriving fields]
 
 let create ~values ~len = { values; len }
 

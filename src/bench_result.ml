@@ -8,7 +8,7 @@ module Predictor_result = struct
   type t = {
     pred        : Variable.t;
     coefficient : Coefficient.t;
-  } with fields, sexp
+  } [@@deriving fields, sexp]
 
   let estimate t = Coefficient.estimate t.coefficient
   let ci95 t = Coefficient.ci95 t.coefficient
@@ -36,7 +36,7 @@ type t = {
   percentage      : float;
   speedup         : float;
   time_taken      : Time.Span.t;
-} with fields, sexp
+} [@@deriving fields, sexp]
 
 
 (* These are here for convenient access *)

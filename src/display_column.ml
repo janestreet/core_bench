@@ -5,4 +5,4 @@ type t =
   | `Speedup
   | `Percentage
   | `Samples
-  ] with sexp
+  ] [@@deriving sexp]

@@ -121,6 +121,8 @@ module Test : sig
     :  name:string
     -> t list
     -> t
+
+  val name : t -> string
 end
 
 (** [Variable.t]s represent variables than can be used as predictors or the responder
@@ -137,7 +139,7 @@ module Variable : sig
   | `Minor_allocated
   | `Major_allocated
   | `One (* the "variable" that is always 1 *)
-  ] with sexp
+  ] [@@deriving sexp]
 end
 
 (** [Run_config.t] specifies how a benchmark should be run. *)
@@ -220,7 +222,7 @@ end
 (** A [Measurement.t] represents the result of measuring execution of a [Test.t]. It is
     used as input for subsequent analysis. *)
 module Measurement : sig
-  type t with sexp
+  type t [@@deriving sexp]
 
   val name : t -> string
   val save : t -> filename:string -> unit

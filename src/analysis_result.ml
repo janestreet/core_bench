@@ -5,7 +5,7 @@ module Ci95 = struct
   type t = {
     left_endpoint  : float;
     right_endpoint : float
-  } with fields, sexp
+  } [@@deriving fields, sexp]
 
 
   let create ~left_endpoint ~right_endpoint = {
@@ -35,7 +35,7 @@ module Coefficient = struct
     predictor    : Variable.t;
     estimate     : float;
     mutable ci95 : Ci95.t option;
-  } with fields, sexp
+  } [@@deriving fields, sexp]
 
   let has_ci95 t = Option.is_some t.ci95
 
@@ -56,7 +56,7 @@ module Regression = struct
     coefficients    : Coefficient.t array;
     regression_name : string option;
     key             : int;
-  } with fields, sexp
+  } [@@deriving fields, sexp]
 
   let has_r_square t = Option.is_some t.r_square
 
@@ -82,7 +82,7 @@ type t = {
   sample_count : int;
   largest_run  : int;
   regressions  : Regression.t array;
-} with fields, sexp
+} [@@deriving fields, sexp]
 
 let create ~name ~sample_count ~largest_run ~regressions = {
   name; sample_count; largest_run; regressions;

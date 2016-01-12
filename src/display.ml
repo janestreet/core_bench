@@ -85,7 +85,7 @@ module Regr = struct
 
   let create_col t str ~f =
     Ascii_table.Column.create_attr
-      ~align:Ascii_table.Align.right
+      ~align:Right
       ~show:`If_not_empty
       str
       (fun res ->
@@ -204,7 +204,7 @@ let make_speed_and_percentage_columns display_config tbl =
         if show_speedup then
           let col =
             Ascii_table.Column.create
-              ~align:Ascii_table.Align.right
+              ~align:Right
               "Speedup"
               (fun res ->
                  match Analysis_result.find_key res timing_key with
@@ -219,7 +219,7 @@ let make_speed_and_percentage_columns display_config tbl =
         if show_percentage then
           let col =
             Ascii_table.Column.create_attr
-              ~align:Ascii_table.Align.right
+              ~align:Right
               "Percentage"
               (fun res ->
                  match Analysis_result.find_key res timing_key with
@@ -265,7 +265,7 @@ let make_columns display_config results =
     if display_config.Display_config.show_samples then
       let samples =
         Ascii_table.Column.create
-          ~align:Ascii_table.Align.right
+          ~align:Right
           "Runs @ Samples"
           (fun res ->
              sprintf "%d @ %d"
@@ -278,7 +278,7 @@ let make_columns display_config results =
   let cols =
     let name =
       Ascii_table.Column.create
-        ~align:Ascii_table.Align.left
+        ~align:Left
         "Name"
         (fun res -> Analysis_result.name res)
     in

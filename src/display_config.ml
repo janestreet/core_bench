@@ -12,7 +12,7 @@ type t = {
   show_samples        : bool;
   show_all_values     : bool;
   show_overheads      : bool;
-} with fields
+} [@@deriving fields]
 
 let create
     ?(don't_display_table=false)

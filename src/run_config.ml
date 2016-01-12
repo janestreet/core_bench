@@ -8,7 +8,7 @@ type t = {
   sampling_type:[`Geometric of float | `Linear of int];
   stabilize_gc_between_runs:bool;
   fork_each_benchmark:bool;
-} with fields, sexp
+} [@@deriving fields, sexp]
 
 let create
     ?(verbosity=`Low)

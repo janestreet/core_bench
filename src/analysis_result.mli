@@ -5,7 +5,7 @@ open Core.Std
 
 (* 95% confidence interval, stored as (left endpoint, right endpoint) *)
 module Ci95 : sig
-  type t with sexp
+  type t [@@deriving sexp]
 
   val left_endpoint  : t -> float
   val right_endpoint : t -> float
@@ -25,7 +25,7 @@ module Ci95 : sig
 end
 
 module Coefficient : sig
-  type t with sexp
+  type t [@@deriving sexp]
 
   val predictor : t -> Variable.t
   val estimate  : t -> float
@@ -68,7 +68,7 @@ module Regression : sig
     -> t
 end
 
-type t with sexp
+type t [@@deriving sexp]
 
 val name         : t -> string
 val sample_count : t -> int

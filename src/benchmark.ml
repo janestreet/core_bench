@@ -74,7 +74,7 @@ let measure =
     let c1 = Cycles.now () in
 
     (* MEASURE A SINGLE SAMPLE *)
-    for _i = 1 to current_runs do
+    for _ = 1 to current_runs do
       ignore(f ());
     done;
     (* END OF MEASUREMENT *)

@@ -3,7 +3,7 @@
    Contains the measurements of several runs of one benchmark. *)
 open Core.Std
 
-type t with sexp
+type t [@@deriving sexp]
 
 val name         : t -> string
 val largest_run  : t -> int

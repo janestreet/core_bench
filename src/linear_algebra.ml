@@ -2,7 +2,7 @@ open Core.Std
 
 (** Vectors *)
 module Vec = struct
-  type t = float array with sexp
+  type t = float array [@@deriving sexp]
   let copy = Array.copy
 
   let create0 len = Array.create ~len 0.
@@ -25,7 +25,7 @@ end
 
 (** Matrices *)
 module Mat = struct
-  type t = float array array with sexp
+  type t = float array array [@@deriving sexp]
 
   let copy t = Array.map t ~f:Array.copy
 
@@ -173,7 +173,7 @@ let ols ?(in_place=false) a b =
   let (q, r) = qr ~in_place a in
   triu_solve r (mul_mv ~transa:true q b)
 
-TEST_MODULE = struct
+let%test_module _ = (module struct
   (* The examples and the correct reference values were generated in Octave. *)
   let mat_A =
     [| [|  1.5539829; -0.4525782; -1.1728152;  1.3674086; -1.1205482 |]
@@ -229,9 +229,9 @@ TEST_MODULE = struct
 
   let (q, r) = qr mat_A
 
-  TEST "qr: correct Q" = Mat.almost_equal ~tol:1e-7 q known_Q
+  let%test "qr: correct Q" = Mat.almost_equal ~tol:1e-7 q known_Q
 
-  TEST "qr: correct R" = Mat.almost_equal ~tol:1e-7 r known_R
+  let%test "qr: correct R" = Mat.almost_equal ~tol:1e-7 r known_R
 
   let v = [| -0.1970397;  1.1226276;  2.1068430; -1.0784432; -0.2012862 |]
 
@@ -240,9 +240,9 @@ TEST_MODULE = struct
 
   let known_R_inverse_v = [| 0.7162378;  0.3869500;  1.5249890; -0.5921073; -0.0768922 |]
 
-  TEST "mul_mv" = Vec.almost_equal ~tol:1e-7 (mul_mv mat_A v) known_A_times_v
+  let%test "mul_mv" = Vec.almost_equal ~tol:1e-7 (mul_mv mat_A v) known_A_times_v
 
-  TEST "triu_solve" =
+  let%test "triu_solve" =
     match triu_solve r v with
     | Ok r_inverse_v ->
       Vec.almost_equal ~tol:1e-7 r_inverse_v known_R_inverse_v
@@ -255,10 +255,10 @@ TEST_MODULE = struct
     [| 7.08921663963053e-01; 7.00514461674804e-02;
        1.25581479352235e+00; -6.33055939677457e-04; 2.55312671644131e-01|]
 
-  TEST "ols" =
+  let%test "ols" =
     match ols mat_A w with
     | Ok a_backslash_w ->
       Vec.almost_equal ~tol:1e-14 a_backslash_w known_A_backslash_w
     | Error _ -> false
 
-end
+end)

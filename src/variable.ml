@@ -14,7 +14,7 @@ type t =
 | `Minor_allocated
 | `Major_allocated
 | `Promoted
-] with sexp
+] [@@deriving sexp]
 
 
 let max_int = 10

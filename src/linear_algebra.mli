@@ -10,7 +10,7 @@ open Core.Std
 
 (** Vectors *)
 module Vec : sig
-  type t = float array with sexp
+  type t = float array [@@deriving sexp]
 
   (** Copy a vector *)
   val copy : t -> t
@@ -27,7 +27,7 @@ end
 
 (** Matrices *)
 module Mat : sig
-  type t = float array array with sexp
+  type t = float array array [@@deriving sexp]
 
   (** Copy a matrix *)
   val copy : t -> t
