@@ -1,5 +1,5 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}. *)
-open Core.Std
+open! Core.Std
 
 module Id : Unique_id.Id
 

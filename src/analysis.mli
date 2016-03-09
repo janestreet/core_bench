@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Does the analysis of collected measurements. *)
-open Core.Std
+open! Core.Std
 
 val analyze
   :  Measurement.t

@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Runs a user specified benchmark and measures runtime, allocations etc. *)
-open Core.Std
+open! Core.Std
 
 val measure_all
   :  Run_config.t

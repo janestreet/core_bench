@@ -4,7 +4,7 @@
 <**/*.ml{,i}>: predicate(ppx_driver)
 <src/*.ml>: for-pack(Core_bench)
 <inline-benchmarks/*.ml>: for-pack(Inline_benchmarks)
-<inline-benchmarks/*.ml{,i}>: pp(ppx-jane -dump-ast -inline-test-lib core_bench.inline_benchmarks)
-<src/*.ml{,i}>: pp(ppx-jane -dump-ast -inline-test-lib core_bench)
+<inline-benchmarks/*.ml{,i}>: pp(ppx-jane -dump-ast -inline-test-drop -bench-drop -inline-test-lib fake_for_drop)
+<src/*.ml{,i}>: pp(ppx-jane -dump-ast -inline-test-drop -bench-drop -inline-test-lib fake_for_drop)
 # OASIS_START
 # OASIS_STOP

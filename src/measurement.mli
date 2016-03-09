@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Contains the measurements of several runs of one benchmark. *)
-open Core.Std
+open! Core.Std
 
 type t [@@deriving sexp]
 

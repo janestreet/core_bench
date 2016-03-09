@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Generates the command line interface to [Core_bench]. *)
-open Core.Std
+open! Core.Std
 
 type callback_bench
   =  ?run_config:Run_config.t

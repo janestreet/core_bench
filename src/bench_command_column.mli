@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Column specifications used by the command line interface. *)
-open Core.Std
+open! Core.Std
 
 type t =
   | Analysis of Analysis_config.t list
