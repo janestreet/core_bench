@@ -4,7 +4,7 @@ open Core.Std
 (* Minimal RDTSC bindings. This will be deprecated when Time_stamp_counter is moved to
    Core.  *)
 module Cycles = struct
-  external now : unit -> int = "bench_rdtsc" "noalloc"
+  external now : unit -> int = "bench_rdtsc" [@@noalloc]
 end
 
 let stabilize_gc () =
