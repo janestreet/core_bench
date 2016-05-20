@@ -54,4 +54,4 @@ let analyze meas analysis_configs =
                             ~f:(fun analysis_config ->
                               Or_error.ok_exn
                                 (Or_error.tag (analyze_one meas analysis_config)
-                                   (M.name meas))))))
+                                   ~tag:(M.name meas))))))
