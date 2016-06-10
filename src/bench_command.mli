@@ -8,6 +8,7 @@ type callback_bench
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
   -> ?save_to_file:(Measurement.t -> string)
+  -> ?libname:string
   -> Test.t list
   -> unit
 

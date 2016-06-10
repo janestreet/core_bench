@@ -2,7 +2,7 @@
 open Core.Std
 
 type t = {
-  verbosity:[ `High | `Low ];
+  verbosity:[ `High | `Low | `Suppress ];
   no_compactions:bool;
   time_quota:Time.Span.t;
   sampling_type:[`Geometric of float | `Linear of int];

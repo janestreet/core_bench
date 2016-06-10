@@ -147,7 +147,7 @@ module Run_config : sig
   type t
 
   val create
-    :  ?verbosity:[`High | `Low ]
+    :  ?verbosity:[`High | `Low | `Suppress]
     -> ?no_compactions:bool
     -> ?time_quota:Time.Span.t
     -> ?sampling_type:[`Geometric of float | `Linear of int]
@@ -166,6 +166,8 @@ module Display_config : sig
     -> ?limit_width_to:int
     -> ?display:Textutils.Ascii_table.Display.t
     -> ?ascii_table:bool
+    -> ?show_output_as_json:bool
+    -> ?show_output_as_esbulk:bool
     -> ?show_absolute_ci:bool
     -> ?show_percentage:bool
     -> ?show_speedup:bool
@@ -246,6 +248,7 @@ val bench
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
   -> ?save_to_file:(Measurement.t -> string)
+  -> ?libname:string
   -> Test.t list
   -> unit
 
@@ -266,7 +269,8 @@ val analyze
 (** [display] is a fragment of the functionality of [bench]. [display results] will
     display a tabular summary of [results] on the terminal. *)
 val display
-  :  ?display_config:Display_config.t
+  :  ?libname:string
+  -> ?display_config:Display_config.t
   -> Analysis_result.t list
   -> unit
 

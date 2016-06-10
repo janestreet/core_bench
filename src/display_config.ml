@@ -2,16 +2,18 @@
 open Textutils
 
 type t = {
-  don't_display_table : bool;
-  limit_width_to      : int;
-  display             : Ascii_table.Display.t;
-  ascii_table         : bool;
-  show_absolute_ci    : bool;
-  show_percentage     : bool;
-  show_speedup        : bool;
-  show_samples        : bool;
-  show_all_values     : bool;
-  show_overheads      : bool;
+  don't_display_table   : bool;
+  limit_width_to        : int;
+  display               : Ascii_table.Display.t;
+  ascii_table           : bool;
+  show_output_as_json   : bool;
+  show_output_as_esbulk : bool;
+  show_absolute_ci      : bool;
+  show_percentage       : bool;
+  show_speedup          : bool;
+  show_samples          : bool;
+  show_all_values       : bool;
+  show_overheads        : bool;
 } [@@deriving fields]
 
 let create
@@ -19,6 +21,8 @@ let create
     ?(limit_width_to=Defaults.limit_width_to)
     ?(display=Defaults.display)
     ?(ascii_table=false)
+    ?(show_output_as_json=false)
+    ?(show_output_as_esbulk=false)
     ?(show_absolute_ci=false)
     ?(show_percentage=false)
     ?(show_speedup=false)
@@ -30,6 +34,8 @@ let create
     limit_width_to;
     display;
     ascii_table;
+    show_output_as_json;
+    show_output_as_esbulk;
     show_absolute_ci;
     show_percentage;
     show_samples;

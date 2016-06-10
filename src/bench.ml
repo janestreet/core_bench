@@ -23,10 +23,10 @@ let measure ?(run_config=Run_config.create ()) tests =
 let analyze ?(analysis_configs=Analysis_config.default) measurements =
   Analysis.analyze measurements analysis_configs
 
-let display ?(display_config=Display_config.create ()) results =
-  Display.display ~display_config results
+let display ?libname ?(display_config=Display_config.create ()) results =
+  Display.display ?libname ~display_config results
 
-let analyze_and_display ~measurements ?analysis_configs ?display_config () =
+let analyze_and_display ~measurements ?analysis_configs ?display_config ?libname () =
   let results = List.map ~f:(analyze ?analysis_configs) measurements in
   let results = List.filter_map results ~f:(function
     | Error err ->
@@ -34,15 +34,15 @@ let analyze_and_display ~measurements ?analysis_configs ?display_config () =
       None
     | Ok r -> Some r)
   in
-  display ?display_config results
+  display ?display_config ?libname results
 
-let bench ?run_config ?analysis_configs ?display_config ?save_to_file tests =
+let bench ?run_config ?analysis_configs ?display_config ?save_to_file ?libname tests =
   let measurements = measure ?run_config tests in
   begin match save_to_file with
   | Some to_filename -> save_measurements measurements ~to_filename
   | None -> ()
   end;
-  analyze_and_display ~measurements ?analysis_configs ?display_config ()
+  analyze_and_display ~measurements ?analysis_configs ?display_config ?libname ()
 
 let make_command tests =
   Bench_command.make

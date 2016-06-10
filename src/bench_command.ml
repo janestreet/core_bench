@@ -8,6 +8,7 @@ type callback_bench
   -> ?analysis_configs:Analysis_config.t list
   -> ?display_config:Display_config.t
   -> ?save_to_file:(Measurement.t -> string)
+  -> ?libname:string
   -> Test.t list
   -> unit
 
@@ -53,6 +54,8 @@ let spec () =
          ~doc:(sprintf "SCALE Use geometric sampling. (default %.2f)"
                  Defaults.geometric_scale)
     +> flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files."
+    +> flag "-json" no_arg ~doc:" Output as json."
+    +> flag "-esbulk" no_arg ~doc:" Output as ElasticSearch bulk format"
     +> flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
     +> flag "-reduced-bootstrap" no_arg ~doc:" Reduce the number of bootstrapping iterations"
     +> flag "-ci-absolute" no_arg ~doc:" Display 95% confidence interval in absolute numbers"
@@ -85,6 +88,8 @@ let parse_commandline_args
       ~show_overheads
       ~sampling_type
       save_sample_data
+      show_output_as_json
+      show_output_as_esbulk
       minimal_tables
       reduced_bootstrap
       show_absolute_ci
@@ -101,9 +106,12 @@ let parse_commandline_args
     else display, false
   in
   let verbosity =
-    if verbosity
-    then `High
-    else `Low
+    if show_output_as_json || show_output_as_esbulk
+    then `Suppress
+    else
+      if verbosity
+      then `High
+      else `Low
   in
   let time_quota = Time.Span.of_float time_quota in
   let columns =
@@ -175,6 +183,8 @@ let parse_commandline_args
       ~show_overheads
       ~display
       ~ascii_table
+      ~show_output_as_json
+      ~show_output_as_esbulk
       ()
   in
   let configs =

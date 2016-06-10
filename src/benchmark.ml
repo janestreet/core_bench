@@ -152,7 +152,7 @@ let measure_all
     ((Time.Span.to_float (RC.time_quota run_config)) *.
         (Float.of_int (List.length tests)))
   in
-  printf "Estimated testing time %s (%d benchmarks x %s). Change using -quota SECS.\n%!"
+  Verbosity.print_low "Estimated testing time %s (%d benchmarks x %s). Change using -quota SECS.\n%!"
     (Time.Span.to_string est_time)
     (List.length tests)
     (Time.Span.to_string (RC.time_quota run_config));

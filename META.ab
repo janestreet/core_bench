@@ -1,6 +1,6 @@
 version = "$(pkg_version)"
 description = "Benchmarking library"
-requires = "bin_prot core fieldslib ppx_assert.runtime-lib ppx_bench.runtime-lib ppx_expect.collector ppx_hash.runtime-lib ppx_inline_test.runtime-lib sexplib textutils typerep variantslib"
+requires = "bin_prot core fieldslib json_wheel_ppxed ppx_assert.runtime-lib ppx_bench.runtime-lib ppx_expect.collector ppx_hash.runtime-lib ppx_inline_test.runtime-lib sexplib textutils typerep typerep_extended.jsonrep variantslib"
 archive(byte  ) = "core_bench.cma"
 archive(native) = "core_bench.cmxa"
 plugin(byte  ) = "core_bench.cma"

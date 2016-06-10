@@ -93,6 +93,7 @@ let run_benchmarks
       ~analysis_configs
       ~display_config
       ?save_to_file
+      ~libname:libname
       tests
 
 let spec () =

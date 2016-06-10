@@ -287,16 +287,24 @@ let make_columns display_config results =
   cols
 
 
-let display ~display_config results =
-  let cols = make_columns display_config results in
-  Ascii_table.output
-    ~oc:stdout
-    ~limit_width_to:(Display_config.limit_width_to display_config)
-    ~bars:(if (Display_config.ascii_table display_config)
-           then `Ascii
-           else `Unicode)
-    ~display:(Display_config.display display_config)
-    cols
-    results;
-  Warnings.display ();
+let display ?libname ~display_config results =
+  if display_config.Display_config.show_output_as_json
+  then Simplified_benchmark.to_json ?libname results
+       |> Json_wheel_internal.Std.Json_io.string_of_json |> print_endline
+  else
+  if display_config.Display_config.show_output_as_esbulk
+  then print_endline (Simplified_benchmark.to_elastic_bulk_format ?libname results)
+  else begin
+    let cols = make_columns display_config results in
+    Ascii_table.output
+      ~oc:stdout
+      ~limit_width_to:(Display_config.limit_width_to display_config)
+      ~bars:(if (Display_config.ascii_table display_config)
+             then `Ascii
+             else `Unicode)
+      ~display:(Display_config.display display_config)
+      cols
+      results;
+    Warnings.display ();
+  end
 
