@@ -106,12 +106,22 @@ module Test : sig
   (** Creates a simple benchmark. Here the benchmark may return some ['a] which is then
       ignored. One should be careful when putting calls to [ignore] in benchmarks because
       OCaml versions 4.02 onwards can optimize away some ignored computations. *)
-  val create : name:string -> ?key:int -> (unit -> 'a) -> t
+  val create
+    : name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> ?key:int
+    -> (unit -> 'a)
+    -> t
 
   (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
       about the ['a] below. *)
   val create_indexed
     :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
     -> args:int list
     -> ?key:int
     -> (int -> (unit -> 'a) Staged.t)
@@ -119,6 +129,9 @@ module Test : sig
 
   val create_group
     :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
     -> t list
     -> t
 
@@ -231,7 +244,6 @@ module Measurement : sig
   val load : filename:string -> t
 end
 
-
 (** [make_command tests] is the easiest way to generate a command-line program that runs a
     list of benchmarks. Here [tests : Test.t list] are the benchmarks that should be run.
     This returns a [Command.t] which provides a command-line interface for running the
@@ -244,43 +256,43 @@ val make_command : Test.t list -> Command.t
     [make_command]. [bench] can also save the measurements of each test to the filename
     returned by [save_to_file]. *)
 val bench
-  :  ?run_config:Run_config.t
-  -> ?analysis_configs:Analysis_config.t list
-  -> ?display_config:Display_config.t
-  -> ?save_to_file:(Measurement.t -> string)
-  -> ?libname:string
+  :  ?run_config       : Run_config.t
+  -> ?analysis_configs : Analysis_config.t list
+  -> ?display_config   : Display_config.t
+  -> ?save_to_file     : (Measurement.t -> string)
+  -> ?libname          : string
   -> Test.t list
   -> unit
 
 (** [measure] is a fragment of the functionality of [bench]. [measure tests] will run
     the specified [tests] and return the resulting measurement results. *)
 val measure
-  :  ?run_config:Run_config.t
+  :  ?run_config : Run_config.t
   -> Test.t list
   -> Measurement.t list
 
 (** [analyze] is a fragment of the functionality of [bench]. [analyze ~analysis_configs m]
     will analyze the measurement [m] using the regressions specified. *)
 val analyze
-  :  ?analysis_configs:Analysis_config.t list
+  :  ?analysis_configs : Analysis_config.t list
   -> Measurement.t
   -> Analysis_result.t Or_error.t
 
 (** [display] is a fragment of the functionality of [bench]. [display results] will
     display a tabular summary of [results] on the terminal. *)
 val display
-  :  ?libname:string
-  -> ?display_config:Display_config.t
+  :  ?libname        : string
+  -> ?display_config : Display_config.t
   -> Analysis_result.t list
   -> unit
 
 (** [make_command_ext] is useful for creating [Command.t]s that have command line flags in
     addition to those provided by [make_command]. *)
 val make_command_ext
-  :  summary:string
-  -> extra_spec:('a, unit -> unit) Core.Std.Command.Spec.t
-  -> f:(Analysis_config.t list * Display_config.t *
-        [ `From_file of string list
-        | `Run of (Measurement.t -> string) option * Run_config.t ]
-        -> 'a)
+  :  summary    : string
+  -> extra_spec : ('a, unit -> unit) Core.Std.Command.Spec.t
+  -> f          : (Analysis_config.t list * Display_config.t *
+                   [ `From_file of string list
+                   | `Run of (Measurement.t -> string) option * Run_config.t ]
+                   -> 'a)
   -> Command.t

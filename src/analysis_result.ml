@@ -78,14 +78,17 @@ module Regression = struct
 end
 
 type t = {
-  name         : string;
-  sample_count : int;
-  largest_run  : int;
-  regressions  : Regression.t array;
+  name          : string;
+  test_name     : string;
+  file_name     : string;
+  module_name   : string;
+  sample_count  : int;
+  largest_run   : int;
+  regressions   : Regression.t array;
 } [@@deriving fields, sexp]
 
-let create ~name ~sample_count ~largest_run ~regressions = {
-  name; sample_count; largest_run; regressions;
+let create ~name ~test_name ~file_name ~module_name ~sample_count ~largest_run ~regressions = {
+  name; test_name; file_name; module_name; sample_count; largest_run; regressions;
 }
 
 let find_key t key =

@@ -23,13 +23,16 @@ let make_benchmark_name entry =
 let entry_to_bench_test entry ~key =
   let open Entry in
   let name = make_benchmark_name entry in
+  let test_name = entry.name in
+  let file_name = entry.filename in
+  let module_name = entry.bench_module_name in
   match entry.Entry.test_spec with
   | Regular_thunk f ->
        let func = f () in
-       Bench.Test.create ~name ~key func
+       Bench.Test.create ~name ~test_name ~file_name ?module_name ~key func
   | Indexed_thunk { arg_values; thunk; _ } ->
     Bench.Test.create_indexed
-      ~name ~args:arg_values ~key
+      ~name ~test_name ~file_name ?module_name ~args:arg_values ~key
       (fun len -> Staged.stage (thunk len))
 
 let pattern_to_predicate s =

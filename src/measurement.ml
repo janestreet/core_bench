@@ -4,13 +4,16 @@ open Core.Std
 
 type t = {
   name         : string;
+  test_name    : string;
+  file_name     : string;
+  module_name  : string;
   largest_run  : int;
   sample_count : int;
   samples      : Measurement_sample.t array
 } [@@deriving sexp, fields]
 
-let create ~name ~largest_run ~sample_count ~samples = {
-  name; largest_run; sample_count; samples;
+let create ~name ~test_name ~file_name ~module_name ~largest_run ~sample_count ~samples = {
+  name; test_name; file_name; module_name; largest_run; sample_count; samples;
 }
 
 let save t ~filename =
@@ -28,6 +31,9 @@ let load ~filename =
   match In_channel.read_lines filename with
   | header1 :: _header2 :: data -> begin
       let name = String.subo ~pos:2 header1 in
+      let test_name = "" in
+      let file_name = "" in
+      let module_name = "" in
       let samples = Array.of_list (List.map data
                                      ~f:Measurement_sample.of_field_values_string)
       in
@@ -37,7 +43,7 @@ let load ~filename =
                           ~len:sample_count
                           ~field:Measurement_sample.runs
       in
-      { name; sample_count; largest_run; samples; }
+      { name; test_name; file_name; module_name; sample_count; largest_run; samples; }
     end
   | _ -> failwith "Bad header format for saved metrics file."
 

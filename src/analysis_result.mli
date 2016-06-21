@@ -34,15 +34,15 @@ module Coefficient : sig
   val has_ci95  : t -> bool
 
   val has_non_trivial_estimate
-    :  show_all_values:bool
+    :  show_all_values : bool
     -> t
-    -> responder:Variable.t
+    -> responder : Variable.t
     -> bool
 
   val create
-    :  predictor:Variable.t
-    -> estimate:float
-    -> ?ci95:Ci95.t
+    :  predictor : Variable.t
+    -> estimate  : float
+    -> ?ci95     : Ci95.t
     -> unit
     -> t
 end
@@ -60,10 +60,10 @@ module Regression : sig
   val regression_name : t -> string option
 
   val create
-    :  responder:Variable.t
-    -> ?r_square:float
-    -> coefficients:Coefficient.t array
-    -> regression_name:string option
+    :  responder       : Variable.t
+    -> ?r_square       : float
+    -> coefficients    : Coefficient.t array
+    -> regression_name : string option
     -> unit
     -> t
 end
@@ -71,15 +71,21 @@ end
 type t [@@deriving sexp]
 
 val name         : t -> string
+val test_name    : t -> string
+val file_name    : t -> string
+val module_name  : t -> string
 val sample_count : t -> int
 val largest_run  : t -> int
 val regressions  : t -> Regression.t array
 
 val create
-  :  name:string
-  -> sample_count:int
-  -> largest_run:int
-  -> regressions:Regression.t array
+  :  name         : string
+  -> test_name    : string
+  -> file_name    : string
+  -> module_name  : string
+  -> sample_count : int
+  -> largest_run  : int
+  -> regressions  : Regression.t array
   -> t
 
 val find_key : t -> int -> Regression.t option

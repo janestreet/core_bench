@@ -48,6 +48,9 @@ let analyze meas analysis_configs =
        (fun () ->
           Analysis_result.create
             ~name:(M.name meas)
+            ~test_name:(M.test_name meas)
+            ~file_name:(M.file_name meas)
+            ~module_name:(M.module_name meas)
             ~sample_count:(M.sample_count meas)
             ~largest_run:(M.largest_run meas)
             ~regressions:(Array.of_list_map analysis_configs

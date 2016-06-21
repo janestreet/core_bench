@@ -7,16 +7,19 @@ module Id : Unique_id.Id = Unique_id.Int()
 module Basic_test = struct
   type packed_f = T : (unit -> 'a) -> packed_f
   type t = {
-    test_id   : Id.t;
-    name      : string;
-    key       : int;
-    arg       : int option;
-    group_key : int option;
-    f         : packed_f;
+    test_id     : Id.t;
+    name        : string;
+    test_name   : string;
+    file_name    : string;
+    module_name : string;
+    key         : int;
+    arg         : int option;
+    group_key   : int option;
+    f           : packed_f;
   } [@@deriving fields]
 
-  let create ~name ?(group_key=None) ?(arg=None) ~key f =
-    { name; f = T f; key; group_key; arg; test_id = Id.create () }
+  let create ~name ?(test_name="") ?(file_name="") ?(module_name="") ?(group_key=None) ?(arg=None) ~key f =
+    { name; test_name; module_name; file_name; f = T f; key; group_key; arg; test_id = Id.create () }
 
   let make_filename t =
     let name = String.tr ~target:' ' ~replacement:'-' t.name in
@@ -25,22 +28,34 @@ module Basic_test = struct
 end
 
 type t = {
-  name : string;
-  tests: Basic_test.t list
+  name        : string;
+  test_name   : string;
+  file_name    : string;
+  module_name : string;
+  tests       : Basic_test.t list
 } [@@deriving fields]
 
-let create ~name ?(key=0) bm = {
+let create ~name ?(test_name="") ?(file_name="") ?(module_name="") ?(key=0) bm = {
   name;
-  tests = [Basic_test.create ~name ~key bm];
+  test_name;
+  module_name;
+  file_name;
+  tests = [Basic_test.create ~name ~test_name ~module_name ~file_name ~key bm];
 }
 
-let create_indexed ~name ~args ?(key=0) bm = {
+let create_indexed ~name ?(test_name="") ?(file_name="") ?(module_name="") ~args ?(key=0) bm = {
   name;
+  test_name;
+  module_name;
+  file_name;
   tests = List.map args ~f:(fun n ->
     let individual_key = Hashtbl.hash (key + n) in
     let name = name ^ ":" ^ (Int.to_string n) in
     { Basic_test.
       name;
+      test_name;
+      module_name;
+      file_name;
       arg = Some n;
       key = individual_key;
       group_key = Some key;
@@ -53,10 +68,13 @@ let create_indexed ~name ~args ?(key=0) bm = {
 let expand ts =
   List.concat (List.map ~f:tests ts)
 
-let create_group ~name ts =
+let create_group ~name ?(test_name="") ?(file_name="") ?(module_name="") ts =
   let ts = expand ts in
   {
     name;
+    test_name;
+    module_name;
+    file_name;
     tests = List.map ts ~f:(fun test ->
       let name = name ^ "/" ^ test.Basic_test.name in
       { test with Basic_test.name = name });
