@@ -64,10 +64,12 @@ let get_matching_tests ~libname patterns =
   in
   tbl, tests
 
-let x_library_inlining_warning ~run_without_inlining =
+let x_library_inlining_warning ~run_without_inlining ~suppress_warnings =
   if not Version_util.x_library_inlining then begin
-    Core.Std.printf
-      "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.\n%!";
+    if not suppress_warnings
+    then
+      Core.Std.printf
+        "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.\n%!";
     if not run_without_inlining then
       failwith "If you would like to run benchmarks, and are ok with getting inaccurate \
                 results due to lack of cross library inlining, use the \
@@ -81,12 +83,13 @@ let run_benchmarks
       ~no_sexp:_
       ~run_config
       ~run_without_inlining
+      ~suppress_warnings
       ~display_config
       ~analysis_configs
       ?save_to_file
       ()
   =
-  x_library_inlining_warning ~run_without_inlining;
+  x_library_inlining_warning ~run_without_inlining ~suppress_warnings;
   let _tbl, tests = get_matching_tests ~libname test_locations in
   if List.is_empty tests
   then printf "No benchmarks to run!\n%!"
@@ -110,6 +113,8 @@ let spec () =
          ~doc:" Do not generate a benchmarks.sexp file (quicker)."
     +> flag "run-without-cross-library-inlining" no_arg
          ~doc:" Run benchmarks even when compiled with X_LIBRARY_INLINING=false."
+    +> flag "suppress-warnings" no_arg
+         ~doc:" Suppress warnings when clean output needed"
   )
 
 
@@ -118,7 +123,7 @@ let main ~libname =
     Bench.make_command_ext
       ~summary:(sprintf "Runs inline benchmarks in lib %s." libname)
       ~extra_spec:(spec ())
-      ~f:(fun args benchmarks_runner test_locations no_sexp run_without_inlining () ->
+      ~f:(fun args benchmarks_runner test_locations no_sexp run_without_inlining suppress_warnings () ->
         if not benchmarks_runner
         then failwith "Don't run directly, run using the benchmarks_runner script.";
         match args with
@@ -129,6 +134,7 @@ let main ~libname =
             ~no_sexp
             ~run_config
             ~run_without_inlining
+            ~suppress_warnings
             ~display_config
             ~analysis_configs
             ?save_to_file

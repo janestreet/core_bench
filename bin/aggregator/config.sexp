@@ -1,0 +1,6 @@
+((benchmark_machine "igm-qdv-iperf1")
+ (extra_flags ("-run-without-cross-library-inlining -suppress-warnings"))
+ (tmpdir_flags ())
+ (ssh_username ())
+ (elasticsearch_url "http://ldn-qdv-ielastic1:9200")
+ )

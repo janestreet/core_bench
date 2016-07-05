@@ -15,8 +15,9 @@ end
    document structure, i.e. no nesting *)
 module Result = struct
   type t =
-    { full_benchmark_name             : string
-    ; benchmark_name                  : string
+    { benchmark_name                  : string
+    ; benchmark_name_with_index       : string
+    ; full_benchmark_name             : string
     ; file_name                       : string
     ; module_name                     : string
     ; library_name                    : string
@@ -72,6 +73,10 @@ module Results = struct
 end
 
 let extract ?(libname="") (results : Analysis_result.t list) =
+  let get_bench_name_with_index res =
+    let tmp = List.nth_exn (String.split ~on:']' (Analysis_result.name res)) 1 in
+    String.drop_prefix tmp 1
+  in
   let estimate regr = C.estimate (R.coefficients regr).(0) in
   let get_ci regr = C.ci95 (R.coefficients regr).(0) in
   let check_time_preds regr =
@@ -90,6 +95,7 @@ let extract ?(libname="") (results : Analysis_result.t list) =
       Result.({
         full_benchmark_name = Analysis_result.name res
       ; benchmark_name = Analysis_result.test_name res
+      ; benchmark_name_with_index = get_bench_name_with_index res
       ; file_name = Analysis_result.file_name res
       ; module_name = Analysis_result.module_name res
       ; library_name = libname
