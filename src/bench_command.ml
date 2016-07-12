@@ -107,7 +107,7 @@ let parse_commandline_args
   in
   let verbosity =
     if show_output_as_json || show_output_as_esbulk
-    then `Suppress
+    then `Suppress_warnings_and_errors
     else
       if verbosity
       then `High

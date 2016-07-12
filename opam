@@ -26,6 +26,7 @@ depends: [
   "ppx_hash"
   "ppx_inline_test"
   "ppx_jane"
+  "re"
   "sexplib"
   "textutils"
   "typerep"

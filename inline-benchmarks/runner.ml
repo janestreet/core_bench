@@ -36,10 +36,10 @@ let entry_to_bench_test entry ~key =
       (fun len -> Staged.stage (thunk len))
 
 let pattern_to_predicate s =
-  let regexp = Str.regexp (".*" ^ s ^ ".*") in
+  let regexp = Re_perl.compile_pat s in
   (fun entry ->
-    let name = make_benchmark_name entry in
-    Str.string_match regexp name 0)
+     let name = make_benchmark_name entry in
+     Re.execp regexp name)
 
 let get_matching_tests ~libname patterns =
   let tbl = Int.Table.create () in
@@ -105,8 +105,6 @@ let run_benchmarks
 let spec () =
   Command.Spec.(
     empty
-    +> flag "benchmarks-runner" no_arg
-         ~doc:" Always need to include this, no benchmarks are run otherwise."
     +> flag "matching" (listed string)
          ~doc:"REGEX Run benchmarks matching the REGEX."
     +> flag "no-sexp" no_arg
@@ -123,8 +121,11 @@ let main ~libname =
     Bench.make_command_ext
       ~summary:(sprintf "Runs inline benchmarks in lib %s." libname)
       ~extra_spec:(spec ())
-      ~f:(fun args benchmarks_runner test_locations no_sexp run_without_inlining suppress_warnings () ->
-        if not benchmarks_runner
+      ~f:(fun args test_locations no_sexp run_without_inlining suppress_warnings () ->
+        let should_run =
+          Option.value_map ~default:false ~f:((=) "TRUE") (Sys.getenv "BENCHMARKS_RUNNER")
+        in
+        if not should_run
         then failwith "Don't run directly, run using the benchmarks_runner script.";
         match args with
         | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->

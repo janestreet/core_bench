@@ -160,7 +160,7 @@ module Run_config : sig
   type t
 
   val create
-    :  ?verbosity:[`High | `Low | `Suppress]
+    :  ?verbosity:[`High | `Low | `Suppress_warnings_and_errors]
     -> ?no_compactions:bool
     -> ?time_quota:Time.Span.t
     -> ?sampling_type:[`Geometric of float | `Linear of int]

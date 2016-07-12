@@ -11,6 +11,28 @@ module Regression_info = struct
   [@@deriving typerep]
 end
 
+module Field_type = struct
+  type t =
+    | Time_per_run
+    | Minor_words_per_run
+    | Major_words_per_run
+    | Promoted_words_per_run
+
+  let to_string = function
+    | Time_per_run -> "time_per_run_nanos"
+    | Minor_words_per_run -> "minor_words_per_run"
+    | Major_words_per_run -> "major_words_per_run"
+    | Promoted_words_per_run -> "promoted_words_per_run"
+
+  let of_string = function
+    | "time_per_run_nanos" -> Time_per_run
+    | "minor_words_per_run" -> Minor_words_per_run
+    | "major_words_per_run" -> Major_words_per_run
+    | "promoted_words_per_run" -> Promoted_words_per_run
+    | _ -> raise (Failure "Not a valid field type")
+
+end
+
 (* each result independently stores redundant info because Kibana can only handle flat
    document structure, i.e. no nesting *)
 module Result = struct

@@ -4,6 +4,18 @@ open Import
 
     Converts an analysis result to a simplified json representation *)
 
+module Field_type : sig
+
+  type t =
+    | Time_per_run
+    | Minor_words_per_run
+    | Major_words_per_run
+    | Promoted_words_per_run
+
+  include Stringable.S with type t := t
+
+end
+
 module Result : sig
   type t =
     { (* [benchmark_name] is just the user defined name when defining an inline test
@@ -43,6 +55,7 @@ module Result : sig
     ; major_words_per_run             : float
     ; promoted_words_per_run          : float
     }
+    [@@deriving typerep]
 
   val to_json : t -> Json_type.t
   val of_json : Json_type.t -> t

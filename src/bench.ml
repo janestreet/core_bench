@@ -30,7 +30,8 @@ let analyze_and_display ~measurements ?analysis_configs ?display_config ?libname
   let results = List.map ~f:(analyze ?analysis_configs) measurements in
   let results = List.filter_map results ~f:(function
     | Error err ->
-      printf "Error %s\n%!" (Error.to_string_hum err);
+      if not (Verbosity.should_suppress ())
+      then printf "Error %s\n%!" (Error.to_string_hum err);
       None
     | Ok r -> Some r)
   in
