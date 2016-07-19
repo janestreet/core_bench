@@ -179,8 +179,7 @@ module Display_config : sig
     -> ?limit_width_to:int
     -> ?display:Textutils.Ascii_table.Display.t
     -> ?ascii_table:bool
-    -> ?show_output_as_json:bool
-    -> ?show_output_as_esbulk:bool
+    -> ?show_output_as_sexp:bool
     -> ?show_absolute_ci:bool
     -> ?show_percentage:bool
     -> ?show_speedup:bool

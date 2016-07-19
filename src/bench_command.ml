@@ -54,8 +54,7 @@ let spec () =
          ~doc:(sprintf "SCALE Use geometric sampling. (default %.2f)"
                  Defaults.geometric_scale)
     +> flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files."
-    +> flag "-json" no_arg ~doc:" Output as json."
-    +> flag "-esbulk" no_arg ~doc:" Output as ElasticSearch bulk format"
+    +> flag "-sexp" no_arg ~doc:" Output as sexp."
     +> flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
     +> flag "-reduced-bootstrap" no_arg ~doc:" Reduce the number of bootstrapping iterations"
     +> flag "-ci-absolute" no_arg ~doc:" Display 95% confidence interval in absolute numbers"
@@ -88,8 +87,7 @@ let parse_commandline_args
       ~show_overheads
       ~sampling_type
       save_sample_data
-      show_output_as_json
-      show_output_as_esbulk
+      show_output_as_sexp
       minimal_tables
       reduced_bootstrap
       show_absolute_ci
@@ -106,7 +104,7 @@ let parse_commandline_args
     else display, false
   in
   let verbosity =
-    if show_output_as_json || show_output_as_esbulk
+    if show_output_as_sexp
     then `Suppress_warnings_and_errors
     else
       if verbosity
@@ -183,8 +181,7 @@ let parse_commandline_args
       ~show_overheads
       ~display
       ~ascii_table
-      ~show_output_as_json
-      ~show_output_as_esbulk
+      ~show_output_as_sexp
       ()
   in
   let configs =

@@ -6,8 +6,7 @@ type t = {
   limit_width_to        : int;
   display               : Ascii_table.Display.t;
   ascii_table           : bool;
-  show_output_as_json   : bool;
-  show_output_as_esbulk : bool;
+  show_output_as_sexp   : bool;
   show_absolute_ci      : bool;
   show_percentage       : bool;
   show_speedup          : bool;
@@ -21,8 +20,7 @@ let create
     ?(limit_width_to=Defaults.limit_width_to)
     ?(display=Defaults.display)
     ?(ascii_table=false)
-    ?(show_output_as_json=false)
-    ?(show_output_as_esbulk=false)
+    ?(show_output_as_sexp=false)
     ?(show_absolute_ci=false)
     ?(show_percentage=false)
     ?(show_speedup=false)
@@ -34,8 +32,7 @@ let create
     limit_width_to;
     display;
     ascii_table;
-    show_output_as_json;
-    show_output_as_esbulk;
+    show_output_as_sexp;
     show_absolute_ci;
     show_percentage;
     show_samples;

@@ -31,6 +31,32 @@ module Field_type = struct
     | "promoted_words_per_run" -> Promoted_words_per_run
     | _ -> raise (Failure "Not a valid field type")
 
+  let of_short_string = function
+    | "time" -> Time_per_run
+    | "mwd"  -> Minor_words_per_run
+    | "mjwd" -> Major_words_per_run
+    | "prom" -> Promoted_words_per_run
+    | _      -> raise (Failure "Not a valid short string")
+
+  let to_short_string = function
+    | Time_per_run           -> "time"
+    | Minor_words_per_run    -> "mwd"
+    | Major_words_per_run    -> "mjwd"
+    | Promoted_words_per_run -> "prom"
+
+  let to_label_string = function
+    | Time_per_run           -> "Time (ns) per run"
+    | Minor_words_per_run    -> "Minor Words per run"
+    | Major_words_per_run    -> "Major Words per run"
+    | Promoted_words_per_run -> "Promoted Words per run"
+
+  let all =
+    [ Time_per_run
+    ; Minor_words_per_run
+    ; Major_words_per_run
+    ; Promoted_words_per_run
+    ]
+
 end
 
 (* each result independently stores redundant info because Kibana can only handle flat
@@ -40,11 +66,13 @@ module Result = struct
     { benchmark_name                  : string
     ; benchmark_name_with_index       : string
     ; full_benchmark_name             : string
+    ; dup_id                          : int option
     ; file_name                       : string
     ; module_name                     : string
     ; library_name                    : string
     ; version                         : string
     ; hg_revision                     : string option
+    ; hg_active_bookmark              : string option
     ; x_library_inlining              : bool
     ; ocaml_version                   : string
     ; machine_where_benchmark_was_run : string
@@ -58,40 +86,12 @@ module Result = struct
     ; major_words_per_run             : float
     ; promoted_words_per_run          : float
     }
-  [@@deriving typerep]
-
-  let to_json =
-    let `generic to_json = Json_typerep.Jsonrep.V2.json_of_t typerep_of_t in
-    to_json
-
-  let of_json =
-    let `generic of_json = Json_typerep.Jsonrep.V2.t_of_json typerep_of_t in
-    of_json
-
+  [@@deriving typerep, sexp]
 end
 
 module Results = struct
   type t = Result.t list
-  [@@deriving typerep]
-
-  let to_json =
-    let `generic to_json = Json_typerep.Jsonrep.V2.json_of_t typerep_of_t in
-    to_json
-
-  let of_json =
-    let `generic of_json = Json_typerep.Jsonrep.V2.t_of_json typerep_of_t in
-    of_json
-
-
-  let to_esbulk t =
-    (List.map t ~f:(fun res ->
-       String.concat
-         [ {|{"create":{"_index":"benchtest","_type":"test"}}|}
-         ; "\n"
-         ; Json_wheel_internal.Std.Json_io.string_of_json ~compact:true (Result.to_json res)
-         ])
-     |> String.concat ~sep:"\n")
-
+  [@@deriving typerep, sexp]
 end
 
 let extract ?(libname="") (results : Analysis_result.t list) =
@@ -118,11 +118,13 @@ let extract ?(libname="") (results : Analysis_result.t list) =
         full_benchmark_name = Analysis_result.name res
       ; benchmark_name = Analysis_result.test_name res
       ; benchmark_name_with_index = get_bench_name_with_index res
+      ; dup_id = None
       ; file_name = Analysis_result.file_name res
       ; module_name = Analysis_result.module_name res
       ; library_name = libname
       ; version = version
       ; hg_revision = None
+      ; hg_active_bookmark = None
       ; x_library_inlining = Version_util.x_library_inlining
       ; ocaml_version = Version_util.ocaml_version
       ; machine_where_benchmark_was_run = Unix.gethostname ()
@@ -174,8 +176,5 @@ let extract ?(libname="") (results : Analysis_result.t list) =
   ) in
   simplified_results
 
-let to_json ?libname results =
-  extract ?libname results |> Results.to_json
-
-let to_elastic_bulk_format ?libname results =
-  extract ?libname results |> Results.to_esbulk
+let to_sexp ?libname results =
+  extract ?libname results |> Results.sexp_of_t

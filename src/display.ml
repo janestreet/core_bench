@@ -288,12 +288,9 @@ let make_columns display_config results =
 
 
 let display ?libname ~display_config results =
-  if display_config.Display_config.show_output_as_json
-  then Simplified_benchmark.to_json ?libname results
-       |> Json_wheel_internal.Std.Json_io.string_of_json |> print_endline
-  else
-  if display_config.Display_config.show_output_as_esbulk
-  then print_endline (Simplified_benchmark.to_elastic_bulk_format ?libname results)
+  if display_config.Display_config.show_output_as_sexp
+  then Simplified_benchmark.to_sexp ?libname results
+       |> Sexp.to_string |> print_endline
   else begin
     let cols = make_columns display_config results in
     Ascii_table.output

@@ -1,5 +1,4 @@
 open! Core.Std
-open Import
 (** A module internal to [Core_Bench].
 
     Converts an analysis result to a simplified json representation *)
@@ -14,6 +13,15 @@ module Field_type : sig
 
   include Stringable.S with type t := t
 
+  val of_short_string : string -> t
+
+  val to_short_string : t -> string
+
+  (* converts [t] to a verbose name e.g. "Time (ns) Per Run" *)
+  val to_label_string : t -> string
+
+  val all : t list
+
 end
 
 module Result : sig
@@ -27,6 +35,8 @@ module Result : sig
     (* [full_benchmark_name] includes file, module name, given name, and index
        concactenated e.g. "[test.ml] addition test:1000" *)
     ; full_benchmark_name             : string
+    (* [dup_id] is a unique id for benchmarks that have the exact same name *)
+    ; dup_id                          : int option
     ; file_name                       : string
     ; module_name                     : string
     ; library_name                    : string
@@ -36,6 +46,7 @@ module Result : sig
     (* hg_revision contains only the action revision id used by hg
        e.g. "1e88f63603b3" *)
     ; hg_revision                     : string option
+    ; hg_active_bookmark              : string option
     ; x_library_inlining              : bool
     ; ocaml_version                   : string
     (* machine_where_benchmark_was_run stores the name of the performance machine used
@@ -49,31 +60,17 @@ module Result : sig
     (* Various stats computed by bench. *)
     ; time_r_square                   : float
     ; time_per_run_nanos              : float
-    ; ci95_upper_bound   : float
-    ; ci95_lower_bound   : float
+    ; ci95_upper_bound                : float
+    ; ci95_lower_bound                : float
     ; minor_words_per_run             : float
     ; major_words_per_run             : float
     ; promoted_words_per_run          : float
     }
-    [@@deriving typerep]
-
-  val to_json : t -> Json_type.t
-  val of_json : Json_type.t -> t
+    [@@deriving typerep, sexp]
 end
 
 module Results : sig
-  type t = Result.t list
-
-  val to_json : t -> Json_type.t
-  val of_json : Json_type.t -> t
+  type t = Result.t list [@@deriving typerep, sexp]
 end
 
-val to_json
-  :  ?libname : string
-  -> Analysis_result.t list
-  -> Json_type.t
-
-val to_elastic_bulk_format
-  : ?libname : string
-  -> Analysis_result.t list
-  -> string
+val to_sexp : ?libname:string -> Analysis_result.t list -> Sexp.t
