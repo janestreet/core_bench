@@ -1,0 +1,6 @@
+(executables
+ ((names (test_bench mv_regr))
+  (libraries (core
+                    core_bench
+                    core_extended))
+  (preprocess (((pps ()) All)))))

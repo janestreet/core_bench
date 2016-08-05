@@ -1,0 +1,8 @@
+(library
+ ((name core_bench)
+  (public_name core_bench)
+  (libraries (core
+              textutils))
+  (library_flags (-cclib -lpthread))
+  (c_names (rdtsc_stubs))
+  (preprocess (((pps (JANE pa_macro)) All)))))
