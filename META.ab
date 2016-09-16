@@ -17,3 +17,12 @@ package "inline_benchmarks" (
   plugin(native) = "inline_benchmarks_public.cmxs"
   exists_if = "inline_benchmarks_public.cma"
 )
+
+package "runner" (
+  version = "$(pkg_version)"
+  description = ""
+  requires = "bin_prot core core_bench.inline_benchmarks fieldslib ppx_assert.runtime-lib ppx_bench.runtime-lib ppx_expect.collector ppx_hash.runtime-lib ppx_inline_test.runtime-lib sexplib typerep variantslib"
+  archive(byte  ) = "public_runner.cmo"
+  archive(native) = "public_runner.cmx"
+  exists_if = "public_runner.cmo"
+)

@@ -1,6 +1,10 @@
 ;; This module is linked by jenga at the very end of all the inline bench runners.
 ;; jenga assumes there is exactly one ml file in here called runner.
 (executables
- ((names (runner))
+ ((names (public_runner))
   (review_help true)
+  (public_release ((build_and_install_as_objects
+                    ((public_runner core_bench.runner)))))
   (libraries (core inline_benchmarks_public))))
+
+(provides core_bench:public_runner.cmx)
