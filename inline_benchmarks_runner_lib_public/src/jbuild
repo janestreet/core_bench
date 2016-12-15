@@ -7,5 +7,5 @@
     core_extended
     textutils
     re
-    re_perl
+    re.perl
     ))))

@@ -29,6 +29,7 @@ let measure =
   fun run_config test ->
     (* test function *)
     let Test.Basic_test.T f = test.Test.Basic_test.f in
+    let f = f `init in
 
     (* the samples *)
     let max_samples = 3_000 in

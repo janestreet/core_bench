@@ -4,7 +4,7 @@ open! Core.Std
 module Id : Unique_id.Id
 
 module Basic_test : sig
-  type packed_f = T : (unit -> 'a) -> packed_f
+  type packed_f = T : ([`init] -> (unit -> 'a)) -> packed_f
 
   type t = {
     test_id     : Id.t;
@@ -28,13 +28,13 @@ module Basic_test : sig
   val group_key   : t -> int option
   val f           : t -> packed_f
 
-  val create :
+  val create_with_initialization :
     name:string ->
     ?test_name:string ->
     ?file_name:string ->
     ?module_name:string ->
     ?group_key:int option ->
-    ?arg:int option -> key:int -> (unit -> unit) -> t
+    ?arg:int option -> key:int -> ([`init] -> unit -> unit) -> t
 
   val make_filename : t -> string
 end
@@ -56,6 +56,15 @@ val create :
   -> ?module_name:string
   -> ?key:int
   -> (unit -> 'a)
+  -> t
+
+val create_with_initialization :
+  name:string
+  -> ?test_name:string
+  -> ?file_name:string
+  -> ?module_name:string
+  -> ?key:int
+  -> ([`init] -> unit -> 'a)
   -> t
 
 val create_indexed

@@ -3,4 +3,4 @@
   (libraries (core
                     core_bench
                     core_extended))
-  (preprocess (((pps ()) All)))))
+  (preprocess (pps ()))))

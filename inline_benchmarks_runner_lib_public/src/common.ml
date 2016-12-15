@@ -32,8 +32,7 @@ let entry_to_bench_test entry ~key =
   let module_name = entry.bench_module_name in
   match entry.Entry.test_spec with
   | Regular_thunk f ->
-       let func = f () in
-       Bench.Test.create ~name ~test_name ~file_name ?module_name ~key func
+    Bench.Test.create_with_initialization ~name ~test_name ~file_name ?module_name ~key f
   | Indexed_thunk { arg_values; thunk; _ } ->
     Bench.Test.create_indexed
       ~name ~test_name ~file_name ?module_name ~args:arg_values ~key

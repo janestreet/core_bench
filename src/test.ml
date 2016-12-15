@@ -5,7 +5,7 @@ open Core.Std
 
 module Id : Unique_id.Id = Unique_id.Int()
 module Basic_test = struct
-  type packed_f = T : (unit -> 'a) -> packed_f
+  type packed_f = T : ([`init] -> (unit -> 'a)) -> packed_f
   type t = {
     test_id     : Id.t;
     name        : string;
@@ -18,7 +18,7 @@ module Basic_test = struct
     f           : packed_f;
   } [@@deriving fields]
 
-  let create ~name ?(test_name="") ?(file_name="") ?(module_name="") ?(group_key=None) ?(arg=None) ~key f =
+  let create_with_initialization ~name ?(test_name="") ?(file_name="") ?(module_name="") ?(group_key=None) ?(arg=None) ~key f =
     { name; test_name; module_name; file_name; f = T f; key; group_key; arg; test_id = Id.create () }
 
   let make_filename t =
@@ -35,13 +35,16 @@ type t = {
   tests       : Basic_test.t list
 } [@@deriving fields]
 
-let create ~name ?(test_name="") ?(file_name="") ?(module_name="") ?(key=0) bm = {
+let create_with_initialization ~name ?(test_name="") ?(file_name="") ?(module_name="") ?(key=0) bm = {
   name;
   test_name;
   module_name;
   file_name;
-  tests = [Basic_test.create ~name ~test_name ~module_name ~file_name ~key bm];
+  tests = [Basic_test.create_with_initialization ~name ~test_name ~module_name ~file_name ~key bm];
 }
+
+let create ~name ?test_name ?file_name ?module_name ?key bm =
+  create_with_initialization ~name ?test_name ?file_name ?module_name ?key (fun `init -> bm)
 
 let create_indexed ~name ?(test_name="") ?(file_name="") ?(module_name="") ~args ?(key=0) bm = {
   name;
@@ -59,7 +62,7 @@ let create_indexed ~name ?(test_name="") ?(file_name="") ?(module_name="") ~args
       arg = Some n;
       key = individual_key;
       group_key = Some key;
-      f = T (Staged.unstage (bm n));
+      f = T (fun `init -> Staged.unstage (bm n));
       test_id = Id.create ()
     }
   )

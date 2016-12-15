@@ -115,6 +115,15 @@ module Test : sig
     -> (unit -> 'a)
     -> t
 
+  val create_with_initialization
+    : name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> ?key:int
+    -> ([`init] -> unit -> 'a)
+    -> t
+
   (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
       about the ['a] below. *)
   val create_indexed
