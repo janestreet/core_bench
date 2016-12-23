@@ -147,7 +147,7 @@ let parse_commandline_args
   let save =
     if save_sample_data then begin
       printf "Measurements will be saved.\n%!";
-      let time_str = Time.format (Time.now ()) "%F-%R" ~zone:Time.Zone.local in
+      let time_str = Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local) in
       Some (fun meas ->
         let name = Measurement.name meas in
         let fn = sprintf "%s-%s-%s.txt"
