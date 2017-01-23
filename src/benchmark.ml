@@ -151,8 +151,8 @@ let measure_all
   let module RC = Run_config in
   Verbosity.set_verbosity (RC.verbosity run_config);
   let est_time =
-    Time.Span.of_float
-      ((Time.Span.to_float (RC.time_quota run_config)) *.
+    Time.Span.of_sec
+      ((Time.Span.to_sec (RC.time_quota run_config)) *.
        (Float.of_int (List.length tests)))
   in
   Verbosity.print_low "Estimated testing time %s (%d benchmarks x %s). Change using -quota SECS.\n%!"

@@ -111,7 +111,7 @@ let parse_commandline_args
       then `High
       else `Low
   in
-  let time_quota = Time.Span.of_float time_quota in
+  let time_quota = Time.Span.of_sec time_quota in
   let columns =
     if clear_columns
     then []
