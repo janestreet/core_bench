@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 (** Vectors *)
 module Vec = struct

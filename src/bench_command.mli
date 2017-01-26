@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Generates the command line interface to [Core_bench]. *)
-open! Core.Std
+open! Core
 
 type callback_bench
   =  ?run_config:Run_config.t
@@ -27,7 +27,7 @@ val make
 
 val make_ext
   :  summary:string
-  -> extra_spec:('a, unit -> unit) Core.Std.Command.Spec.t
+  -> extra_spec:('a, unit -> unit) Core.Command.Spec.t
   -> f:(Analysis_config.t list * Display_config.t *
         [ `From_file of string list
         | `Run of (Measurement.t -> string) option * Run_config.t ]

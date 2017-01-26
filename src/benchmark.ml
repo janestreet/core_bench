@@ -1,5 +1,5 @@
 
-open Core.Std
+open Core
 
 (* Minimal RDTSC bindings. This will be deprecated when Time_stamp_counter is moved to
    Core.  *)

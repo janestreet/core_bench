@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Core_bench.Std
 
 module Entry = Ppx_bench_lib.Benchmark_accumulator.Entry
@@ -7,7 +7,7 @@ let x_library_inlining_warning ~run_without_inlining ~suppress_warnings =
   if not Version_util.x_library_inlining then begin
     if not suppress_warnings
     then
-      Core.Std.printf
+      Core.printf
         "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.\n%!";
     if not run_without_inlining then
       failwith "If you would like to run benchmarks, and are ok with getting inaccurate \

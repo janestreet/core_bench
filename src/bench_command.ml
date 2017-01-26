@@ -1,5 +1,5 @@
 (* This module makes the command line interface for bench. *)
-open Core.Std
+open Core
 
 module Ascii_table = Textutils.Ascii_table
 

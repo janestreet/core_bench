@@ -1,5 +1,5 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}. *)
-open Core.Std
+open Core
 
 let verbosity : [`High | `Low | `Suppress_warnings_and_errors] ref = ref `Low
 

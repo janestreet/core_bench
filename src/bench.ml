@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 module Test = Test
 module Run_config = Run_config

@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Textutils.Std
 
 module R = Analysis_result.Regression

@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Results of a benchmark analysis, including all the regressions. *)
-open! Core.Std
+open! Core
 
 (* 95% confidence interval, stored as (left endpoint, right endpoint) *)
 module Ci95 : sig

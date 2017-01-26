@@ -6,7 +6,7 @@
 
     Matrices are represented via [float array array], in row-major order.
 *)
-open! Core.Std
+open! Core
 
 (** Vectors *)
 module Vec : sig

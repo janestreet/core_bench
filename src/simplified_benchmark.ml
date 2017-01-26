@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 module R = Analysis_result.Regression
 module C = Analysis_result.Coefficient

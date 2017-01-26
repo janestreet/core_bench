@@ -1,5 +1,5 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}. *)
-open Core.Std
+open Core
 
 module Coefficient = Analysis_result.Coefficient
 module Ci95        = Analysis_result.Ci95

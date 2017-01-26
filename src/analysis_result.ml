@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 module Ci95 = struct
   (* 95% confidence interval, stored as (left endpoint, right endpoint) *)

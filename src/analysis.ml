@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Linear_algebra_wrapper
 
 module M = Measurement

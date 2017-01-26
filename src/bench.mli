@@ -5,7 +5,7 @@
 
     The easiest way to get started is using an example:
     {[
-      open! Core.Std
+      open! Core
       open Core_bench.Std
 
       let () =
@@ -62,7 +62,7 @@
     One can also create indexed benchmarks, which can be helpful in understanding
     non-linearities in the execution profiles of functions. For example:
     {[
-      open! Core.Std open Core_bench.Std
+      open! Core open Core_bench.Std
 
       let () =
        Command.run (Bench.make_command [
@@ -96,7 +96,7 @@
 
     @see <https://github.com/janestreet/core_bench/wiki> Core_bench wiki
 *)
-open! Core.Std
+open! Core
 
 
 (** [Test.t] are benchmarked by calls to bench. *)
@@ -298,7 +298,7 @@ val display
     addition to those provided by [make_command]. *)
 val make_command_ext
   :  summary    : string
-  -> extra_spec : ('a, unit -> unit) Core.Std.Command.Spec.t
+  -> extra_spec : ('a, unit -> unit) Core.Command.Spec.t
   -> f          : (Analysis_config.t list * Display_config.t *
                    [ `From_file of string list
                    | `Run of (Measurement.t -> string) option * Run_config.t ]

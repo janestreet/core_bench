@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
    Contains the measurements of one run of a benchmark. *)
-open Core.Std
+open Core
 
 type t = {
   mutable runs              : int;

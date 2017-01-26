@@ -1,6 +1,6 @@
 (* This module is the heart of bench : This is where all the timing and measurements
    happen. *)
-open Core.Std
+open Core
 
 type t = {
   name         : string;

@@ -1,7 +1,7 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
     A [Test.t] represents a user specified benchmark. *)
-open Core.Std
+open Core
 
 module Id : Unique_id.Id = Unique_id.Int()
 module Basic_test = struct
