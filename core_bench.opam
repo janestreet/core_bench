@@ -15,7 +15,7 @@ depends: [
   "ppx_driver"
   "ppx_jane"
   "textutils"
-  "re"
+  "re"            {>= "1.5.0"}
 ]
 available: [ ocaml-version >= "4.03.0" ]
 descr: "
