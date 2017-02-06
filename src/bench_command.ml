@@ -173,9 +173,9 @@ let parse_commandline_args
   let display_config =
     Display_config.create
       ~limit_width_to
-      ~show_samples:(List.mem columns `Samples)
-      ~show_percentage:(List.mem columns `Percentage)
-      ~show_speedup:(List.mem columns `Speedup)
+      ~show_samples:   (List.mem columns `Samples    ~equal:Display_column.equal)
+      ~show_percentage:(List.mem columns `Percentage ~equal:Display_column.equal)
+      ~show_speedup:   (List.mem columns `Speedup    ~equal:Display_column.equal)
       ~show_all_values
       ~show_absolute_ci
       ~show_overheads

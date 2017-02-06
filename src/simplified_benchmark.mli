@@ -11,6 +11,7 @@ module Field_type : sig
     | Major_words_per_run
     | Promoted_words_per_run
 
+  include Equal.S      with type t := t
   include Stringable.S with type t := t
 
   val of_short_string : string -> t

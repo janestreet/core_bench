@@ -5,4 +5,7 @@ type t =
   | `Speedup
   | `Percentage
   | `Samples
-  ] [@@deriving sexp]
+  ]
+[@@deriving compare, sexp]
+
+let equal = [%compare.equal: t]

@@ -17,6 +17,9 @@ module Field_type = struct
     | Minor_words_per_run
     | Major_words_per_run
     | Promoted_words_per_run
+  [@@deriving compare]
+
+  let equal = [%compare.equal: t]
 
   let to_string = function
     | Time_per_run -> "time_per_run_nanos"
