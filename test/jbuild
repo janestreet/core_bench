@@ -4,3 +4,5 @@
                     core_bench
                     core_extended))
   (preprocess (pps ()))))
+
+(jbuild_version jane_street)

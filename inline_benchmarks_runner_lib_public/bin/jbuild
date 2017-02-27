@@ -7,3 +7,5 @@
   (libraries (core inline_benchmarks_public))))
 
 (provides core_bench:public_runner.cmx)
+
+(jbuild_version jane_street)

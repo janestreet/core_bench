@@ -5,3 +5,5 @@
               textutils))
   (library_flags (-cclib -lpthread))
   (c_names (rdtsc_stubs))))
+
+(jbuild_version jane_street)
