@@ -4,6 +4,7 @@
   (libraries (core
               textutils))
   (library_flags (-cclib -lpthread))
-  (c_names (rdtsc_stubs))))
+  (c_names (rdtsc_stubs))
+  (preprocess (pps (ppx_jane)))))
 
 (jbuild_version jane_street)
