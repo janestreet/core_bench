@@ -3,6 +3,6 @@
   (libraries (core
                     core_bench
                     core_extended))
-  (preprocess (pps ()))))
+  (preprocess (pps ( ppx_driver.runner)))))
 
 (jbuild_version jane_street)

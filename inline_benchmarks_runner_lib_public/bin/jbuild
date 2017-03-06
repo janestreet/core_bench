@@ -5,7 +5,7 @@
   (public_name   core_bench.runner)
   (library_flags (-linkall))
   (libraries     (core inline_benchmarks_public))
-  (preprocess (pps (ppx_jane)))))
+  (preprocess (pps (ppx_jane ppx_driver.runner)))))
 
 (provides core_bench:public_runner.cmx)
 
