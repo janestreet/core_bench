@@ -7,6 +7,5 @@
   (libraries     (core inline_benchmarks_public))
   (preprocess (pps (ppx_jane ppx_driver.runner)))))
 
-(provides core_bench:public_runner.cmx)
 
 (jbuild_version jane_street)
