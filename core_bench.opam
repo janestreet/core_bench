@@ -1,4 +1,5 @@
 opam-version: "1.2"
+version: "v0.9.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/core_bench"
@@ -9,12 +10,12 @@ build: [
   ["jbuilder" "build" "--only-packages" "core_bench" "--root" "." "-j" jobs "@install"]
 ]
 depends: [
-  "core"
-  "core_extended"
+  "core"                    {>= "v0.9" & < "v0.10"}
+  "core_extended"           {>= "v0.9" & < "v0.10"}
   "jbuilder"                {build & >= "1.0+beta2"}
-  "ppx_driver"
-  "ppx_jane"
-  "textutils"
+  "ppx_driver"              {>= "v0.9" & < "v0.10"}
+  "ppx_jane"                {>= "v0.9" & < "v0.10"}
+  "textutils"               {>= "v0.9" & < "v0.10"}
   "ocaml-migrate-parsetree" {>= "0.4"}
   "re"                      {>= "1.5.0"}
 ]
