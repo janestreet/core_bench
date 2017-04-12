@@ -3,7 +3,7 @@
     Abstracts the representation, choice and scaling of units for each variable.
 *)
 open Core
-open Textutils.Std
+open Textutils
 
 
 type t =
