@@ -52,7 +52,7 @@ let get_matching_tests ~libname patterns =
     (* if no regexes are specified not specified, run all entries *)
     | [] -> entries
     | _ :: _ ->
-      List.dedup ~compare:Entry.compare
+      List.dedup_and_sort ~compare:Entry.compare
         (List.concat_map patterns ~f:(fun pattern ->
            let entries = List.filter entries ~f:(pattern_to_predicate pattern) in
            if List.is_empty entries
@@ -69,7 +69,7 @@ let get_matching_tests ~libname patterns =
 
 let get_matching_tests_no_dups ~libname patterns =
   let _tbl, tests = get_matching_tests ~libname patterns in
-  let tests = List.dedup tests ~compare:(fun t1 t2 ->
+  let tests = List.dedup_and_sort tests ~compare:(fun t1 t2 ->
     String.compare (Core_bench.Test.name t1) (Core_bench.Test.name t2))
   in
   tests
