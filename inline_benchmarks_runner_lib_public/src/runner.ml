@@ -41,11 +41,16 @@ let run_benchmarks
       ~libname:libname
       tests
 
-let spec () =
+let list_spec () =
   Command.Spec.(
     empty
     +> flag "matching" (listed string)
-         ~doc:"REGEX Run benchmarks matching the REGEX."
+         ~doc:"REGEX Include only benchmarks matching the REGEX."
+  )
+
+let spec () =
+  Command.Spec.(
+    list_spec ()
     +> flag "no-sexp" no_arg
          ~doc:" Do not generate a benchmarks.sexp file (quicker)."
     +> flag "run-without-cross-library-inlining" no_arg
@@ -54,6 +59,14 @@ let spec () =
          ~doc:" Suppress warnings when clean output needed"
   )
 
+let list_command ~libname =
+  Command.basic
+    ~summary:"list benchmark names"
+    (list_spec ())
+    (fun pattern () ->
+       let _, tests = Common.get_matching_tests ~libname pattern in
+       List.iter tests ~f:(fun test ->
+         print_endline (Core_bench.Test.name test)))
 
 let command ~libname =
   Bench.make_command_ext
