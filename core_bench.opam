@@ -11,10 +11,10 @@ build: [
 depends: [
   "core"
   "core_extended"
-  "jbuilder"                {build & >= "1.0+beta8"}
   "ppx_driver"
   "ppx_jane"
   "textutils"
+  "jbuilder"                {build & >= "1.0+beta12"}
   "ocaml-migrate-parsetree" {>= "0.4"}
   "re"                      {>= "1.5.0"}
 ]
