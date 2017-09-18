@@ -10,7 +10,7 @@ module Basic_test = struct
     test_id     : Id.t;
     name        : string;
     test_name   : string;
-    file_name    : string;
+    file_name   : string;
     module_name : string;
     key         : int;
     arg         : int option;

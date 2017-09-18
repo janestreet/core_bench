@@ -1,6 +1,6 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
-   Results of a benchmark analysis, including all the regressions. *)
+    Results of a benchmark analysis, including all the regressions. *)
 open! Core
 
 (* 95% confidence interval, stored as (left endpoint, right endpoint) *)
@@ -89,4 +89,3 @@ val create
   -> t
 
 val find_key : t -> int -> Regression.t option
-

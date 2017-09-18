@@ -1,20 +1,21 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}.
 
-   Abstract set of variables used for specifying regressions. *)
+    Abstract set of variables used for specifying regressions. *)
 open Core
 
 type t =
-[ `One (* the "variable" that is always 1 *)
-| `Runs
-| `Cycles
-| `Nanos
-| `Minor_collections
-| `Major_collections
-| `Compactions
-| `Minor_allocated
-| `Major_allocated
-| `Promoted
-] [@@deriving sexp]
+  [ `One  (* the "variable" that is always 1 *)
+  | `Runs
+  | `Cycles
+  | `Nanos
+  | `Minor_collections
+  | `Major_collections
+  | `Compactions
+  | `Minor_allocated
+  | `Major_allocated
+  | `Promoted
+  ]
+[@@deriving sexp]
 
 
 let max_int = 10
@@ -99,5 +100,3 @@ let make_col_name resp pred =
   | `One    -> sprintf "%s Overhd" (to_short_string resp)
   | `Cycles -> (to_short_string resp) ^ "/Cycle"
   | _ ->  (to_short_string resp) ^ "/" ^ (to_short_string pred)
-
-
