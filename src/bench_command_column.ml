@@ -100,7 +100,7 @@ let of_string col  =
   in
   t
 
-let arg = Command.Spec.Arg_type.create of_string
+let arg = Command.Param.Arg_type.create of_string
 
 
 

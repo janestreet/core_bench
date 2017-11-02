@@ -2,7 +2,7 @@
 open Core
 
 type t = {
-  verbosity:[ `High | `Low | `Suppress_warnings_and_errors ];
+  verbosity:Verbosity.t;
   no_compactions:bool;
   time_quota:Time.Span.t;
   sampling_type:[`Geometric of float | `Linear of int];
@@ -11,7 +11,7 @@ type t = {
 } [@@deriving fields, sexp]
 
 let create
-    ?(verbosity=`Low)
+    ?(verbosity=Verbosity.Low)
     ?(no_compactions=Defaults.no_compactions)
     ?(time_quota=Defaults.time_quota)
     ?(sampling_type=`Geometric Defaults.geometric_scale)

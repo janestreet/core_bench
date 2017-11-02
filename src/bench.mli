@@ -169,7 +169,7 @@ module Run_config : sig
   type t
 
   val create
-    :  ?verbosity:[`High | `Low | `Suppress_warnings_and_errors]
+    :  ?verbosity:Verbosity.t
     -> ?no_compactions:bool
     -> ?time_quota:Time.Span.t
     -> ?sampling_type:[`Geometric of float | `Linear of int]
@@ -297,10 +297,10 @@ val display
 (** [make_command_ext] is useful for creating [Command.t]s that have command line flags in
     addition to those provided by [make_command]. *)
 val make_command_ext
-  :  summary    : string
-  -> extra_spec : ('a, unit -> unit) Core.Command.Spec.t
-  -> f          : (Analysis_config.t list * Display_config.t *
-                   [ `From_file of string list
-                   | `Run of (Measurement.t -> string) option * Run_config.t ]
-                   -> 'a)
+  :  summary : string
+  -> (Analysis_config.t list * Display_config.t *
+      [ `From_file of string list
+      | `Run of (Measurement.t -> string) option * Run_config.t ]
+      -> unit)
+     Command.Param.t
   -> Command.t

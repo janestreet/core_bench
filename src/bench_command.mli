@@ -27,9 +27,9 @@ val make
 
 val make_ext
   :  summary:string
-  -> extra_spec:('a, unit -> unit) Core.Command.Spec.t
-  -> f:(Analysis_config.t list * Display_config.t *
-        [ `From_file of string list
-        | `Run of (Measurement.t -> string) option * Run_config.t ]
-        -> 'a)
+  -> (Analysis_config.t list * Display_config.t *
+      [ `From_file of string list
+      | `Run of (Measurement.t -> string) option * Run_config.t ]
+      -> unit)
+     Command.Param.t
   -> Command.t

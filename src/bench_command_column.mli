@@ -9,6 +9,6 @@ type t =
 
 val column_description_table : string
 val of_string                : string -> t
-val arg                      : t Command.Spec.Arg_type.t
+val arg                      : t Command.Param.Arg_type.t
 
 

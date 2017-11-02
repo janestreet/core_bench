@@ -19,179 +19,174 @@ type callback_load_analyze_and_display
   -> unit
   -> unit
 
-let spec () =
-  Command.Spec.(
-    (* flags *)
-    empty
-    +> flag "-width" (optional_with_default Defaults.limit_width_to int)
-         ~doc:(sprintf "WIDTH width limit on column display (default %d)."
-                 Defaults.limit_width_to)
-    +> flag "-display" (optional_with_default Defaults.display_as_string string)
-         ~doc:(sprintf "STYLE Table style (short, tall, line, blank or column). Default %s."
-                 Defaults.display_as_string)
-    +> flag "-v" no_arg ~doc:" High verbosity level."
-    +> flag "-quota" (optional_with_default Defaults.time_quota_float float)
-         ~doc:(sprintf "SECS Time quota allowed per test (default %s)."
-                 (Time.Span.to_string Defaults.time_quota))
-    +> flag "-fork" no_arg ~doc:" Fork and run each benchmark in separate child-process"
-    +> flag "-all-values" no_arg ~doc:" Show all column values, including very small ones."
-    +> flag "-no-compactions" no_arg ~doc:" Disable GC compactions."
-    ++ step (fun m x -> m ~show_overheads:x)
-    +> flag "-overheads" no_arg ~doc:" Show measurement overheads, when applicable."
-    ++ step (fun m linear geometric ->
-      let sampling_type =
-        match linear, geometric with
-        | None, None     -> `Geometric Defaults.geometric_scale
-        | None, Some s   -> `Geometric s
-        | Some k, None   -> `Linear k
-        | Some _, Some _ ->
-          failwith "Cannot specify both -linear and -geometric"
-      in
-      m ~sampling_type)
-    +> flag "-linear" (optional int)
-         ~doc:"INCREMENT Use linear sampling to explore number of runs, example 1."
-    +> flag "-geometric" (optional float)
-         ~doc:(sprintf "SCALE Use geometric sampling. (default %.2f)"
-                 Defaults.geometric_scale)
-    +> flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files."
-    +> flag "-sexp" no_arg ~doc:" Output as sexp."
-    +> flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
-    +> flag "-reduced-bootstrap" no_arg ~doc:" Reduce the number of bootstrapping iterations"
-    +> flag "-ci-absolute" no_arg ~doc:" Display 95% confidence interval in absolute numbers"
-    +> flag "-stabilize-gc" no_arg ~doc:" Stabilize GC between each sample capture."
-    +> flag "-clear-columns" no_arg ~doc:" Don't display default columns. Only show \
-                                          user specified ones."
-    +> flag "-load" (listed file) ~doc:"FILE Analyze previously saved data files and
-        don't run tests. [-load] can be specified multiple times."
-    +> flag "-regression" (listed string)
-         ~doc:"REGR Specify additional regressions (See -? help). "
-    +> anon (sequence ("COLUMN" %: Bench_command_column.arg))
-  )
-
-
-let sanitize_name str =
-  String.map str ~f:(fun c ->
-    if Char.is_alphanum c || String.mem "-_." c
-    then c
-    else '_')
-
-let parse_commandline_args
-      ~f
-      limit_width_to
-      display_style
-      verbosity
-      time_quota
-      fork_each_benchmark
-      show_all_values
-      no_compactions
-      ~show_overheads
-      ~sampling_type
-      save_sample_data
-      show_output_as_sexp
-      minimal_tables
-      reduced_bootstrap
-      show_absolute_ci
-      stabilize_gc_between_runs
-      clear_columns
-      analyze_files
-      regressions
-      anon_columns
-  =
-  let display = Defaults.string_to_display display_style in
-  let display, ascii_table =
-    if minimal_tables
-    then Ascii_table.Display.column_titles, true
-    else display, false
-  in
-  let verbosity =
-    if show_output_as_sexp
-    then `Suppress_warnings_and_errors
-    else
-      if verbosity
-      then `High
-      else `Low
-  in
-  let time_quota = Time.Span.of_sec time_quota in
-  let columns =
-    if clear_columns
-    then []
-    else Defaults.command_columns
-  in
-  let columns = columns @ anon_columns in
-  let analysis_configs, columns =
-    let f =
-      let open Bench_command_column in
-      function
-      | Analysis analysis -> `Fst analysis
-      | Display_column col -> `Snd col
+let wrapper_param =
+  let open Command.Let_syntax in
+  [%map_open
+    let limit_width_to =
+      flag "-width" (optional_with_default Defaults.limit_width_to int)
+        ~doc:(sprintf "WIDTH width limit on column display (default %d)."
+                Defaults.limit_width_to)
+    and display_style =
+      flag "-display" (optional_with_default Defaults.display_as_string string)
+        ~doc:(sprintf
+                "STYLE Table style (short, tall, line, blank or column). Default %s."
+                Defaults.display_as_string)
+    and verbosity =
+      flag "-v" no_arg ~doc:" High verbosity level."
+    and time_quota =
+      flag "-quota" (optional_with_default Defaults.time_quota_float float)
+        ~doc:(sprintf "SECS Time quota allowed per test (default %s)."
+                (Time.Span.to_string Defaults.time_quota))
+    and fork_each_benchmark =
+      flag "-fork" no_arg ~doc:" Fork and run each benchmark in separate child-process"
+    and show_all_values =
+      flag "-all-values" no_arg ~doc:" Show all column values, including very small ones."
+    and no_compactions =
+      flag "-no-compactions" no_arg ~doc:" Disable GC compactions."
+    and show_overheads =
+      flag "-overheads" no_arg ~doc:" Show measurement overheads, when applicable."
+    and sampling_type =
+      choose_one ~if_nothing_chosen:(`Default_to (`Geometric Defaults.geometric_scale))
+        [ flag "-linear" (optional int)
+            ~doc:"INCREMENT Use linear sampling to explore number of runs, example 1."
+          |> map ~f:(Option.map ~f:(fun k -> `Linear k))
+        ; flag "-geometric" (optional float)
+            ~doc:(sprintf "SCALE Use geometric sampling. (default %.2f)"
+                    Defaults.geometric_scale)
+          |> map ~f:(Option.map ~f:(fun s -> `Geometric s))
+        ]
+    and save_sample_data =
+      flag "-save" no_arg
+        ~doc:" Save benchmark data to <test name>.txt files."
+    and show_output_as_sexp =
+      flag "-sexp" no_arg ~doc:" Output as sexp."
+    and minimal_tables =
+      flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
+    and reduced_bootstrap =
+      flag "-reduced-bootstrap" no_arg
+        ~doc:" Reduce the number of bootstrapping iterations"
+    and show_absolute_ci =
+      flag "-ci-absolute" no_arg
+        ~doc:" Display 95% confidence interval in absolute numbers"
+    and stabilize_gc_between_runs =
+      flag "-stabilize-gc" no_arg
+        ~doc:" Stabilize GC between each sample capture."
+    and clear_columns =
+      flag "-clear-columns" no_arg
+        ~doc:" Don't display default columns. Only show \ user specified ones."
+    and analyze_files =
+      flag "-load" (listed file)
+        ~doc:"FILE Analyze previously saved data files and don't run tests. \
+              [-load] can be specified multiple times."
+    and regressions =
+      flag "-regression" (listed string)
+        ~doc:"REGR Specify additional regressions (See -? help). "
+    and anon_columns =
+      anon (sequence ("COLUMN" %: Bench_command_column.arg))
     in
-    List.partition_map columns ~f
-  in
-  let analysis_configs = List.concat analysis_configs in
-  let analysis_configs =
-    let to_name i = sprintf " [%d]" (i+1) in
-    analysis_configs @
-    (List.mapi regressions
-       ~f:(fun i reg ->
-         let regression_name = to_name i in
-         printf "Regression%s = %s\n%!" regression_name reg;
-         Analysis_config.parse reg ~regression_name))
-  in
-  let analysis_configs =
-    if reduced_bootstrap
-    then List.map analysis_configs
-           ~f:(Analysis_config.reduce_bootstrap
-                 ~bootstrap_trials:Analysis_config.default_reduced_bootstrap_trials)
-    else analysis_configs
-  in
-  let save =
-    if save_sample_data then begin
-      printf "Measurements will be saved.\n%!";
-      let time_str = Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local) in
-      Some (fun meas ->
-        let name = Measurement.name meas in
-        let fn = sprintf "%s-%s-%s.txt"
-                   (sanitize_name name)
-                   time_str
-                   (Time.Span.to_string time_quota)
+    fun ~main () ->
+      let sanitize_name str =
+        String.map str ~f:(fun c ->
+          if Char.is_alphanum c || String.mem "-_." c
+          then c
+          else '_')
+      in
+      let display = Defaults.string_to_display display_style in
+      let display, ascii_table =
+        if minimal_tables
+        then Ascii_table.Display.column_titles, true
+        else display, false
+      in
+      let verbosity : Verbosity.t =
+        if show_output_as_sexp
+        then Quiet
+        else
+        if verbosity
+        then High
+        else Low
+      in
+      let time_quota = Time.Span.of_sec time_quota in
+      let columns =
+        if clear_columns
+        then []
+        else Defaults.command_columns
+      in
+      let columns = columns @ anon_columns in
+      let analysis_configs, columns =
+        let f =
+          let open Bench_command_column in
+          function
+          | Analysis analysis -> `Fst analysis
+          | Display_column col -> `Snd col
         in
-        printf "Saving to: %s.\n%!" fn;
-        fn)
-    end
-    else None
-  in
-  let run_config =
-    Run_config.create
-      ~verbosity
-      ~time_quota
-      ~sampling_type
-      ~stabilize_gc_between_runs
-      ~no_compactions
-      ~fork_each_benchmark
-      ()
-  in
-  let display_config =
-    Display_config.create
-      ~limit_width_to
-      ~show_samples:   (List.mem columns `Samples    ~equal:Display_column.equal)
-      ~show_percentage:(List.mem columns `Percentage ~equal:Display_column.equal)
-      ~show_speedup:   (List.mem columns `Speedup    ~equal:Display_column.equal)
-      ~show_all_values
-      ~show_absolute_ci
-      ~show_overheads
-      ~display
-      ~ascii_table
-      ~show_output_as_sexp
-      ()
-  in
-  let configs =
-    match analyze_files with
-    | [] ->
-      (analysis_configs, display_config, `Run (save, run_config))
-    | filenames ->
-      (analysis_configs, display_config, `From_file filenames)
-  in
-  f configs
+        List.partition_map columns ~f
+      in
+      let analysis_configs = List.concat analysis_configs in
+      let analysis_configs =
+        let to_name i = sprintf " [%d]" (i+1) in
+        analysis_configs @
+        (List.mapi regressions
+           ~f:(fun i reg ->
+             let regression_name = to_name i in
+             printf "Regression%s = %s\n%!" regression_name reg;
+             Analysis_config.parse reg ~regression_name))
+      in
+      let analysis_configs =
+        if reduced_bootstrap
+        then List.map analysis_configs
+               ~f:(Analysis_config.reduce_bootstrap
+                     ~bootstrap_trials:Analysis_config.default_reduced_bootstrap_trials)
+        else analysis_configs
+      in
+      let save =
+        if save_sample_data then begin
+          printf "Measurements will be saved.\n%!";
+          let time_str = Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local) in
+          Some (fun meas ->
+            let name = Measurement.name meas in
+            let fn = sprintf "%s-%s-%s.txt"
+                       (sanitize_name name)
+                       time_str
+                       (Time.Span.to_string time_quota)
+            in
+            printf "Saving to: %s.\n%!" fn;
+            fn)
+        end
+        else None
+      in
+      let run_config =
+        Run_config.create
+          ~verbosity
+          ~time_quota
+          ~sampling_type
+          ~stabilize_gc_between_runs
+          ~no_compactions
+          ~fork_each_benchmark
+          ()
+      in
+      let display_config =
+        Display_config.create
+          ~limit_width_to
+          ~show_samples:   (List.mem columns `Samples    ~equal:Display_column.equal)
+          ~show_percentage:(List.mem columns `Percentage ~equal:Display_column.equal)
+          ~show_speedup:   (List.mem columns `Speedup    ~equal:Display_column.equal)
+          ~show_all_values
+          ~show_absolute_ci
+          ~show_overheads
+          ~display
+          ~ascii_table
+          ~show_output_as_sexp
+          ()
+      in
+      let configs =
+        match analyze_files with
+        | [] ->
+          (analysis_configs, display_config, `Run (save, run_config))
+        | filenames ->
+          (analysis_configs, display_config, `From_file filenames)
+      in
+      main configs
+  ]
 
 let readme () = sprintf "\
 Columns that can be specified are:
@@ -245,23 +240,15 @@ variables available for regression include:
                   (String.concat ~sep:" " Defaults.columns_as_string)
                   (Variable.summarize ())
 
-let make_ext
-      (type a)
-      ~(summary : string)
-      ~(extra_spec : (a, unit -> unit) Command.Spec.t)
-      ~(f :
-          (Analysis_config.t list * Display_config.t *
-           [ `From_file of string list
-           | `Run of (Measurement.t -> string) option * Run_config.t ])
-        -> a)
-  : Command.t
-  =
-    Command.basic
-      ~readme
-      ~summary
-      Command.Spec.(spec () ++ extra_spec)
-      (parse_commandline_args ~f)
-
+let make_ext ~summary main_param =
+  let open Command.Let_syntax in
+  Command.basic' ~readme ~summary
+    [%map_open
+      let wrapper = wrapper_param
+      and main    = main_param
+      in
+      wrapper ~main
+    ]
 
 let make
       ~(bench : callback_bench)
@@ -277,19 +264,18 @@ let make
               if len = 1
               then Test.name test
               else sprintf "%s (%d tests)" (Test.name test) len))))
-    ~extra_spec:Command.Spec.empty
-    ~f:(fun args () ->
-      match args with
-      | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
-        bench
-          ~analysis_configs
-          ~display_config
-          ~run_config
-          ?save_to_file
-          tests
-      | (analysis_configs, display_config, `From_file filenames) ->
-        analyze
-          ~analysis_configs
-          ~display_config
-          ~filenames
-          ())
+    (Command.Param.return (fun args ->
+       match args with
+       | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
+         bench
+           ~analysis_configs
+           ~display_config
+           ~run_config
+           ?save_to_file
+           tests
+       | (analysis_configs, display_config, `From_file filenames) ->
+         analyze
+           ~analysis_configs
+           ~display_config
+           ~filenames
+           ()))

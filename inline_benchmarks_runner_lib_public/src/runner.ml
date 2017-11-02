@@ -18,7 +18,7 @@ let x_library_inlining_warning ~run_without_inlining ~suppress_warnings =
 (* The main function for the inline benchmarks *)
 let run_benchmarks
       ~libname
-      ~test_locations
+      ~matching
       ~no_sexp:_
       ~run_config
       ~run_without_inlining
@@ -29,7 +29,7 @@ let run_benchmarks
       ()
   =
   x_library_inlining_warning ~run_without_inlining ~suppress_warnings;
-  let _tbl, tests = Common.get_matching_tests ~libname test_locations in
+  let _tbl, tests = Common.get_matching_tests ~libname matching in
   if List.is_empty tests
   then printf "No benchmarks to run!\n%!"
   else
@@ -41,58 +41,60 @@ let run_benchmarks
       ~libname:libname
       tests
 
-let list_spec () =
-  Command.Spec.(
-    empty
-    +> flag "matching" (listed string)
-         ~doc:"REGEX Include only benchmarks matching the REGEX."
-  )
-
-let spec () =
-  Command.Spec.(
-    list_spec ()
-    +> flag "no-sexp" no_arg
-         ~doc:" Do not generate a benchmarks.sexp file (quicker)."
-    +> flag "run-without-cross-library-inlining" no_arg
-         ~doc:" Run benchmarks even when compiled with X_LIBRARY_INLINING=false."
-    +> flag "suppress-warnings" no_arg
-         ~doc:" Suppress warnings when clean output needed"
-  )
+let matching_param =
+  let open Command.Param in
+  flag "matching" (listed string)
+    ~doc:"REGEX Include only benchmarks matching the REGEX."
 
 let list_command ~libname =
-  Command.basic
-    ~summary:"list benchmark names"
-    (list_spec ())
-    (fun pattern () ->
-       let _, tests = Common.get_matching_tests ~libname pattern in
-       List.iter tests ~f:(fun test ->
-         print_endline (Core_bench.Test.name test)))
+  let open Command.Let_syntax in
+  Command.basic' ~summary:"list benchmark names"
+    [%map_open
+      let matching = matching_param
+      in
+      fun () ->
+        let _, tests = Common.get_matching_tests ~libname matching in
+        List.iter tests ~f:(fun test ->
+          print_endline (Core_bench.Test.name test))
+    ]
 
 let command ~libname =
+  let open Command.Let_syntax in
   Bench.make_command_ext
     ~summary:(sprintf "run inline benchmarks of %s now." libname)
-    ~extra_spec:(spec ())
-    ~f:(fun args test_locations no_sexp run_without_inlining suppress_warnings () ->
-      let should_run =
-        Option.value_map ~default:false ~f:((=) "TRUE") (Sys.getenv "BENCHMARKS_RUNNER")
+    [%map_open
+      let matching = matching_param
+      and no_sexp =
+        flag "no-sexp" no_arg
+          ~doc:" Do not generate a benchmarks.sexp file (quicker)."
+      and run_without_inlining =
+        flag "run-without-cross-library-inlining" no_arg
+          ~doc:" Run benchmarks even when compiled with X_LIBRARY_INLINING=false."
+      and suppress_warnings =
+        flag "suppress-warnings" no_arg
+          ~doc:" Suppress warnings when clean output needed"
       in
-      if not should_run
-      then failwith "Don't run directly, run using the benchmarks_runner script.";
-      match args with
-      | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
-        run_benchmarks
-          ~libname
-          ~test_locations
-          ~no_sexp
-          ~run_config
-          ~run_without_inlining
-          ~suppress_warnings
-          ~display_config
-          ~analysis_configs
-          ?save_to_file
-          ()
-      | (_analysis_configs, _display_config, `From_file _filenames) ->
-        failwith "Loading saved files is not supported for inline executables."
-    )
+      fun args ->
+        let should_run =
+          Option.value_map ~default:false ~f:((=) "TRUE") (Sys.getenv "BENCHMARKS_RUNNER")
+        in
+        if not should_run
+        then failwith "Don't run directly, run using the benchmarks_runner script.";
+        match args with
+        | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
+          run_benchmarks
+            ~libname
+            ~matching
+            ~no_sexp
+            ~run_config
+            ~run_without_inlining
+            ~suppress_warnings
+            ~display_config
+            ~analysis_configs
+            ?save_to_file
+            ()
+        | (_analysis_configs, _display_config, `From_file _filenames) ->
+          failwith "Loading saved files is not supported for inline executables."
+    ]
 
 let main ~libname = Command.run (command ~libname)
