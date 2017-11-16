@@ -48,7 +48,7 @@ let matching_param =
 
 let list_command ~libname =
   let open Command.Let_syntax in
-  Command.basic' ~summary:"list benchmark names"
+  Command.basic ~summary:"list benchmark names"
     [%map_open
       let matching = matching_param
       in

@@ -1,6 +1,7 @@
 (library
  ((name inline_benchmarks_public)
   (public_name core_bench.inline_benchmarks)
+  (flags (:standard -safe-string))
   (libraries (
     core
     core_bench

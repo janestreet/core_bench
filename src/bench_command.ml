@@ -242,7 +242,7 @@ variables available for regression include:
 
 let make_ext ~summary main_param =
   let open Command.Let_syntax in
-  Command.basic' ~readme ~summary
+  Command.basic ~readme ~summary
     [%map_open
       let wrapper = wrapper_param
       and main    = main_param
