@@ -1,12 +1,6 @@
 
 open Core
 
-(* Minimal RDTSC bindings. This will be deprecated when Time_stamp_counter is moved to
-   Core.  *)
-module Cycles = struct
-  external now : unit -> int = "bench_rdtsc" [@@noalloc]
-end
-
 let stabilize_gc () =
   let rec loop failsafe last_heap_live_words =
     if failsafe <= 0 then
@@ -70,7 +64,7 @@ let measure =
       (* pre-run measurements *)
       let gc1 = Gc.quick_stat () in
       let t1 = Time.now () in
-      let c1 = Cycles.now () in
+      let c1 = Time_stamp_counter.now () in
 
       (* MEASURE A SINGLE SAMPLE *)
       for _ = 1 to current_runs do
@@ -79,7 +73,7 @@ let measure =
       (* END OF MEASUREMENT *)
 
       (* post-run measurements *)
-      let c2 = Cycles.now () in
+      let c2 = Time_stamp_counter.now () in
       let t2 = Time.now () in
       let gc2 = Gc.quick_stat () in
 
@@ -89,7 +83,7 @@ let measure =
       (* save measurements *)
       let s = results.(current_index) in
       s.M.runs  <- current_runs;
-      s.M.cycles  <- c2 - c1;
+      s.M.cycles  <- Time_stamp_counter.Span.to_int_exn (Time_stamp_counter.diff c2 c1);
       s.M.nanos  <- (Float.iround_towards_zero_exn
                        (Time.Span.to_ns (Time.diff t2 t1)));
       s.M.minor_allocated <- Float.iround_towards_zero_exn
