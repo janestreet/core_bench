@@ -247,7 +247,7 @@ let make_columns_for_regressions display_config results =
     Array.iter (Analysis_result.regressions result) ~f:(fun regr ->
       add_to_table regr));
   let regressions =
-    List.sort (Int.Table.to_alist tbl) ~cmp:(fun (a, _) (b, _) -> compare a b)
+    List.sort (Int.Table.to_alist tbl) ~compare:(fun (a, _) (b, _) -> compare a b)
   in
   let show_absolute_ci = display_config.Display_config.show_absolute_ci in
   let show_all_values = display_config.Display_config.show_all_values in

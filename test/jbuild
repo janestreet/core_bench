@@ -4,7 +4,7 @@
   (libraries (core
                     core_bench
                     core_extended))
-  (preprocess (pps ( ppx_driver.runner)))))
+  (preprocess (pps ( ppxlib.runner)))))
 
 
 (jbuild_version 1)
