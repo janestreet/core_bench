@@ -4,7 +4,6 @@
  ((name          public_runner)
   (public_name   core_bench.runner)
   (library_flags (-linkall))
- (flags (:standard -safe-string))
   (libraries     (core inline_benchmarks_public))
   (preprocess (pps (ppx_jane ppxlib.runner)))))
 

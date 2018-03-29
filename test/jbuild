@@ -1,6 +1,5 @@
 (executables
  ((names (test_bench mv_regr))
-(flags (:standard -safe-string))
   (libraries (core
                     core_bench
                     core_extended))
