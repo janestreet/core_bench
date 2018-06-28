@@ -1,5 +1,4 @@
 (** A module internal to [Core_bench]. Please look at {!Bench}. *)
-open Textutils
 
 type t = {
   don't_display_table   : bool;

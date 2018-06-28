@@ -1,8 +1,6 @@
 (* This module makes the command line interface for bench. *)
 open Core
 
-module Ascii_table = Textutils.Ascii_table
-
 type callback_bench
   = ?run_config:Run_config.t
   -> ?analysis_configs:Analysis_config.t list

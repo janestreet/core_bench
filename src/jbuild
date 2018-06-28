@@ -1,8 +1,8 @@
 (library
  ((name core_bench)
   (public_name core_bench)
-  (libraries (core
-              textutils))
+  (libraries (ascii_table
+              core))
   (preprocess (pps (ppx_jane ppxlib.runner)))))
 
 

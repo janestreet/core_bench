@@ -1,6 +1,5 @@
 open Core
 open Core_bench.Std
-open Core_extended.Std
 
 let get_float () =
   if Random.bool ()

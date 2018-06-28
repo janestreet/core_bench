@@ -186,7 +186,7 @@ module Display_config : sig
   val create
     :  ?don't_display_table:bool
     -> ?limit_width_to:int
-    -> ?display:Textutils.Ascii_table.Display.t
+    -> ?display:Ascii_table.Display.t
     -> ?ascii_table:bool
     -> ?show_output_as_sexp:bool
     -> ?show_absolute_ci:bool

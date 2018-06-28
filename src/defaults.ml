@@ -2,7 +2,7 @@
 
    Many of the default settings are here. *)
 open Core
-module Ascii_table = Textutils.Ascii_table
+
 
 (* default columns for command *)
 let columns_as_string = [

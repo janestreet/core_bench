@@ -1,5 +1,4 @@
 open Core
-open Textutils
 
 module R = Analysis_result.Regression
 module C = Analysis_result.Coefficient
