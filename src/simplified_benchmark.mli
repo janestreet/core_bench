@@ -34,7 +34,7 @@ module Result : sig
        for indexed tests e.g. "addition test:1000" *)
     ; benchmark_name_with_index       : string
     (* [full_benchmark_name] includes file, module name, given name, and index
-       concactenated e.g. "[test.ml] addition test:1000" *)
+       concatenated e.g. "[test.ml] addition test:1000" *)
     ; full_benchmark_name             : string
     (* [dup_id] is a unique id for benchmarks that have the exact same name *)
     ; dup_id                          : int option
@@ -55,7 +55,7 @@ module Result : sig
     ; machine_where_benchmark_was_run : string
     (* epoch_time_of_run is the epoch time of when exactly the benchmarks were run,
        in nanoseconds *)
-    ; epoch_time_of_run               : int
+    ; epoch_time_of_run               : Int63.t
     (* time_of_hg_revision is the time at which the hg revision was created *)
     ; time_of_hg_revision             : string option
     (* Various stats computed by bench. *)

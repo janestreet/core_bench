@@ -79,7 +79,7 @@ module Result = struct
     ; x_library_inlining              : bool
     ; ocaml_version                   : string
     ; machine_where_benchmark_was_run : string
-    ; epoch_time_of_run               : int
+    ; epoch_time_of_run               : Int63.t
     ; time_of_hg_revision             : string option
     ; time_r_square                   : float
     ; time_per_run_nanos              : float
@@ -99,8 +99,12 @@ end
 
 let extract ?(libname="") (results : Analysis_result.t list) =
   let get_bench_name_with_index res =
-    let tmp = List.nth_exn (String.split ~on:']' (Analysis_result.name res)) 1 in
-    String.drop_prefix tmp 1
+    let name = Analysis_result.name res in
+    match String.lsplit2 ~on:']' name with
+    | Some (_, subname) when String.is_prefix subname ~prefix:" " ->
+      String.drop_prefix subname 1
+    | Some (_, _)
+    | None -> name
   in
   let estimate regr = C.estimate (R.coefficients regr).(0) in
   let get_ci regr = C.ci95 (R.coefficients regr).(0) in
@@ -113,7 +117,7 @@ let extract ?(libname="") (results : Analysis_result.t list) =
     Array.length preds = 2 && Array.exists preds ~f:((=) `One)
     && Array.exists preds ~f:((=) `Runs)
   in
-  let cur_time = (Time_ns.now () |> Time_ns.to_int_ns_since_epoch) in
+  let cur_time = (Time_ns.now () |> Time_ns.to_int63_ns_since_epoch) in
   let version = Version_util.version in
   let simplified_results = List.map results ~f:(fun res ->
     let jtest =
@@ -181,3 +185,62 @@ let extract ?(libname="") (results : Analysis_result.t list) =
 
 let to_sexp ?libname results =
   extract ?libname results |> Results.sexp_of_t
+
+let%expect_test "extract" =
+  let analysis_results =
+    List.map ~f:(fun s -> Sexp.of_string s |> Analysis_result.t_of_sexp)
+      [ {|((name alloc_list:10) (test_name "") (file_name "") (module_name "")
+  (sample_count 1059) (largest_run 790170)
+  (regressions
+   (((responder Nanos) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 12.614163005077506) (ci95 ()))))
+     (regression_name ()) (key 1025))
+    ((responder Minor_allocated) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 12.00006865591944) (ci95 ()))
+       ((predictor One) (estimate 30.998178509821386) (ci95 ()))))
+     (regression_name ()) (key 3585))
+    ((responder Major_allocated) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 0.00010110434458848057) (ci95 ()))
+       ((predictor One) (estimate 3.8155829518820092) (ci95 ()))))
+     (regression_name ()) (key 4609))
+    ((responder Promoted) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 0.00010110434458848057) (ci95 ()))
+       ((predictor One) (estimate 3.8155829518820092) (ci95 ()))))
+     (regression_name ()) (key 5633)))))|}
+      ; {|((name "[test.ml] Time.now") (test_name Time.now) (file_name test.ml)
+  (module_name "") (sample_count 892) (largest_run 150024)
+  (regressions
+   (((responder Nanos) (r_square ())
+     (coefficients (((predictor Runs) (estimate 65.779200048688) (ci95 ()))))
+     (regression_name ()) (key 1025))
+    ((responder Minor_allocated) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 4.000015101820142) (ci95 ()))
+       ((predictor One) (estimate 31.001015087871728) (ci95 ()))))
+     (regression_name ()) (key 3585))
+    ((responder Major_allocated) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 9.51464237451749E-05) (ci95 ()))
+       ((predictor One) (estimate -0.0087109316142560851) (ci95 ()))))
+     (regression_name ()) (key 4609))
+    ((responder Promoted) (r_square ())
+     (coefficients
+      (((predictor Runs) (estimate 9.51464237451749E-05) (ci95 ()))
+       ((predictor One) (estimate -0.0087109316142560851) (ci95 ()))))
+     (regression_name ()) (key 5633)))))|}
+      ]
+  in
+  (* We can't just [print_s (to_sexp analysis_results)] because many fields in a
+     [Result.t] depend on when the code is run, on what box, etc.  We just focus on
+     testing the formerly problematic part of [extract]. *)
+  let results = extract analysis_results in
+  List.iter results ~f:(fun result ->
+    printf "%s; %s\n" result.benchmark_name result.benchmark_name_with_index
+  );
+  [%expect {|
+    ; alloc_list:10
+    Time.now; Time.now |}]

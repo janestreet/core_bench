@@ -13,6 +13,8 @@ val largest_run   : t -> int
 val sample_count  : t -> int
 val samples       : t -> Measurement_sample.t array
 
+(** [samples] should have length at least [sample_count].  Extra entries are ignored in
+    calculations. *)
 val create
   :  name:string
   -> test_name:string
@@ -23,6 +25,6 @@ val create
   -> samples:Measurement_sample.t array
   -> t
 
-val save : t -> filename : string -> unit
-val load : filename : string -> t
+val save : t -> filename:string -> unit
+val load : filename:string -> t
 

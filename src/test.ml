@@ -30,7 +30,7 @@ end
 type t = {
   name        : string;
   test_name   : string;
-  file_name    : string;
+  file_name   : string;
   module_name : string;
   tests       : Basic_test.t list
 } [@@deriving fields]
@@ -81,5 +81,4 @@ let create_group ~name ?(test_name="") ?(file_name="") ?(module_name="") ts =
     tests = List.map ts ~f:(fun test ->
       let name = name ^ "/" ^ test.Basic_test.name in
       { test with Basic_test.name = name });
-}
-
+  }

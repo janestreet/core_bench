@@ -27,29 +27,37 @@ let create () = {
   minor_collections = 0;
 }
 
+let field_names () =
+  let field_name accum f = Field.name f :: accum in
+  Fields.fold ~init:[] ~runs:field_name ~cycles:field_name ~nanos:field_name
+    ~compactions:field_name ~minor_allocated:field_name ~major_allocated:field_name
+    ~promoted:field_name ~minor_collections:field_name ~major_collections:field_name
+  |> List.rev
 
+let field_names_to_string () = String.concat ~sep:"," (field_names ())
 
-let field_names_to_string () =
-  let field_name str f = str ^ " " ^ (Field.name f) ^ ";" in
-  (Fields.fold ~init:"#" ~runs:field_name ~cycles:field_name ~nanos:field_name
-     ~compactions:field_name ~minor_allocated:field_name ~major_allocated:field_name
-     ~promoted:field_name ~minor_collections:field_name ~major_collections:field_name)
+let to_int_list t =
+  let prepend accum field = Field.get field t :: accum in
+  Fields.fold ~init:[]
+    ~runs:prepend
+    ~nanos:prepend
+    ~minor_collections:prepend
+    ~major_collections:prepend
+    ~compactions:prepend
+    ~cycles:prepend
+    ~minor_allocated:prepend
+    ~major_allocated:prepend
+    ~promoted:prepend
+  |> List.rev
 
 let field_values_to_string t =
-  let value_str str field = str ^ (Int.to_string (Field.get field t)) ^ " " in
-  Fields.fold ~init:""
-    ~runs:value_str
-    ~nanos:value_str
-    ~minor_collections:value_str
-    ~major_collections:value_str
-    ~compactions:value_str
-    ~cycles:value_str
-    ~minor_allocated:value_str
-    ~major_allocated:value_str
-    ~promoted:value_str
+  to_int_list t
+  |> List.map ~f:Int.to_string
+  |> String.concat ~sep:","
 
+(* Can handle current format ("100,200,300") and previous format ("100 200 300 "). *)
 let of_field_values_string line =
-  let parts = String.split ~on:' ' (String.strip line) in
+  let parts = String.split_on_chars ~on:[','; ' '] (String.strip line) in
   let t = create () in
   let set_value vs field =
     match vs with
@@ -68,7 +76,7 @@ let of_field_values_string line =
                  ~promoted:set_value) with
   | [] -> ()
   | ls -> failwithf "Too many data values in saved metrics file: %s"
-    (String.concat ~sep:"," ls) ()
+            (String.concat ~sep:"," ls) ()
   end;
   t
 
