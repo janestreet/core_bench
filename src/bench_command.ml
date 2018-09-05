@@ -73,7 +73,7 @@ let wrapper_param =
       flag "-clear-columns" no_arg
         ~doc:" Don't display default columns. Only show \ user specified ones."
     and analyze_files =
-      flag "-load" (listed file)
+      flag "-load" (listed Filename.arg_type)
         ~doc:"FILE Analyze previously saved data files and don't run tests. \
               [-load] can be specified multiple times."
     and regressions =
