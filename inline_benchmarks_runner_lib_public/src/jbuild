@@ -5,7 +5,6 @@
     core
     core_bench
     re
-    re.perl
     ))
   (preprocess (pps (ppx_jane ppxlib.runner)))))
 

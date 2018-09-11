@@ -39,7 +39,7 @@ let entry_to_bench_test entry ~key =
       (fun len -> Staged.stage (thunk len))
 
 let pattern_to_predicate s =
-  let regexp = Re_perl.compile_pat s in
+  let regexp = Re.Perl.compile_pat s in
   (fun entry ->
      let name = make_benchmark_name entry in
      Re.execp regexp name)
