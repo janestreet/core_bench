@@ -1,3 +1,9 @@
+## git version
+
+- Changed `quota` parameter of `Run_config.t` to be either time quota or
+  a number of calls. Use `Run_config.create ~quota:(Span old_quota)` to
+  preserve the previous functionality.
+
 ## 113.24.00
 
 - Switched to ppx.

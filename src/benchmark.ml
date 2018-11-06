@@ -12,10 +12,6 @@ let stabilize_gc () =
   in
   loop 10 0
 
-let exceeded_allowed_time allowed_time_span t1 =
-  let t2 = Time.now () in
-  Time.diff t2 t1 > allowed_time_span
-
 (* The main benchmarking function *)
 let measure =
   let module RC = Run_config  in
@@ -32,13 +28,16 @@ let measure =
     (* counters *)
     let index = ref 0 in
     let runs = ref 0 in
+    let total_runs = ref 0 in
 
     (* get the old Gc settings *)
     let old_gc = Gc.get () in
 
     (* THE MAIN TEST LOOP *)
     let init_t1 = Time.now () in
-    while not (exceeded_allowed_time (RC.time_quota run_config) init_t1)
+    let quota = RC.quota run_config in
+    let quota_max_count = Quota.max_count quota in
+    while not (Quota.fulfilled quota ~start:init_t1 ~num_calls:!total_runs)
           && !index < Array.length results
     do
       let current_runs = !runs in
@@ -77,6 +76,8 @@ let measure =
       let t2 = Time.now () in
       let gc2 = Gc.quick_stat () in
 
+      total_runs := !total_runs + current_runs;
+
       (* reset the old Gc now that we are done with measurements *)
       Gc.set old_gc;
 
@@ -106,9 +107,13 @@ let measure =
         | `Linear k -> current_runs + k
         | `Geometric scale ->
           let next_geometric =
-            Float.iround_towards_zero_exn ((Float.of_int current_runs) *. scale) in
+            Float.iround_towards_zero_exn ((Float.of_int current_runs) *. scale)
+          in
           Int.max next_geometric (current_runs + 1)
       in
+      (* if [next] would put us over the quota, we decrease as necessary *)
+      let next = Int.min next (quota_max_count - !total_runs) in
+      assert (next >= 0); (* otherwise the loop guard is broken *)
       runs := next;
     done;
     let end_time = Time.now () in
@@ -144,15 +149,24 @@ let measure_all
   Random.self_init ();
   let module RC = Run_config in
   Verbosity.set_verbosity (RC.verbosity run_config);
-  let est_time =
-    Time.Span.of_sec
-      ((Time.Span.to_sec (RC.time_quota run_config)) *.
-       (Float.of_int (List.length tests)))
-  in
-  Verbosity.print_low "Estimated testing time %s (%d benchmarks x %s). Change using -quota SECS.\n%!"
-    (Time.Span.to_string est_time)
-    (List.length tests)
-    (Time.Span.to_string (RC.time_quota run_config));
+  begin
+    match RC.quota run_config with
+    | Num_calls trials ->
+      Verbosity.print_low
+        "Estimated testing time unknown (%d benchmarks x %d trials). \
+         Change using '-quota'.\n%!"
+        (List.length tests)
+        trials
+    | Span span ->
+      let est_time =
+        Time.Span.scale span (Float.of_int (List.length tests))
+      in
+      Verbosity.print_low
+        "Estimated testing time %s (%d benchmarks x %s). Change using '-quota'.\n%!"
+        (Time.Span.to_string est_time)
+        (List.length tests)
+        (Time.Span.to_string span);
+  end;
   if (RC.fork_each_benchmark run_config) then
     let fds = List.map tests ~f:(fun _ -> Unix.pipe ()) in
     let () =
@@ -173,4 +187,3 @@ let measure_all
       Marshal.from_channel ic)
   else
     List.map tests ~f:(measure run_config)
-

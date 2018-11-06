@@ -164,6 +164,41 @@ module Variable : sig
   ] [@@deriving sexp]
 end
 
+(** A quota can be specified as an amount of wall time, or a number of times to
+    run the function.
+
+    (Strictly speaking, for [Num_calls n], it is possible that the function is
+    called fewer than [n] times if the array of measurements fills up.  But
+    with default settings for how batches are sized, you don't run into this
+    issue until [n] is over 1.9e16.) *)
+module Quota : sig
+  type t =
+    | Span of Time.Span.t
+    | Num_calls of int
+  [@@deriving sexp, bin_io]
+
+  (** Examples:
+      - "10" -> Span 10s (float-like: convert to seconds)
+      - "1m" -> Span 1m  (span-like: keep as span)
+      - "5x" -> Num_calls 5
+      - "1e9x" -> Num_calls 1_000_000_000
+  *)
+  include Stringable.S with type t := t
+
+  val arg_type : t Command.Param.Arg_type.t
+
+  (** [fulfilled t ~start ~num_calls] returns [true] iff we have fulfilled the
+      quota, given that we *started* at time [start] and have run the function
+      [num_calls] times. *)
+  val fulfilled : t -> start:Time.t -> num_calls:int -> bool
+
+  (** [max_count (Num_calls n)] returns [n], [max_count (Span _)] returns [max_int]. *)
+  val max_count : t -> int
+
+  (** Scale by an integer factor *)
+  val scale_int : t -> int -> t
+end
+
 (** [Run_config.t] specifies how a benchmark should be run. *)
 module Run_config : sig
   type t
@@ -171,10 +206,11 @@ module Run_config : sig
   val create
     :  ?verbosity:Verbosity.t
     -> ?no_compactions:bool
-    -> ?time_quota:Time.Span.t
+    -> ?quota:Quota.t
     -> ?sampling_type:[`Geometric of float | `Linear of int]
     -> ?stabilize_gc_between_runs:bool
     -> ?fork_each_benchmark:bool
+    -> ?thin_overhead:int
     -> unit
     -> t
 end

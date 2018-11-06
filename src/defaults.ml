@@ -21,8 +21,7 @@ let stabilize_gc_between_runs = false
 let no_compactions = false
 
 (* how long to measure *)
-let time_quota_float = 10.0
-let time_quota       = Time.Span.of_sec time_quota_float
+let quota = Quota.Span (Time.Span.of_int_sec 10)
 
 (* saving generated data *)
 let save_sample_data = false

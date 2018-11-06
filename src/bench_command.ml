@@ -31,10 +31,12 @@ let wrapper_param =
                 Defaults.display_as_string)
     and verbosity =
       flag "-v" no_arg ~doc:" High verbosity level."
-    and time_quota =
-      flag "-quota" (optional_with_default Defaults.time_quota_float float)
-        ~doc:(sprintf "SECS Time quota allowed per test (default %s)."
-                (Time.Span.to_string Defaults.time_quota))
+    and quota =
+      flag "-quota" (optional_with_default Defaults.quota Quota.arg_type)
+        ~doc:(sprintf "<INT>x|<SPAN> Quota allowed per test. May be a number of runs \
+                       (e.g. 1000x or 1e6x) or a time span (e.g. 10s or 500ms). \
+                       Default %s."
+                (Quota.to_string Defaults.quota))
     and fork_each_benchmark =
       flag "-fork" no_arg ~doc:" Fork and run each benchmark in separate child-process"
     and show_all_values =
@@ -79,6 +81,11 @@ let wrapper_param =
     and regressions =
       flag "-regression" (listed string)
         ~doc:"REGR Specify additional regressions (See -? help). "
+    and thin_overhead =
+      flag "-thin-overhead" (optional float)
+        ~doc:"INT If given, just run the test function(s) N times; skip \
+              measurements and regressions. Float lexemes like \"1e6\" are allowed."
+      |> map ~f:(Option.map ~f:Float.to_int)
     and anon_columns =
       anon (sequence ("COLUMN" %: Bench_command_column.arg))
     in
@@ -103,7 +110,6 @@ let wrapper_param =
         then High
         else Low
       in
-      let time_quota = Time.Span.of_sec time_quota in
       let columns =
         if clear_columns
         then []
@@ -145,7 +151,7 @@ let wrapper_param =
             let fn = sprintf "%s-%s-%s.txt"
                        (sanitize_name name)
                        time_str
-                       (Time.Span.to_string time_quota)
+                       (Quota.to_string quota)
             in
             printf "Saving to: %s.\n%!" fn;
             fn)
@@ -155,11 +161,12 @@ let wrapper_param =
       let run_config =
         Run_config.create
           ~verbosity
-          ~time_quota
+          ~quota
           ~sampling_type
           ~stabilize_gc_between_runs
           ~no_compactions
           ~fork_each_benchmark
+          ?thin_overhead
           ()
       in
       let display_config =

@@ -1,5 +1,6 @@
 open Core
 
+module Quota = Quota
 module Test = Test
 module Run_config = Run_config
 module Display_column = Display_column
@@ -37,12 +38,26 @@ let analyze_and_display ~measurements ?analysis_configs ?display_config ?libname
   display ?display_config ?libname results
 
 let bench ?run_config ?analysis_configs ?display_config ?save_to_file ?libname tests =
-  let measurements = measure ?run_config tests in
-  begin match save_to_file with
-  | Some to_filename -> save_measurements measurements ~to_filename
-  | None -> ()
-  end;
-  analyze_and_display ~measurements ?analysis_configs ?display_config ?libname ()
+  match Option.bind run_config ~f:Run_config.thin_overhead with
+  | None ->
+    let measurements = measure ?run_config tests in
+    begin match save_to_file with
+    | Some to_filename -> save_measurements measurements ~to_filename
+    | None -> ()
+    end;
+    analyze_and_display ~measurements ?analysis_configs ?display_config ?libname ()
+  | Some n ->
+    let n = Int.max 0 n in
+    (* Just run each test function n times. *)
+    List.iter (Test.expand tests) ~f:(fun basic_test ->
+      match Test.Basic_test.f basic_test with
+      | Test.Basic_test.T f ->
+        Verbosity.print_low "Running '%s' %i times\n" (Test.Basic_test.name basic_test) n;
+        let f = f `init in
+        for _ = 1 to n do
+          ignore (f ())
+        done
+    )
 
 let make_command tests =
   Bench_command.make
