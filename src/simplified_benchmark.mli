@@ -42,7 +42,7 @@ module Result : sig
     ; module_name                     : string
     ; library_name                    : string
     (* version contains the full string received from Version_util.version
-       e.g. "ssh://hg//hg/jane/submissions_1e88f63603b3" *)
+        *)
     ; version                         : string
     (* hg_revision contains only the action revision id used by hg
        e.g. "1e88f63603b3" *)
@@ -51,7 +51,7 @@ module Result : sig
     ; x_library_inlining              : bool
     ; ocaml_version                   : string
     (* machine_where_benchmark_was_run stores the name of the performance machine used
-       for the benchmarks e.g. "igm-qwd-iperf1" *)
+       for the benchmarks  *)
     ; machine_where_benchmark_was_run : string
     (* epoch_time_of_run is the epoch time of when exactly the benchmarks were run,
        in nanoseconds *)

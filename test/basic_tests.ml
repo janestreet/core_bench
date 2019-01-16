@@ -13,7 +13,7 @@ let get_int64 () =
   then Int64.of_int 10
   else 10L
 
-let scale t mul = Pervasives.int_of_float ((Pervasives.float_of_int t) *. mul)
+let scale t mul = Caml.int_of_float ((Caml.float_of_int t) *. mul)
 
 let t1 = Bench.Test.create ~name:"Id"
   (fun () -> ())
