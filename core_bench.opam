@@ -12,10 +12,11 @@ build: [
 depends: [
   "ocaml" {>= "4.07.0"}
   "core"
+  "core_kernel"
   "ppx_jane"
   "textutils"
-  "dune"      {build & >= "1.5.1"}
-  "re"        {>= "1.8.0"}
+  "dune"        {build & >= "1.5.1"}
+  "re"          {>= "1.8.0"}
 ]
 synopsis: "Benchmarking library"
 description: "
