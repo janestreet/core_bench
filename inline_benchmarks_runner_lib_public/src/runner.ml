@@ -1,4 +1,5 @@
 open Core
+open Poly
 open Core_bench.Std
 
 module Entry = Ppx_bench_lib.Benchmark_accumulator.Entry

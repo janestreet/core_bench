@@ -3,6 +3,7 @@
     Abstracts the representation, choice and scaling of units for each variable.
 *)
 open Core
+open Poly
 
 type t =
   | Words

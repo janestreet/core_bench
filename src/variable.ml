@@ -2,6 +2,7 @@
 
     Abstract set of variables used for specifying regressions. *)
 open Core
+open Poly
 
 type t =
   [ `One  (* the "variable" that is always 1 *)

@@ -1,4 +1,5 @@
 open Core
+open Poly
 
 module R = Analysis_result.Regression
 module C = Analysis_result.Coefficient
