@@ -46,7 +46,7 @@ let wrapper_param =
     and show_overheads =
       flag "-overheads" no_arg ~doc:" Show measurement overheads, when applicable."
     and sampling_type =
-      choose_one ~if_nothing_chosen:(`Default_to (`Geometric Defaults.geometric_scale))
+      choose_one ~if_nothing_chosen:(Default_to (`Geometric Defaults.geometric_scale))
         [ flag "-linear" (optional int)
             ~doc:"INCREMENT Use linear sampling to explore number of runs, example 1."
           |> map ~f:(Option.map ~f:(fun k -> `Linear k))
