@@ -6,6 +6,7 @@
 
     Matrices are represented via [float array array], in row-major order.
 *)
+
 open! Core
 
 (** Vectors *)

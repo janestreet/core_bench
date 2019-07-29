@@ -1,7 +1,8 @@
-open! Core
 (** A module internal to [Core_Bench].
 
     Converts an analysis result to a simplified json representation *)
+
+open! Core
 
 module Field_type : sig
 

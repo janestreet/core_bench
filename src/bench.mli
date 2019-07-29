@@ -96,8 +96,8 @@
 
     @see <https://github.com/janestreet/core_bench/wiki> Core_bench wiki
 *)
-open! Core
 
+open! Core
 
 (** [Test.t] are benchmarked by calls to bench. *)
 module Test : sig
