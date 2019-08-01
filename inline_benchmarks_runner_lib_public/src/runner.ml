@@ -1,6 +1,6 @@
 open Core
 open Poly
-open Core_bench.Std
+open Core_bench
 
 module Entry = Ppx_bench_lib.Benchmark_accumulator.Entry
 
@@ -56,7 +56,7 @@ let list_command ~libname =
       fun () ->
         let _, tests = Common.get_matching_tests ~libname matching in
         List.iter tests ~f:(fun test ->
-          print_endline (Core_bench.Test.name test))
+          print_endline (Bench.Test.name test))
     ]
 
 let command ~libname =

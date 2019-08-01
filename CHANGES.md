@@ -4,6 +4,9 @@
   a number of calls. Use `Run_config.create ~quota:(Span old_quota)` to
   preserve the previous functionality.
 
+- Made "stdless" so that one should now `open Core_bench` rather than
+  `open Core_bench.Std`.
+
 ## 113.24.00
 
 - Switched to ppx.

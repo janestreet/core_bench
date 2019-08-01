@@ -1,5 +1,5 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
 module Entry = Ppx_bench_lib.Benchmark_accumulator.Entry
 
@@ -70,7 +70,7 @@ let get_matching_tests ~libname patterns =
 let get_matching_tests_no_dups ~libname patterns =
   let _tbl, tests = get_matching_tests ~libname patterns in
   let tests = List.dedup_and_sort tests ~compare:(fun t1 t2 ->
-    String.compare (Core_bench.Test.name t1) (Core_bench.Test.name t2))
+    String.compare (Bench.Test.name t1) (Bench.Test.name t2))
   in
   tests
 

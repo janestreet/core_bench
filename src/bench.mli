@@ -6,7 +6,7 @@
     The easiest way to get started is using an example:
     {[
       open! Core
-      open Core_bench.Std
+      open Core_bench
 
       let () =
         Random.self_init ();
@@ -62,7 +62,8 @@
     One can also create indexed benchmarks, which can be helpful in understanding
     non-linearities in the execution profiles of functions. For example:
     {[
-      open! Core open Core_bench.Std
+      open! Core
+      open Core_bench
 
       let () =
        Command.run (Bench.make_command [
@@ -277,6 +278,9 @@ module Analysis_config : sig
       [allocations_vs_runs] and [gc_vs_runs]. *)
   val default : t list
 end
+
+(** Results of a benchmark analysis, including all the regressions. *)
+module Analysis_result : Analysis_result_intf.Analysis_result (** @inline *)
 
 (** A [Measurement.t] represents the result of measuring execution of a [Test.t]. It is
     used as input for subsequent analysis. *)

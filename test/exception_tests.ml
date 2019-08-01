@@ -1,5 +1,5 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
 exception Noarg
 exception Arg1 of int

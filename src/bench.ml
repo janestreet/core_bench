@@ -8,6 +8,7 @@ module Display_config = Display_config
 module Variable = Variable
 module Measurement = Measurement
 module Analysis_config = Analysis_config
+module Analysis_result = Analysis_result
 
 
 let load_measurements ~filenames =

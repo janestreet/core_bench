@@ -1,5 +1,5 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
 let calibrator = force Time_stamp_counter.calibrator
 
