@@ -15,7 +15,7 @@ depends: [
   "core_kernel"
   "ppx_jane"
   "textutils"
-  "dune"        {build & >= "1.5.1"}
+  "dune"        {>= "1.5.1"}
   "re"          {>= "1.8.0"}
 ]
 synopsis: "Benchmarking library"
