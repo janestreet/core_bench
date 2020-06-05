@@ -80,7 +80,7 @@ let command ~libname =
           Option.value_map ~default:false ~f:((=) "TRUE") (Sys.getenv "BENCHMARKS_RUNNER")
         in
         if not should_run
-        then failwith "Don't run directly, run using the benchmarks_runner script.";
+        then failwith "Don't run directly, run using the inline_benchmarks_runner script.";
         match args with
         | (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
           run_benchmarks
