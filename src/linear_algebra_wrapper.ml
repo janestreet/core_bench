@@ -8,14 +8,16 @@ let random_indices_in_place ~max arr =
   for i = 0 to len - 1 do
     arr.(i) <- Random.int max
   done
+;;
 
 (* [quantile_of_array] sorts the array and returns the values at the quantile indices.  If
    we ever expose this function, we should check that low_quantile and high_quantile are
    in the interval [0,1]. *)
-let quantile_of_array arr ?(failures=0) ~len ~low_quantile ~high_quantile =
+let quantile_of_array arr ?(failures = 0) ~len ~low_quantile ~high_quantile =
   Array.sort arr ~len ~compare:Float.compare;
   let index q =
-    Float.iround_towards_zero_exn (Float.of_int len *. q +. 0.5 *. Float.of_int failures)
+    Float.iround_towards_zero_exn
+      ((Float.of_int len *. q) +. (0.5 *. Float.of_int failures))
   in
   (* [extended_get i] retrieves entry [i] from [arr], pretending that
      [arr.(i) = infinity] when [i > len - 1], and that [arr.(i) = neg_infinity]
@@ -25,18 +27,20 @@ let quantile_of_array arr ?(failures=0) ~len ~low_quantile ~high_quantile =
   let extended_get i = if i >= len then Float.infinity else arr.(i) in
   (* For the low_quantile calculation, if the index is too large (too many failures),
      return the last entry of sorted array to preserve monotonicity *)
-  let left_endpoint  = extended_get (Int.min (index low_quantile) (len - 1)) in
+  let left_endpoint = extended_get (Int.min (index low_quantile) (len - 1)) in
   let right_endpoint = extended_get (Int.max (index high_quantile) failures) in
-  Analysis_result.Ci95.create  ~left_endpoint ~right_endpoint
+  Analysis_result.Ci95.create ~left_endpoint ~right_endpoint
+;;
 
 let debug_print pred_matrix resp_vector =
-  for i = 0 to (Array.length pred_matrix - 1) do
+  for i = 0 to Array.length pred_matrix - 1 do
     printf "(%4d) " i;
-    for j = 0 to (Array.length pred_matrix.(0) - 1) do
-      printf "%3g " pred_matrix.(i).(j);
+    for j = 0 to Array.length pred_matrix.(0) - 1 do
+      printf "%3g " pred_matrix.(i).(j)
     done;
-    printf "| %3g\n%!" resp_vector.(i);
+    printf "| %3g\n%!" resp_vector.(i)
   done
+;;
 
 (* val ols : Measurement.t -> responder -> predictors -> float array *)
 let make_lr_inputs ?indices meas ~resp ~preds =
@@ -48,53 +52,51 @@ let make_lr_inputs ?indices meas ~resp ~preds =
   let pred_matrix, resp_vector =
     match indices with
     | Some indices ->
-      Array.map indices ~f:(fun i -> make_pred_values mss.(i)),
-      Array.map indices ~f:(fun i -> resp_acc mss.(i))
+      ( Array.map indices ~f:(fun i -> make_pred_values mss.(i))
+      , Array.map indices ~f:(fun i -> resp_acc mss.(i)) )
     | None ->
-      Array.init (Measurement.sample_count meas) ~f:(fun i ->
-        make_pred_values mss.(i)),
-      Array.init (Measurement.sample_count meas) ~f:(fun i ->
-        resp_acc mss.(i))
+      ( Array.init (Measurement.sample_count meas) ~f:(fun i -> make_pred_values mss.(i))
+      , Array.init (Measurement.sample_count meas) ~f:(fun i -> resp_acc mss.(i)) )
   in
-  if debug
-  then debug_print pred_matrix resp_vector;
+  if debug then debug_print pred_matrix resp_vector;
   pred_matrix, resp_vector
+;;
 
 let ols meas ~resp ~preds =
-  if debug then begin
-    Array.iteri preds ~f:(fun i pred ->
-      printf "(%d) %s " i (Variable.to_string pred));
-    printf "\n%!";
-  end;
+  if debug
+  then (
+    Array.iteri preds ~f:(fun i pred -> printf "(%d) %s " i (Variable.to_string pred));
+    printf "\n%!");
   let matrix, vector = make_lr_inputs meas ~resp ~preds in
   match Linear_algebra.ols ~in_place:true matrix vector with
   | Ok _ as x -> x
   | Error _ ->
-    Or_error.error_string "\
-Regression failed. (In Bench, this is usually because the predictors were
-linearly dependent, commonly as a result of having a predictor that is always
-zero, or having two predictors that are multiples of each other.)"
+    Or_error.error_string
+      "Regression failed. (In Bench, this is usually because the predictors were\n\
+       linearly dependent, commonly as a result of having a predictor that is always\n\
+       zero, or having two predictors that are multiples of each other.)"
+;;
 
 (* val r_square : Measurement.t -> responder -> predictors -> coefficients:float array -> float *)
 let r_square meas ~resp ~preds ~coeffs =
   let predictors_matrix, responder_vector = make_lr_inputs meas ~resp ~preds in
-  let sum_responder = Array.fold responder_vector ~init:0. ~f:(+.) in
+  let sum_responder = Array.fold responder_vector ~init:0. ~f:( +. ) in
   let mean = sum_responder /. Float.of_int (Array.length responder_vector) in
   let tot_ss = ref 0. in
   let res_ss = ref 0. in
   let predicted i =
     let x = ref 0. in
     for j = 0 to Array.length coeffs - 1 do
-      x := !x +. predictors_matrix.(i).(j) *. coeffs.(j)
+      x := !x +. (predictors_matrix.(i).(j) *. coeffs.(j))
     done;
     !x
   in
   for i = 0 to Array.length responder_vector - 1 do
-    tot_ss := !tot_ss +. (responder_vector.(i) -. mean) ** 2.;
-    res_ss := !res_ss +. (responder_vector.(i) -. predicted i) ** 2.;
+    tot_ss := !tot_ss +. ((responder_vector.(i) -. mean) ** 2.);
+    res_ss := !res_ss +. ((responder_vector.(i) -. predicted i) ** 2.)
   done;
-  1. -. !res_ss /. !tot_ss
-
+  1. -. (!res_ss /. !tot_ss)
+;;
 
 (* A note about the constant [threshold = 10] (for the number of nonzero values each
    predictor must have) below:
@@ -135,21 +137,29 @@ let can_bootstrap meas ~resp ~preds =
   let non_zero_cols = ref 0 in
   Array.iter matrix ~f:(fun row ->
     for i = 0 to Array.length non_zero - 1 do
-      if row.(i) <> 0.0 then begin
+      if row.(i) <> 0.0
+      then (
         non_zero.(i) <- non_zero.(i) + 1;
-        if non_zero.(i) = bootstrap_threshold then incr non_zero_cols
-      end
+        if non_zero.(i) = bootstrap_threshold then incr non_zero_cols)
     done);
   if !non_zero_cols = Array.length non_zero
   then None
-  else Some (Error.of_string
-               (sprintf "Columns %s have less that %d non-zero values."
-                  (Array.foldi non_zero ~init:"" ~f:(fun i str col_count ->
-                     if col_count < bootstrap_threshold
-                     then sprintf "%s %s(non-zero %d)" str
-                            (Variable.to_string preds.(i)) col_count
-                     else str))
-                  bootstrap_threshold))
+  else
+    Some
+      (Error.of_string
+         (sprintf
+            "Columns %s have less that %d non-zero values."
+            (Array.foldi non_zero ~init:"" ~f:(fun i str col_count ->
+               if col_count < bootstrap_threshold
+               then
+                 sprintf
+                   "%s %s(non-zero %d)"
+                   str
+                   (Variable.to_string preds.(i))
+                   col_count
+               else str))
+            bootstrap_threshold))
+;;
 
 let bootstrap ~trials meas ~resp ~preds =
   let num_preds = Array.length preds in
@@ -169,20 +179,24 @@ let bootstrap ~trials meas ~resp ~preds =
       (* If the run succeeded, save the coefficients. *)
       | Ok bt_ols_result ->
         for p = 0 to num_preds - 1 do
-          bootstrap_coeffs.(p).(i) <- bt_ols_result.(p);
+          bootstrap_coeffs.(p).(i) <- bt_ols_result.(p)
         done
       (* If the run failed, assume neg_infinity *)
       | _ ->
         incr bootstrap_fails;
         for p = 0 to num_preds - 1 do
-          bootstrap_coeffs.(p).(i) <- Float.neg_infinity;
+          bootstrap_coeffs.(p).(i) <- Float.neg_infinity
         done
     done;
-    Ok (Array.init num_preds ~f:(fun i ->
-      if trials = 0
-      then Analysis_result.Ci95.bad_ci95
-      else quantile_of_array (bootstrap_coeffs.(i))
+    Ok
+      (Array.init num_preds ~f:(fun i ->
+         if trials = 0
+         then Analysis_result.Ci95.bad_ci95
+         else
+           quantile_of_array
+             bootstrap_coeffs.(i)
              ~failures:!bootstrap_fails
              ~len:trials
              ~low_quantile:0.025
              ~high_quantile:0.975))
+;;

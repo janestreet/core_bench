@@ -35,11 +35,11 @@ module Mat : sig
 
   (** Create a matrix of 0s *)
   val create0 : rows:int -> cols:int -> t
-  val create_per_row: rows:int -> cols:int -> f:(int -> float) -> t
+
+  val create_per_row : rows:int -> cols:int -> f:(int -> float) -> t
 
   (** Extract a column.  Data is copied.  Indices start at 0. *)
   val get_column : t -> int -> Vec.t
-
 end
 
 (** [qr A] returns the QR-decomposition of [A] as a pair (Q,R). [A] must have
