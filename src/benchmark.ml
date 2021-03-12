@@ -157,20 +157,20 @@ let measure_all run_config tests =
     let () =
       Caml.List.iter2
         (fun test (_fdr, fdw) ->
-           match Caml.Unix.fork () with
+           match Caml_unix.fork () with
            | 0 ->
              let x = measure run_config test in
              let open Caml in
-             let oc = Unix.out_channel_of_descr fdw in
+             let oc = Caml_unix.out_channel_of_descr fdw in
              Marshal.to_channel oc x [];
              exit 0
-           | pid -> ignore (Caml.Unix.waitpid [] pid))
+           | pid -> ignore (Caml_unix.waitpid [] pid))
         tests
         fds
     in
     List.map fds ~f:(fun (fdr, _fdw) ->
       let open Caml in
-      let ic = Unix.in_channel_of_descr fdr in
+      let ic = Caml_unix.in_channel_of_descr fdr in
       Marshal.from_channel ic))
   else List.map tests ~f:(measure run_config)
 ;;
