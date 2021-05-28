@@ -1,5 +1,6 @@
 (* This module makes the command line interface for bench. *)
 open Core
+module Time = Time_unix
 
 type callback_bench =
   ?run_config:Run_config.t
@@ -95,7 +96,7 @@ let wrapper_param =
     and analyze_files =
       flag
         "-load"
-        (listed Filename.arg_type)
+        (listed Filename_unix.arg_type)
         ~doc:
           "FILE Analyze previously saved data files and don't run tests. [-load] can be \
            specified multiple times."

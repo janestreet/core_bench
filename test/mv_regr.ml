@@ -61,5 +61,5 @@ let () =
     SimpleBenchmarks.all;
   ] ) in
 
-  Command.run (Bench.make_command testCases)
+  Command_unix.run (Bench.make_command testCases)
 

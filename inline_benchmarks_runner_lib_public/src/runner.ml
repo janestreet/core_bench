@@ -98,4 +98,4 @@ let command ~libname =
           failwith "Loading saved files is not supported for inline executables."
     ]
 
-let main ~libname = Command.run (command ~libname)
+let main ~libname = Command_unix.run (command ~libname)

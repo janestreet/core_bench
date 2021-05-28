@@ -1,4 +1,5 @@
 open Core
+module Unix = Core_unix
 
 let stabilize_gc () =
   let rec loop failsafe last_heap_live_words =

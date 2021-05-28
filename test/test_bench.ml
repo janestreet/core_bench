@@ -1,7 +1,7 @@
 open Core
 
 let main () =
-  Command.run (Command.group
+  Command_unix.run (Command.group
                  ~summary:"Several benchmarks"
                  [
                    "basic"     , Basic_tests.     command;
