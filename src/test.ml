@@ -15,7 +15,7 @@ module Basic_test = struct
     ; file_name : string
     ; module_name : string
     ; key : int
-    ; arg : int option
+    ; arg : string option
     ; group_key : int option
     ; f : packed_f
     }
@@ -87,7 +87,7 @@ let create ~name ?test_name ?file_name ?module_name ?key bm =
     bm)
 ;;
 
-let create_indexed
+let create_parameterised
       ~name
       ?(test_name = "")
       ?(file_name = "")
@@ -102,19 +102,30 @@ let create_indexed
   ; file_name
   ; tests =
       List.map args ~f:(fun n ->
-        let individual_key = Hashtbl.hash (key + n) in
-        let name = name ^ ":" ^ Int.to_string n in
+        let individual_key = Caml.Hashtbl.seeded_hash key n in
+        let name = name ^ ":" ^ fst n in
         { Basic_test.name
         ; test_name
         ; module_name
         ; file_name
-        ; arg = Some n
+        ; arg = Some (fst n)
         ; key = individual_key
         ; group_key = Some key
-        ; f = T (fun `init -> Staged.unstage (bm n))
+        ; f = T (fun `init -> Staged.unstage (bm (snd n)))
         ; test_id = Id.create ()
         })
   }
+;;
+
+let create_indexed ~name ?test_name ?file_name ?module_name ~args ?key bm =
+  create_parameterised
+    ~name
+    ?test_name
+    ?file_name
+    ?module_name
+    ?key
+    bm
+    ~args:(List.map args ~f:(fun i -> Int.to_string i, i))
 ;;
 
 let expand ts = List.concat (List.map ~f:tests ts)

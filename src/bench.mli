@@ -127,6 +127,18 @@ module Test : sig
 
   (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
       about the ['a] below. *)
+  val create_parameterised
+    :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> args:(string * 'param) list
+    -> ?key:int
+    -> ('param -> (unit -> 'a) Staged.t)
+    -> t
+
+  (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
+      about the ['a] below. *)
   val create_indexed
     :  name:string
     -> ?test_name:string

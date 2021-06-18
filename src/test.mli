@@ -13,7 +13,7 @@ module Basic_test : sig
     ; file_name : string
     ; module_name : string
     ; key : int
-    ; arg : int option
+    ; arg : string option
     ; group_key : int option
     ; f : packed_f
     }
@@ -24,7 +24,10 @@ module Basic_test : sig
   val file_name : t -> string
   val module_name : t -> string
   val key : t -> int
-  val arg : t -> int option
+
+  (** a name describing this arg *)
+  val arg : t -> string option
+
   val group_key : t -> int option
   val f : t -> packed_f
 
@@ -34,7 +37,7 @@ module Basic_test : sig
     -> ?file_name:string
     -> ?module_name:string
     -> ?group_key:int option
-    -> ?arg:int option
+    -> ?arg:string option
     -> key:int
     -> ([ `init ] -> unit -> unit)
     -> t
@@ -67,6 +70,16 @@ val create_with_initialization
   -> ?module_name:string
   -> ?key:int
   -> ([ `init ] -> unit -> 'a)
+  -> t
+
+val create_parameterised
+  :  name:string
+  -> ?test_name:string
+  -> ?file_name:string
+  -> ?module_name:string
+  -> args:(string * 'param) list
+  -> ?key:int
+  -> ('param -> (unit -> 'a) Staged.t)
   -> t
 
 val create_indexed

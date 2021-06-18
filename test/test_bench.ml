@@ -11,14 +11,8 @@ let main () =
                    "tuple"     , Tuple_tests.     command;
                    "array"     , Array_tests.     command;
                    "allocation", Allocation_tests.command;
+                   "list"      , List_tests.      command;
 
                  ])
 
 let () = main ()
-
-
-
-
-
-
-

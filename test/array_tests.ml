@@ -13,4 +13,3 @@ let t1 = Bench.Test.create_indexed
 let tests = [ t1 ]
 
 let command = Bench.make_command tests
-

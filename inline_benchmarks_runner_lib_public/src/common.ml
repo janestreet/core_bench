@@ -33,9 +33,9 @@ let entry_to_bench_test entry ~key =
   match entry.Entry.test_spec with
   | Regular_thunk f ->
     Bench.Test.create_with_initialization ~name ~test_name ~file_name ?module_name ~key f
-  | Indexed_thunk { arg_values; thunk; _ } ->
-    Bench.Test.create_indexed
-      ~name ~test_name ~file_name ?module_name ~args:arg_values ~key
+  | Parameterised_thunk {params; thunk; _} ->
+    Bench.Test.create_parameterised
+      ~name ~test_name ~file_name ?module_name ~args:params ~key
       (fun len -> Staged.stage (thunk len))
 
 let pattern_to_predicate s =
@@ -73,4 +73,3 @@ let get_matching_tests_no_dups ~libname patterns =
     String.compare (Bench.Test.name t1) (Bench.Test.name t2))
   in
   tests
-

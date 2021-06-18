@@ -50,7 +50,6 @@ module SimpleBenchmarks = struct
     ~name:"ArrayCreateInt1"
     (fun () -> ignore(Array.create ~len:200 0) )
 
-
   let all = [ t1; t2; t3; t4; t7 ]
 
 
@@ -62,4 +61,3 @@ let () =
   ] ) in
 
   Command_unix.run (Bench.make_command testCases)
-
