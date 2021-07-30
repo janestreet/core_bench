@@ -13,7 +13,7 @@ let random_indices_in_place ~max arr =
 (* [quantile_of_array] sorts the array and returns the values at the quantile indices.  If
    we ever expose this function, we should check that low_quantile and high_quantile are
    in the interval [0,1]. *)
-let quantile_of_array arr ?(failures = 0) ~len ~low_quantile ~high_quantile =
+let quantile_of_array ?(failures = 0) arr ~len ~low_quantile ~high_quantile =
   Array.sort arr ~len ~compare:Float.compare;
   let index q =
     Float.iround_towards_zero_exn
