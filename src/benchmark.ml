@@ -47,7 +47,7 @@ let measure =
          will cause an early collection or two which will not happen subsequently. These
          early collections are just noise.
 
-         While benchmarking functions that do not allocate any memory this early noise is
+         When benchmarking functions that do not allocate any memory, this early noise is
          the only significant input. In these cases, these spurious early collections will
          give the allocation stats (major and promoted words) a slight negative value. *)
       if RC.stabilize_gc_between_runs run_config || current_runs = 0 then stabilize_gc ();
