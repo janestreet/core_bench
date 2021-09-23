@@ -1,6 +1,3 @@
-(** A module internal to [Core_bench]. Please look at {!Bench}.
-
-    Contains the measurements of one run of a benchmark. *)
 open Core
 
 type t =

@@ -3,7 +3,7 @@ open! Core
 type t =
   | Span of Time.Span.t
   | Num_calls of int
-[@@deriving sexp, bin_io]
+[@@deriving sexp]
 
 include Stringable.S with type t := t
 

@@ -63,11 +63,12 @@ module Result : sig
     ; major_words_per_run : float
     ; promoted_words_per_run : float
     }
-  [@@deriving typerep, sexp]
+  [@@deriving sexp]
 end
 
 module Results : sig
-  type t = Result.t list [@@deriving typerep, sexp]
+  type t = Result.t list [@@deriving sexp]
 end
 
 val to_sexp : ?libname:string -> Analysis_result.t list -> Sexp.t
+val extract : ?libname:string -> Analysis_result.t list -> Results.t

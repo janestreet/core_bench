@@ -189,7 +189,7 @@ module Quota : sig
   type t =
     | Span of Time.Span.t
     | Num_calls of int
-  [@@deriving sexp, bin_io]
+  [@@deriving sexp]
 
   (** Examples:
       - "10" -> Span 10s (float-like: convert to seconds)

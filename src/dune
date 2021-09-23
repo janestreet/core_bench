@@ -1,4 +1,4 @@
 (library (name core_bench) (public_name core_bench)
  (libraries textutils.ascii_table core_kernel.core core.filename_unix
   core.time_stamp_counter core.time_unix core_kernel.version_util)
- (preprocess (pps ppx_jane)))
+ (preprocess (pps ppx_compare ppx_fields_conv ppx_let ppx_sexp_conv)))

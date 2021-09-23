@@ -63,7 +63,7 @@ let bench ?run_config ?analysis_configs ?display_config ?save_to_file ?libname t
           n;
         let f = f `init in
         for _ = 1 to n do
-          ignore (f ())
+          ignore (f () : (* existential type from GADT *) _)
         done)
 ;;
 

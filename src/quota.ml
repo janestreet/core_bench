@@ -3,7 +3,7 @@ open Core
 type t =
   | Span of Time.Span.t
   | Num_calls of int
-[@@deriving sexp, bin_io]
+[@@deriving sexp]
 
 let int_of_string_with_scientific_notation string =
   try Int.of_string string with
@@ -12,7 +12,7 @@ let int_of_string_with_scientific_notation string =
     let int = Float.to_int float in
     if Float.equal float (Float.of_int int)
     then int
-    else raise_s [%message "fractional values not allowed" ~_:(float : float)]
+    else raise_s ([%sexp_of: string * float] ("fractional values not allowed", float))
 ;;
 
 let of_string string =

@@ -60,7 +60,7 @@ let measure =
       let c1 = Time_stamp_counter.now () in
       (* MEASURE A SINGLE SAMPLE *)
       for _ = 1 to current_runs do
-        ignore (f ())
+        ignore (f () : (* existential type from GADT *) _)
       done;
       (* END OF MEASUREMENT *)
 
@@ -165,7 +165,7 @@ let measure_all run_config tests =
              let oc = Caml_unix.out_channel_of_descr fdw in
              Marshal.to_channel oc x [];
              exit 0
-           | pid -> ignore (Caml_unix.waitpid [] pid))
+           | pid -> ignore (Caml_unix.waitpid [] pid : int * Caml_unix.process_status))
         tests
         fds
     in

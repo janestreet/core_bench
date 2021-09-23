@@ -4,14 +4,6 @@ module Unix = Core_unix
 module R = Analysis_result.Regression
 module C = Analysis_result.Coefficient
 
-module Regression_info = struct
-  type t =
-    { value : float
-    ; predictors : string list
-    }
-  [@@deriving typerep]
-end
-
 module Field_type = struct
   type t =
     | Time_per_run
@@ -91,11 +83,11 @@ module Result = struct
     ; major_words_per_run : float
     ; promoted_words_per_run : float
     }
-  [@@deriving typerep, sexp]
+  [@@deriving sexp]
 end
 
 module Results = struct
-  type t = Result.t list [@@deriving typerep, sexp]
+  type t = Result.t list [@@deriving sexp]
 end
 
 let extract ?(libname = "") (results : Analysis_result.t list) =
@@ -189,63 +181,3 @@ let extract ?(libname = "") (results : Analysis_result.t list) =
 ;;
 
 let to_sexp ?libname results = extract ?libname results |> Results.sexp_of_t
-
-let%expect_test "extract" =
-  let analysis_results =
-    List.map
-      ~f:(fun s -> Sexp.of_string s |> Analysis_result.t_of_sexp)
-      [ {|((name alloc_list:10) (test_name "") (file_name "") (module_name "")
-  (sample_count 1059) (largest_run 790170)
-  (regressions
-   (((responder Nanos) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 12.614163005077506) (ci95 ()))))
-     (regression_name ()) (key 1025))
-    ((responder Minor_allocated) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 12.00006865591944) (ci95 ()))
-       ((predictor One) (estimate 30.998178509821386) (ci95 ()))))
-     (regression_name ()) (key 3585))
-    ((responder Major_allocated) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 0.00010110434458848057) (ci95 ()))
-       ((predictor One) (estimate 3.8155829518820092) (ci95 ()))))
-     (regression_name ()) (key 4609))
-    ((responder Promoted) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 0.00010110434458848057) (ci95 ()))
-       ((predictor One) (estimate 3.8155829518820092) (ci95 ()))))
-     (regression_name ()) (key 5633)))))|}
-      ; {|((name "[test.ml] Time.now") (test_name Time.now) (file_name test.ml)
-  (module_name "") (sample_count 892) (largest_run 150024)
-  (regressions
-   (((responder Nanos) (r_square ())
-     (coefficients (((predictor Runs) (estimate 65.779200048688) (ci95 ()))))
-     (regression_name ()) (key 1025))
-    ((responder Minor_allocated) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 4.000015101820142) (ci95 ()))
-       ((predictor One) (estimate 31.001015087871728) (ci95 ()))))
-     (regression_name ()) (key 3585))
-    ((responder Major_allocated) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 9.51464237451749E-05) (ci95 ()))
-       ((predictor One) (estimate -0.0087109316142560851) (ci95 ()))))
-     (regression_name ()) (key 4609))
-    ((responder Promoted) (r_square ())
-     (coefficients
-      (((predictor Runs) (estimate 9.51464237451749E-05) (ci95 ()))
-       ((predictor One) (estimate -0.0087109316142560851) (ci95 ()))))
-     (regression_name ()) (key 5633)))))|}
-      ]
-  in
-  (* We can't just [print_s (to_sexp analysis_results)] because many fields in a
-     [Result.t] depend on when the code is run, on what box, etc.  We just focus on
-     testing the formerly problematic part of [extract]. *)
-  let results = extract analysis_results in
-  List.iter results ~f:(fun result ->
-    printf "%s; %s\n" result.benchmark_name result.benchmark_name_with_index);
-  [%expect {|
-    ; alloc_list:10
-    Time.now; Time.now |}]
-;;

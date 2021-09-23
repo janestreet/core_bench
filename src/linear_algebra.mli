@@ -24,6 +24,9 @@ module Vec : sig
 
   (** The Euclidean length of a vector *)
   val norm : t -> float
+
+  (** Comparison up to a tolerance for testing purposes. *)
+  val almost_equal : tol:float -> t -> t -> bool
 end
 
 (** Matrices *)
@@ -40,6 +43,9 @@ module Mat : sig
 
   (** Extract a column.  Data is copied.  Indices start at 0. *)
   val get_column : t -> int -> Vec.t
+
+  (** Comparison up to a tolerance for testing purposes. *)
+  val almost_equal : tol:float -> t -> t -> bool
 end
 
 (** [qr A] returns the QR-decomposition of [A] as a pair (Q,R). [A] must have

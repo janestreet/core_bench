@@ -1,4 +1,4 @@
 (library (name public_runner) (public_name core_bench.runner)
  (library_flags -linkall)
  (libraries core_kernel.core inline_benchmarks_public)
- (preprocess (pps ppx_jane)))
+ (preprocess no_preprocessing))
