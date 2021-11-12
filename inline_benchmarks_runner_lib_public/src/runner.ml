@@ -1,7 +1,6 @@
 open Core
 open Poly
 open Core_bench
-module Entry = Ppx_bench_lib.Benchmark_accumulator.Entry
 
 let x_library_inlining_warning ~run_without_inlining ~suppress_warnings =
   if not Version_util.x_library_inlining

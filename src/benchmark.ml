@@ -1,4 +1,5 @@
 open Core
+open Core_bench_internals
 module Unix = Core_unix
 
 let stabilize_gc () =
@@ -74,8 +75,8 @@ let measure =
       (* save measurements *)
       let s = results.(current_index) in
       s.M.runs <- current_runs;
-      s.M.cycles <- Time_stamp_counter.Span.to_int_exn (Time_stamp_counter.diff c2 c1);
-      s.M.nanos <- Float.iround_towards_zero_exn (Time.Span.to_ns (Time.diff t2 t1));
+      s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
+      s.M.nanos <- Float.int63_round_down_exn (Time.Span.to_ns (Time.diff t2 t1));
       s.M.minor_allocated
       <- Float.iround_towards_zero_exn
            (gc2.Gc.Stat.minor_words -. gc1.Gc.Stat.minor_words);

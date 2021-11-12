@@ -3,6 +3,7 @@
     Generates the command line interface to [Core_bench]. *)
 
 open! Core
+open! Core_bench_internals
 
 type callback_bench =
   ?run_config:Run_config.t

@@ -5,8 +5,8 @@ open! Core
 
 type t =
   { mutable runs : int
-  ; mutable cycles : int
-  ; mutable nanos : int
+  ; mutable cycles : Int63.t
+  ; mutable nanos : Int63.t
   ; mutable compactions : int
   ; mutable minor_allocated : int
   ; mutable major_allocated : int

@@ -3,6 +3,7 @@
     Tabular display of [Analysis_result]s. *)
 
 open! Core
+open! Core_bench_internals
 
 val display
   :  ?libname:string

@@ -128,7 +128,7 @@ let is_displayed_opt ~show_all_values t v =
   | None -> false
 ;;
 
-let to_string ~show_all_values t exp v : Ascii_table.Attr.t list * string =
+let to_string ~show_all_values t exp v : Ascii_table_kernel.Attr.t list * string =
   let to_string = function
     | Words -> Magnitude.to_string_words
     | Time -> Magnitude.to_string_nanos
@@ -146,7 +146,9 @@ let to_string ~show_all_values t exp v : Ascii_table.Attr.t list * string =
   else [], ""
 ;;
 
-let to_ci_string ~show_all_values t exp (left, right) : Ascii_table.Attr.t list * string =
+let to_ci_string ~show_all_values t exp (left, right)
+  : Ascii_table_kernel.Attr.t list * string
+  =
   let (a1, left), (a2, right) =
     to_string ~show_all_values t exp left, to_string ~show_all_values t exp right
   in

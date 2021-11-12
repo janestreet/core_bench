@@ -99,6 +99,7 @@
 *)
 
 open! Core
+open! Core_bench_internals
 
 (** [Test.t] are benchmarked by calls to bench. *)
 module Test : sig
@@ -215,7 +216,7 @@ end
 
 (** [Run_config.t] specifies how a benchmark should be run. *)
 module Run_config : sig
-  type t
+  type t = Core_bench_internals.Run_config.t
 
   val create
     :  ?verbosity:Verbosity.t
@@ -299,7 +300,7 @@ module Analysis_result : Analysis_result_intf.Analysis_result
 (** A [Measurement.t] represents the result of measuring execution of a [Test.t]. It is
     used as input for subsequent analysis. *)
 module Measurement : sig
-  type t [@@deriving sexp]
+  type t = Core_bench_internals.Measurement.t [@@deriving sexp]
 
   val name : t -> string
   val save : t -> filename:string -> unit

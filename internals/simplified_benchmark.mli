@@ -70,5 +70,5 @@ module Results : sig
   type t = Result.t list [@@deriving sexp]
 end
 
-val to_sexp : ?libname:string -> Analysis_result.t list -> Sexp.t
-val extract : ?libname:string -> Analysis_result.t list -> Results.t
+val to_sexp : ?hostname:string -> ?libname:string -> Analysis_result.t list -> Sexp.t
+val extract : ?hostname:string -> ?libname:string -> Analysis_result.t list -> Results.t

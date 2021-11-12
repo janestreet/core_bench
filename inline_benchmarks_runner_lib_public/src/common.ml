@@ -40,9 +40,7 @@ let entry_to_bench_test entry ~key =
 
 let pattern_to_predicate s =
   let regexp = Re.Perl.compile_pat s in
-  fun entry ->
-    let name = make_benchmark_name entry in
-    Re.execp regexp name
+  fun name -> Re.execp regexp name
 ;;
 
 let get_matching_tests ~libname patterns =
@@ -50,16 +48,32 @@ let get_matching_tests ~libname patterns =
   let entries = Ppx_bench_lib.Benchmark_accumulator.lookup_lib ~libname in
   let entries =
     match patterns with
-    (* if no regexes are specified not specified, run all entries *)
+    (* if no regexes are specified, run all entries *)
     | [] -> entries
     | _ :: _ ->
-      List.dedup_and_sort
-        ~compare:Entry.compare
-        (List.concat_map patterns ~f:(fun pattern ->
-           let entries = List.filter entries ~f:(pattern_to_predicate pattern) in
-           if List.is_empty entries
-           then printf "Warning: %s didn't match any benchmark\n" pattern;
-           entries))
+      let filter =
+        let preds = List.map patterns ~f:pattern_to_predicate in
+        fun name -> List.exists preds ~f:(fun pred -> pred name)
+      in
+      (* for parameterized tests we must include the param in the filter (so we can filter
+         to "size:1000" or what have you.) *)
+      List.filter_map entries ~f:(fun entry ->
+        let name = make_benchmark_name entry in
+        match entry.Entry.test_spec with
+        | Regular_thunk _ -> Option.some_if (filter name) entry
+        | Parameterised_thunk { params; arg_name; thunk } ->
+          let params =
+            List.filter params ~f:(fun (p, _) ->
+              let name = name ^ ":" ^ p in
+              filter name)
+          in
+          (match params with
+           | [] -> None
+           | _ :: _ ->
+             Some
+               (Entry.with_test_spec
+                  entry
+                  (Parameterised_thunk { params; arg_name; thunk }))))
   in
   let tests =
     List.map entries ~f:(fun entry ->

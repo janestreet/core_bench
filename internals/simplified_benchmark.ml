@@ -1,6 +1,5 @@
 open Core
 open Poly
-module Unix = Core_unix
 module R = Analysis_result.Regression
 module C = Analysis_result.Coefficient
 
@@ -90,7 +89,11 @@ module Results = struct
   type t = Result.t list [@@deriving sexp]
 end
 
-let extract ?(libname = "") (results : Analysis_result.t list) =
+let extract
+      ?(hostname = "<unknown host>")
+      ?(libname = "")
+      (results : Analysis_result.t list)
+  =
   let get_bench_name_with_index res =
     let name = Analysis_result.name res in
     match String.lsplit2 ~on:']' name with
@@ -128,7 +131,7 @@ let extract ?(libname = "") (results : Analysis_result.t list) =
           ; hg_active_bookmark = None
           ; x_library_inlining = Version_util.x_library_inlining
           ; ocaml_version = Version_util.ocaml_version
-          ; machine_where_benchmark_was_run = Unix.gethostname ()
+          ; machine_where_benchmark_was_run = hostname
           ; epoch_time_of_run = cur_time
           ; time_of_hg_revision = None
           ; time_r_square = 0.
@@ -180,4 +183,6 @@ let extract ?(libname = "") (results : Analysis_result.t list) =
   simplified_results
 ;;
 
-let to_sexp ?libname results = extract ?libname results |> Results.sexp_of_t
+let to_sexp ?hostname ?libname results =
+  extract ?hostname ?libname results |> Results.sexp_of_t
+;;

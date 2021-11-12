@@ -22,7 +22,7 @@ let fork_each_benchmark = false
 let display_as_string = "short"
 
 let string_to_display =
-  let module Display = Ascii_table.Display in
+  let module Display = Ascii_table_kernel.Display in
   function
   | "short" -> Display.short_box
   | "tall" -> Display.tall_box

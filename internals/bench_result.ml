@@ -1,7 +1,6 @@
 open Core
 open Poly
 module Coefficient = Analysis_result.Coefficient
-module Ci95 = Analysis_result.Ci95
 
 module Predictor_result = struct
   type t =
