@@ -13,6 +13,7 @@ depends: [
   "ocaml" {>= "4.08.0"}
   "core"
   "core_kernel"
+  "core_unix"
   "ppx_compare"
   "ppx_fields_conv"
   "ppx_jane"
