@@ -1,7 +1,7 @@
 (* This module makes the command line interface for bench. *)
 open Core
 open Core_bench_internals
-module Time = Time_unix
+module Time = Time_float_unix
 
 type callback_bench =
   ?run_config:Run_config.t

@@ -32,7 +32,7 @@ type t =
   ; samples : string
   ; percentage : float
   ; speedup : float
-  ; time_taken : Time.Span.t
+  ; time_taken : Time_float.Span.t
   }
 [@@deriving fields, sexp]
 

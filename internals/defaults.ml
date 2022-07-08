@@ -10,7 +10,7 @@ let stabilize_gc_between_runs = false
 let no_compactions = false
 
 (* how long to measure *)
-let quota = Quota.Span (Time.Span.of_int_sec 10)
+let quota = Quota.Span (Time_float.Span.of_int_sec 10)
 
 (* width of the output table *)
 let limit_width_to = 200

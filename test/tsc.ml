@@ -5,7 +5,7 @@ let calibrator = force Time_stamp_counter.calibrator
 
 let command =
   Bench.make_command
-    [ Bench.Test.create ~name:"Time.now" (fun () -> ignore (Time.now ()))
+    [ Bench.Test.create ~name:"Time.now" (fun () -> ignore (Time_float.now ()))
     ; Bench.Test.create ~name:"Calibrator.calibrate" (fun () ->
         ignore (Time_stamp_counter.Calibrator.calibrate calibrator))
     ; Bench.Test.create_group

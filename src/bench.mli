@@ -188,7 +188,7 @@ end
     issue until [n] is over 1.9e16.) *)
 module Quota : sig
   type t =
-    | Span of Time.Span.t
+    | Span of Time_float.Span.t
     | Num_calls of int
   [@@deriving sexp]
 
@@ -205,7 +205,7 @@ module Quota : sig
   (** [fulfilled t ~start ~num_calls] returns [true] iff we have fulfilled the
       quota, given that we *started* at time [start] and have run the function
       [num_calls] times. *)
-  val fulfilled : t -> start:Time.t -> num_calls:int -> bool
+  val fulfilled : t -> start:Time_float.t -> num_calls:int -> bool
 
   (** [max_count (Num_calls n)] returns [n], [max_count (Span _)] returns [max_int]. *)
   val max_count : t -> int

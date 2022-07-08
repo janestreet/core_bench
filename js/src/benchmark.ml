@@ -31,7 +31,7 @@ let measure =
     (* get the old Gc settings *)
     let old_gc = Gc.get () in
     (* THE MAIN TEST LOOP *)
-    let init_t1 = Time.now () in
+    let init_t1 = Time_float.now () in
     let quota = RC.quota run_config in
     let quota_max_count = Quota.max_count quota in
     while
@@ -56,7 +56,7 @@ let measure =
       then Gc.set { (Gc.get ()) with Gc.Control.max_overhead = 1_000_000 };
       (* pre-run measurements *)
       let gc1 = Gc.quick_stat () in
-      let t1 = Time.now () in
+      let t1 = Time_float.now () in
       (* MEASURE A SINGLE SAMPLE *)
       for _ = 1 to current_runs do
         ignore (f () : (* existential type from GADT *) _)
@@ -64,7 +64,7 @@ let measure =
       (* END OF MEASUREMENT *)
 
       (* post-run measurements *)
-      let t2 = Time.now () in
+      let t2 = Time_float.now () in
       let gc2 = Gc.quick_stat () in
       total_runs := !total_runs + current_runs;
       (* reset the old Gc now that we are done with measurements *)
@@ -73,7 +73,8 @@ let measure =
       let s = results.(current_index) in
       s.M.runs <- current_runs;
       s.M.cycles <- Int63.zero;
-      s.M.nanos <- Float.int63_round_down_exn (Time.Span.to_ns (Time.diff t2 t1));
+      s.M.nanos
+      <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
       s.M.minor_allocated
       <- Float.iround_towards_zero_exn
            (gc2.Gc.Stat.minor_words -. gc1.Gc.Stat.minor_words);
@@ -105,7 +106,7 @@ let measure =
       (* otherwise the loop guard is broken *)
       runs := next
     done;
-    let end_time = Time.now () in
+    let end_time = Time_float.now () in
     (* END OF MAIN TEST LOOP *)
     let total_samples = !index in
     let largest_run = !runs in
@@ -122,7 +123,7 @@ let measure =
     Verbosity.print_high
       "%s: Total time taken %s (%d samples, max runs %d).\n%!"
       (Test.Basic_test.name test)
-      (Time.Span.to_string (Time.diff end_time init_t1))
+      (Time_float.Span.to_string (Time_float.diff end_time init_t1))
       total_samples
       largest_run;
     (* if (RC.save_sample_data run_config)
@@ -144,11 +145,11 @@ let measure_all run_config tests =
        (List.length tests)
        trials
    | Span span ->
-     let est_time = Time.Span.scale span (Float.of_int (List.length tests)) in
+     let est_time = Time_float.Span.scale span (Float.of_int (List.length tests)) in
      Verbosity.print_low
        "Estimated testing time %s (%d benchmarks x %s). Change using '-quota'.\n%!"
-       (Time.Span.to_string est_time)
+       (Time_float.Span.to_string est_time)
        (List.length tests)
-       (Time.Span.to_string span));
+       (Time_float.Span.to_string span));
   List.map tests ~f:(measure run_config)
 ;;

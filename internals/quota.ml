@@ -1,7 +1,7 @@
 open Core
 
 type t =
-  | Span of Time.Span.t
+  | Span of Time_float.Span.t
   | Num_calls of int
 [@@deriving sexp]
 
@@ -19,13 +19,13 @@ let of_string string =
   match String.chop_suffix string ~suffix:"x" with
   | Some prefix -> Num_calls (int_of_string_with_scientific_notation prefix)
   | None ->
-    (match Time.Span.of_string string with
+    (match Time_float.Span.of_string string with
      | span -> Span span
-     | exception _ -> Span (Time.Span.of_sec (Float.of_string string)))
+     | exception _ -> Span (Time_float.Span.of_sec (Float.of_string string)))
 ;;
 
 let to_string = function
-  | Span s -> Time.Span.to_string s
+  | Span s -> Time_float.Span.to_string s
   | Num_calls n -> sprintf "%ix" n
 ;;
 
@@ -34,8 +34,8 @@ let arg_type = Command.Param.Arg_type.create of_string
 let fulfilled t ~start ~num_calls =
   match t with
   | Span span ->
-    let now = Time.now () in
-    Time.Span.( >= ) (Time.diff now start) span
+    let now = Time_float.now () in
+    Time_float.Span.( >= ) (Time_float.diff now start) span
   | Num_calls n -> num_calls >= n
 ;;
 
@@ -46,6 +46,6 @@ let max_count = function
 
 let scale_int t factor =
   match t with
-  | Span span -> Span (Time.Span.scale span (Float.of_int factor))
+  | Span span -> Span (Time_float.Span.scale span (Float.of_int factor))
   | Num_calls num_calls -> Num_calls (num_calls * factor)
 ;;

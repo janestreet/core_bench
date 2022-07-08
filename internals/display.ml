@@ -23,7 +23,8 @@ module Warnings = struct
         "Benchmarks that take 1ns to %s can be estimated precisely. For more reliable \n\
          estimates, redesign your benchmark to have a shorter execution time.\n\
          %!"
-        (Time.Span.to_string (Time.Span.of_ns long_running_benchmark_time_limit_nanos))
+        (Time_float.Span.to_string
+           (Time_float.Span.of_ns long_running_benchmark_time_limit_nanos))
   ;;
 end
 
