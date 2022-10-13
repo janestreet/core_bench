@@ -206,7 +206,7 @@ let make_speed_and_percentage_columns display_config tbl =
     (* To computer speedup and percentage, we need the Nanos-vs-Rubs regression as to be
        present in the results. *)
     let timing_key = Analysis_config.make_key Analysis_config.nanos_vs_runs in
-    match Int.Table.find tbl timing_key with
+    match Hashtbl.find tbl timing_key with
     | None ->
       printf "Error: Estimating speedup/percentage requires Nanos-vs-Runs analysis.\n%!";
       []
@@ -262,12 +262,12 @@ let make_columns_for_regressions display_config results =
   let add_to_table regr =
     Regr.update
       ~regr
-      (Int.Table.find_or_add tbl (R.key regr) ~default:(fun () -> Regr.create regr))
+      (Hashtbl.find_or_add tbl (R.key regr) ~default:(fun () -> Regr.create regr))
   in
   List.iter results ~f:(fun result ->
     Array.iter (Analysis_result.regressions result) ~f:(fun regr -> add_to_table regr));
   let regressions =
-    List.sort (Int.Table.to_alist tbl) ~compare:(fun (a, _) (b, _) -> compare a b)
+    List.sort (Hashtbl.to_alist tbl) ~compare:(fun (a, _) (b, _) -> compare a b)
   in
   let show_absolute_ci = display_config.Display_config.show_absolute_ci in
   let show_all_values = display_config.Display_config.show_all_values in
