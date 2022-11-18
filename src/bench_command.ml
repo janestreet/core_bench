@@ -243,8 +243,8 @@ let readme () =
      flag \"-regression\" . It is worth noting that this feature requires\n\
      some understanding of both linear regression and how various quatities\n\
      relate to each other in the OCaml runtime.  To specify a regression\n\
-     one must specify the responder variable and a command separated list\n\
-     of predictor variables.\n\n\
+     one must specify the responder variable and a comma-separated list of\n\
+     predictor variables.\n\n\
      For example: +Time:Run,mjGC,Comp\n\n\
      which asks bench to estimate execution time using three predictors\n\
      namely the number of runs, major GCs and compaction stats and display\n\
