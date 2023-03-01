@@ -4,7 +4,7 @@ open Core_bench
 let get_float () = if Random.bool () then 10.0 else 10.0
 let get_int () = Random.int 200000
 let get_int64 () = if Random.bool () then Int64.of_int 10 else 10L
-let scale t mul = Caml.int_of_float (Caml.float_of_int t *. mul)
+let scale t mul = Stdlib.int_of_float (Stdlib.float_of_int t *. mul)
 let t1 = Bench.Test.create ~name:"Id" (fun () -> ())
 
 let t2 =

@@ -102,7 +102,7 @@ let create_parameterised
   ; file_name
   ; tests =
       List.map args ~f:(fun n ->
-        let individual_key = Caml.Hashtbl.seeded_hash key n in
+        let individual_key = Stdlib.Hashtbl.seeded_hash key n in
         let name = name ^ ":" ^ fst n in
         { Basic_test.name
         ; test_name
