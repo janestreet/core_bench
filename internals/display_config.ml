@@ -10,11 +10,13 @@ type t =
   ; show_samples : bool
   ; show_all_values : bool
   ; show_overheads : bool
+  ; max_name_length : int
   }
 [@@deriving fields]
 
 let create
       ?(don't_display_table = false)
+      ?(max_name_length = Defaults.max_name_length)
       ?(limit_width_to = Defaults.limit_width_to)
       ?(display = Defaults.display)
       ?(ascii_table = false)
@@ -38,5 +40,6 @@ let create
   ; show_speedup
   ; show_all_values
   ; show_overheads
+  ; max_name_length
   }
 ;;

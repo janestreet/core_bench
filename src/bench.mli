@@ -236,6 +236,7 @@ module Display_config : sig
 
   val create
     :  ?don't_display_table:bool
+    -> ?max_name_length:int
     -> ?limit_width_to:int
     -> ?display:Ascii_table.Display.t
     -> ?ascii_table:bool

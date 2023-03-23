@@ -114,6 +114,13 @@ let wrapper_param =
           "INT If given, just run the test function(s) N times; skip measurements and \
            regressions. Float lexemes like \"1e6\" are allowed."
       |> map ~f:(Option.map ~f:Float.to_int)
+    and max_name_length =
+      flag_optional_with_default_doc
+        "name-length-max"
+        int
+        [%sexp_of: int]
+        ~default:Defaults.max_name_length
+        ~doc:" max width of name column"
     and anon_columns = anon (sequence ("COLUMN" %: Bench_command_column.arg)) in
     fun ~main () ->
       let sanitize_name str =
@@ -192,6 +199,7 @@ let wrapper_param =
       let display_config =
         Display_config.create
           ~limit_width_to
+          ~max_name_length
           ~show_samples:(List.mem columns `Samples ~equal:Display_column.equal)
           ~show_percentage:(List.mem columns `Percentage ~equal:Display_column.equal)
           ~show_speedup:(List.mem columns `Speedup ~equal:Display_column.equal)

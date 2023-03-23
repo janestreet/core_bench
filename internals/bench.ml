@@ -65,10 +65,7 @@ let bench
     List.iter (Test.expand tests) ~f:(fun basic_test ->
       match Test.Basic_test.f basic_test with
       | Test.Basic_test.T f ->
-        Verbosity.print_low
-          "Running '%s' %i times\n"
-          (Test.Basic_test.name basic_test)
-          n;
+        Verbosity.print_low "Running '%s' %i times\n" (Test.Basic_test.name basic_test) n;
         let f = f `init in
         for _ = 1 to n do
           ignore (f () : (* existential type from GADT *) _)

@@ -296,8 +296,11 @@ let make_columns display_config results =
   in
   let cols =
     let name =
-      Ascii_table_kernel.Column.create ~align:Left "Name" (fun res ->
-        Analysis_result.name res)
+      Ascii_table_kernel.Column.create
+        ~max_width:display_config.Display_config.max_name_length
+        ~align:Left
+        "Name"
+        (fun res -> Analysis_result.name res)
     in
     name :: cols
   in

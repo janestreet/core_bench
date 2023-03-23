@@ -152,11 +152,7 @@ let can_bootstrap meas ~resp ~preds =
             (Array.foldi non_zero ~init:"" ~f:(fun i str col_count ->
                if col_count < bootstrap_threshold
                then
-                 sprintf
-                   "%s %s(non-zero %d)"
-                   str
-                   (Variable.to_string preds.(i))
-                   col_count
+                 sprintf "%s %s(non-zero %d)" str (Variable.to_string preds.(i)) col_count
                else str))
             bootstrap_threshold))
 ;;

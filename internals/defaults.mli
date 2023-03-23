@@ -10,6 +10,7 @@ val display_as_string : string
 val fork_each_benchmark : bool
 val geometric_scale : float
 val limit_width_to : int
+val max_name_length : int
 val no_compactions : bool
 val quota : Quota.t
 val stabilize_gc_between_runs : bool

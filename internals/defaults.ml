@@ -14,6 +14,7 @@ let quota = Quota.Span (Time_float.Span.of_int_sec 10)
 
 (* width of the output table *)
 let limit_width_to = 200
+let max_name_length = 110
 
 (* Fork each benchmark and run in separate process *)
 let fork_each_benchmark = false

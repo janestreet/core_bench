@@ -20,8 +20,7 @@ let command =
            Bench.Test.create ~name:"TSC.to_nanos_since_epoch" (fun () ->
              ignore (Time_stamp_counter.to_time_ns c ~calibrator)))
         ; Bench.Test.create ~name:"TSC.to_nanos_since_epoch(TSC.now ())" (fun () ->
-            ignore
-              (Time_stamp_counter.to_time_ns (Time_stamp_counter.now ()) ~calibrator))
+            ignore (Time_stamp_counter.to_time_ns (Time_stamp_counter.now ()) ~calibrator))
         ]
     ]
 ;;

@@ -13,11 +13,13 @@ type t =
   ; show_samples : bool
   ; show_all_values : bool
   ; show_overheads : bool
+  ; max_name_length : int
   }
 [@@deriving fields]
 
 val create
   :  ?don't_display_table:bool
+  -> ?max_name_length:int
   -> ?limit_width_to:int
   -> ?display:Ascii_table_kernel.Display.t
   -> ?ascii_table:bool
