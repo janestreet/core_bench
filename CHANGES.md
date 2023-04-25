@@ -1,3 +1,12 @@
+## Release v0.16.0
+
+* Updated due to name change of `Time` -> `Time_float`.
+
+* Added `?max_name_length` flag to `Bench.Display_config.create`. Prevents name
+  field from taking up too much of the display width.
+
+## Old pre-v0.15 changelogs (very likely stale and incomplete)
+
 ## git version
 
 - Changed `quota` parameter of `Run_config.t` to be either time quota or
