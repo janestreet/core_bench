@@ -30,6 +30,7 @@ let measure =
     let total_runs = ref 0 in
     (* get the old Gc settings *)
     let old_gc = Gc.get () in
+    stabilize_gc ();
     (* THE MAIN TEST LOOP *)
     let init_t1 = Time_float.now () in
     let quota = RC.quota run_config in
@@ -50,7 +51,7 @@ let measure =
          When benchmarking functions that do not allocate any memory, this early noise is
          the only significant input. In these cases, these spurious early collections will
          give the allocation stats (major and promoted words) a slight negative value. *)
-      if RC.stabilize_gc_between_runs run_config || current_runs = 0 then stabilize_gc ();
+      if RC.stabilize_gc_between_runs run_config && current_runs <> 0 then stabilize_gc ();
       (* make any Gc changes required. *)
       if RC.no_compactions run_config
       then Gc.set { (Gc.get ()) with Gc.Control.max_overhead = 1_000_000 };
@@ -117,8 +118,7 @@ let measure =
         ~file_name:(Test.Basic_test.file_name test)
         ~module_name:(Test.Basic_test.module_name test)
         ~largest_run
-        ~sample_count:total_samples
-        ~samples:results
+        ~samples:(Array.sub results ~pos:0 ~len:total_samples)
     in
     Verbosity.print_high
       "%s: Total time taken %s (%d samples, max runs %d).\n%!"

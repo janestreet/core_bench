@@ -71,5 +71,9 @@ val mul_mv : ?transa:bool -> Mat.t -> Vec.t -> Vec.t
     b where Q' denotes the transpose of Q.
 
     If [in_place] (default: [false]) is [true], then [A] will be destroyed.
+
+    With zero rows of data, the number of predictors is ambiguous; here the design
+    decision is to succeed with an empty vector of coefficients.  (This is in contrast
+    to [Linear_algebra_wrapper.ols] which fails when it has zero data points.)
 *)
 val ols : ?in_place:bool -> Mat.t -> Vec.t -> Vec.t Or_error.t

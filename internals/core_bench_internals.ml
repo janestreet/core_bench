@@ -8,6 +8,7 @@ module Display = Display
 module Display_column = Display_column
 module Display_config = Display_config
 module Linear_algebra = Linear_algebra
+module Linear_algebra_wrapper = Linear_algebra_wrapper
 module Measurement = Measurement
 module Measurement_sample = Measurement_sample
 module Quota = Quota

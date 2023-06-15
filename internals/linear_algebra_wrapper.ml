@@ -42,7 +42,6 @@ let debug_print pred_matrix resp_vector =
   done
 ;;
 
-(* val ols : Measurement.t -> responder -> predictors -> float array *)
 let make_lr_inputs ?indices meas ~resp ~preds =
   let module Ms = Measurement_sample in
   let preds_acc = Array.map preds ~f:Ms.accessor in
@@ -62,19 +61,56 @@ let make_lr_inputs ?indices meas ~resp ~preds =
   pred_matrix, resp_vector
 ;;
 
+(* Raises if input is not a matrix (that is, inner arrays not all the same length). *)
+let find_column_of_zeros_exn matrix =
+  Array.findi (Array.transpose_exn matrix) ~f:(fun _index col ->
+    Array.for_all col ~f:(fun x -> Float.( = ) x 0.))
+  |> Option.map ~f:fst
+;;
+
 let ols meas ~resp ~preds =
   if debug
   then (
     Array.iteri preds ~f:(fun i pred -> printf "(%d) %s " i (Variable.to_string pred));
     printf "\n%!");
   let matrix, vector = make_lr_inputs meas ~resp ~preds in
-  match Linear_algebra.ols ~in_place:true matrix vector with
-  | Ok _ as x -> x
-  | Error _ ->
-    Or_error.error_string
-      "Regression failed. (In Bench, this is usually because the predictors were\n\
-       linearly dependent, commonly as a result of having a predictor that is always\n\
-       zero, or having two predictors that are multiples of each other.)"
+  let num_rows = Array.length matrix in
+  let num_preds = Array.length preds in
+  if num_rows < num_preds
+  then
+    Or_error.error_s
+      [%message
+        "Too few measurements to fit coefficients."
+          "Quota is too low or something is taking much longer than expected?"
+          ~measurements:(num_rows : int)
+          ~need_at_least:(num_preds : int)]
+  else (
+    match Linear_algebra.ols ~in_place:true matrix vector with
+    | Ok _ as x -> x
+    | Error _ ->
+      (* Try to identify what's wrong.  Note that [ols] has overwritten [matrix], so we
+         remake it. *)
+      let matrix, _vector = make_lr_inputs meas ~resp ~preds in
+      (* At this point, most common failure mode is a column of zeros. *)
+      (match find_column_of_zeros_exn matrix with
+       | Some j ->
+         let pred = preds.(j) in
+         Or_error.error_s
+           [%message
+             "Predictor is all zeros; cannot fit coefficients."
+               ~index:(j : int)
+               ~predictor:(pred : Variable.t)]
+       | None ->
+         (* At this point (which should be rare), we just fall back on more generic error
+            message. *)
+         Or_error.error_s
+           [%message
+             "Regression failed."
+               "This is probably the result of predictors being linearly dependent."
+               "We have ruled out the two most common sources of this:"
+               "fewer observations than predictors, or a predictor that's all zeros."
+               ~measurements:(num_rows : int)
+               ~predictors:(num_preds : int)]))
 ;;
 
 (* val r_square : Measurement.t -> responder -> predictors -> coefficients:float array -> float *)

@@ -4,6 +4,7 @@
 
 open! Core
 
+(** Returns an error if the set of measurements is empty or if the regression fails. *)
 val ols
   :  Measurement.t
   -> resp:Variable.t

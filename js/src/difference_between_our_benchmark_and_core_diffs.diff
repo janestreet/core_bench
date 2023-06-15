@@ -1,10 +1,10 @@
 11a12
 > module Unix = Core_unix
-86a88
+87a89
 >       let c1 = Time_stamp_counter.now () in
-93a96
+94a97
 >       let c2 = Time_stamp_counter.now () in
-102c105
+103c106
 <       s.M.cycles <- Int63.zero;
 ---
 >       s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
