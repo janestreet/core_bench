@@ -14,7 +14,7 @@ type t =
   ; mutable major_collections : int
   ; mutable minor_collections : int
   }
-[@@deriving sexp, fields]
+[@@deriving sexp]
 
 val accessor : Variable.t -> t -> float
 val create : unit -> t

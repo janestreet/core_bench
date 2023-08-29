@@ -7,7 +7,7 @@ module Predictor_result = struct
     { pred : Variable.t
     ; coefficient : Coefficient.t
     }
-  [@@deriving fields, sexp]
+  [@@deriving fields ~getters, sexp]
 
   let estimate t = Coefficient.estimate t.coefficient
   let ci95 t = Coefficient.ci95 t.coefficient
@@ -34,7 +34,7 @@ type t =
   ; speedup : float
   ; time_taken : Time_float.Span.t
   }
-[@@deriving fields, sexp]
+[@@deriving sexp]
 
 (* These are here for convenient access *)
 let nanos_coeff t =

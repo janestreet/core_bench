@@ -9,7 +9,7 @@ type t =
   ; fork_each_benchmark : bool
   ; thin_overhead : int option
   }
-[@@deriving fields, sexp]
+[@@deriving fields ~getters, sexp]
 
 let create
       ?(verbosity = Verbosity.Low)

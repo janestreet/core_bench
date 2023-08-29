@@ -11,7 +11,7 @@ type t =
   ; mutable major_collections : int
   ; mutable minor_collections : int
   }
-[@@deriving sexp, fields]
+[@@deriving sexp, fields ~getters ~iterators:fold]
 
 let create () =
   { runs = 0

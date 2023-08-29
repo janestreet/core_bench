@@ -19,7 +19,7 @@ module Basic_test = struct
     ; group_key : int option
     ; f : packed_f
     }
-  [@@deriving fields]
+  [@@deriving fields ~getters]
 
   let create_with_initialization
         ~name
@@ -56,7 +56,7 @@ type t =
   ; module_name : string
   ; tests : Basic_test.t list
   }
-[@@deriving fields]
+[@@deriving fields ~getters]
 
 let create_with_initialization
       ~name

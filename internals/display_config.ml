@@ -12,7 +12,7 @@ type t =
   ; show_overheads : bool
   ; max_name_length : int
   }
-[@@deriving fields]
+[@@deriving fields ~getters]
 
 let create
       ?(don't_display_table = false)
