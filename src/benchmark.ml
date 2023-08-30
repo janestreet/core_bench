@@ -78,21 +78,21 @@ let measure =
       s.M.runs <- current_runs;
       s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
       s.M.nanos
-      <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
+        <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
       s.M.minor_allocated
-      <- Float.iround_towards_zero_exn
-           (gc2.Gc.Stat.minor_words -. gc1.Gc.Stat.minor_words);
+        <- Float.iround_towards_zero_exn
+             (gc2.Gc.Stat.minor_words -. gc1.Gc.Stat.minor_words);
       s.M.major_allocated
-      <- Float.iround_towards_zero_exn
-           (gc2.Gc.Stat.major_words -. gc1.Gc.Stat.major_words);
+        <- Float.iround_towards_zero_exn
+             (gc2.Gc.Stat.major_words -. gc1.Gc.Stat.major_words);
       s.M.promoted
-      <- Float.iround_towards_zero_exn
-           (gc2.Gc.Stat.promoted_words -. gc1.Gc.Stat.promoted_words);
+        <- Float.iround_towards_zero_exn
+             (gc2.Gc.Stat.promoted_words -. gc1.Gc.Stat.promoted_words);
       s.M.compactions <- gc2.Gc.Stat.compactions - gc1.Gc.Stat.compactions;
       s.M.major_collections
-      <- gc2.Gc.Stat.major_collections - gc1.Gc.Stat.major_collections;
+        <- gc2.Gc.Stat.major_collections - gc1.Gc.Stat.major_collections;
       s.M.minor_collections
-      <- gc2.Gc.Stat.minor_collections - gc1.Gc.Stat.minor_collections;
+        <- gc2.Gc.Stat.minor_collections - gc1.Gc.Stat.minor_collections;
       incr index;
       (* determine the next number of runs *)
       let next =
@@ -160,14 +160,14 @@ let measure_all run_config tests =
     let () =
       Stdlib.List.iter2
         (fun test (_fdr, fdw) ->
-           match Caml_unix.fork () with
-           | 0 ->
-             let x = measure run_config test in
-             let open Stdlib in
-             let oc = Caml_unix.out_channel_of_descr fdw in
-             Marshal.to_channel oc x [];
-             exit 0
-           | pid -> ignore (Caml_unix.waitpid [] pid : int * Caml_unix.process_status))
+          match Caml_unix.fork () with
+          | 0 ->
+            let x = measure run_config test in
+            let open Stdlib in
+            let oc = Caml_unix.out_channel_of_descr fdw in
+            Marshal.to_channel oc x [];
+            exit 0
+          | pid -> ignore (Caml_unix.waitpid [] pid : int * Caml_unix.process_status))
         tests
         fds
     in

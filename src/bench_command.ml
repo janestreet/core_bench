@@ -150,9 +150,9 @@ let wrapper_param =
         let to_name i = sprintf " [%d]" (i + 1) in
         analysis_configs
         @ List.mapi regressions ~f:(fun i reg ->
-          let regression_name = to_name i in
-          printf "Regression%s = %s\n%!" regression_name reg;
-          Analysis_config.parse reg ~regression_name)
+            let regression_name = to_name i in
+            printf "Regression%s = %s\n%!" regression_name reg;
+            Analysis_config.parse reg ~regression_name)
       in
       let analysis_configs =
         if reduced_bootstrap
@@ -173,16 +173,16 @@ let wrapper_param =
           in
           Some
             (fun meas ->
-               let name = Measurement.name meas in
-               let fn =
-                 sprintf
-                   "%s-%s-%s.txt"
-                   (sanitize_name name)
-                   time_str
-                   (Quota.to_string quota)
-               in
-               printf "Saving to: %s.\n%!" fn;
-               fn))
+              let name = Measurement.name meas in
+              let fn =
+                sprintf
+                  "%s-%s-%s.txt"
+                  (sanitize_name name)
+                  time_str
+                  (Quota.to_string quota)
+              in
+              printf "Saving to: %s.\n%!" fn;
+              fn))
         else None
       in
       let run_config =
@@ -276,9 +276,9 @@ let make_ext ~summary main_param =
 ;;
 
 let make
-      ~(bench : callback_bench)
-      ~(analyze : callback_load_analyze_and_display)
-      ~(tests : Test.t list)
+  ~(bench : callback_bench)
+  ~(analyze : callback_load_analyze_and_display)
+  ~(tests : Test.t list)
   =
   make_ext
     ~summary:

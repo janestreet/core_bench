@@ -12,14 +12,14 @@ type t =
 [@@deriving fields ~getters, sexp]
 
 let create
-      ?(verbosity = Verbosity.Low)
-      ?(no_compactions = Defaults.no_compactions)
-      ?(quota = Defaults.quota)
-      ?(sampling_type = `Geometric Defaults.geometric_scale)
-      ?(stabilize_gc_between_runs = Defaults.stabilize_gc_between_runs)
-      ?(fork_each_benchmark = Defaults.fork_each_benchmark)
-      ?thin_overhead
-      ()
+  ?(verbosity = Verbosity.Low)
+  ?(no_compactions = Defaults.no_compactions)
+  ?(quota = Defaults.quota)
+  ?(sampling_type = `Geometric Defaults.geometric_scale)
+  ?(stabilize_gc_between_runs = Defaults.stabilize_gc_between_runs)
+  ?(fork_each_benchmark = Defaults.fork_each_benchmark)
+  ?thin_overhead
+  ()
   =
   { verbosity
   ; no_compactions

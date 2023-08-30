@@ -18,12 +18,12 @@ let analyze ?(analysis_configs = Analysis_config.default) measurements =
 ;;
 
 let analyze_and_display
-      ~measurements
-      ?analysis_configs
-      ?display_config
-      ?libname
-      ~display
-      ()
+  ~measurements
+  ?analysis_configs
+  ?display_config
+  ?libname
+  ~display
+  ()
   =
   let results = List.map ~f:(analyze ?analysis_configs) measurements in
   let results =
@@ -37,14 +37,14 @@ let analyze_and_display
 ;;
 
 let bench
-      ?run_config
-      ?analysis_configs
-      ?display_config
-      ?save_to_file
-      ?libname
-      tests
-      ~(measure_with : Run_config.t -> Test.Basic_test.t list -> Measurement.t list)
-      ~display
+  ?run_config
+  ?analysis_configs
+  ?display_config
+  ?save_to_file
+  ?libname
+  tests
+  ~(measure_with : Run_config.t -> Test.Basic_test.t list -> Measurement.t list)
+  ~display
   =
   match Option.bind run_config ~f:Run_config.thin_overhead with
   | None ->
@@ -71,5 +71,3 @@ let bench
           ignore (f () : (* existential type from GADT *) _)
         done)
 ;;
-
-

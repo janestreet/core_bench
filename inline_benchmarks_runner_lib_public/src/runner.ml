@@ -20,16 +20,16 @@ let x_library_inlining_warning ~run_without_inlining ~suppress_warnings =
 
 (* The main function for the inline benchmarks *)
 let run_benchmarks
-      ~libname
-      ~matching
-      ~no_sexp:_
-      ~run_config
-      ~run_without_inlining
-      ~suppress_warnings
-      ~display_config
-      ~analysis_configs
-      ?save_to_file
-      ()
+  ~libname
+  ~matching
+  ~no_sexp:_
+  ~run_config
+  ~run_without_inlining
+  ~suppress_warnings
+  ~display_config
+  ~analysis_configs
+  ?save_to_file
+  ()
   =
   x_library_inlining_warning ~run_without_inlining ~suppress_warnings;
   let _tbl, tests = Common.get_matching_tests ~libname matching in

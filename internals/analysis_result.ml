@@ -85,13 +85,13 @@ type t =
 [@@deriving fields ~getters, sexp]
 
 let create
-      ~name
-      ~test_name
-      ~file_name
-      ~module_name
-      ~sample_count
-      ~largest_run
-      ~regressions
+  ~name
+  ~test_name
+  ~file_name
+  ~module_name
+  ~sample_count
+  ~largest_run
+  ~regressions
   =
   { name; test_name; file_name; module_name; sample_count; largest_run; regressions }
 ;;

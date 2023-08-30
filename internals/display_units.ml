@@ -9,8 +9,6 @@ type t =
   | Count
   | Percentage
 
-
-
 let display_minimum = function
   | Words -> 0.1
   | Time -> 0.01
@@ -95,7 +93,6 @@ module Magnitude = struct
     | Mega -> f2s "M" 1E6
     | Giga -> f2s "G" 1E9
   ;;
-
 
   let to_string_gc = function
     | Nano -> f2s "e-9" 1E-9

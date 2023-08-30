@@ -41,7 +41,6 @@ module type Analysis_result = sig
     val create : predictor:Variable.t -> estimate:float -> ?ci95:Ci95.t -> unit -> t
   end
 
-
   module Regression : sig
     type t
 

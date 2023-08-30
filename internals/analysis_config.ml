@@ -9,12 +9,12 @@ type t =
   }
 
 let create
-      ~responder
-      ~predictors
-      ?(bootstrap_trials = 0)
-      ?(r_square = false)
-      ?regression_name
-      ()
+  ~responder
+  ~predictors
+  ?(bootstrap_trials = 0)
+  ?(r_square = false)
+  ?regression_name
+  ()
   =
   { responder; predictors; bootstrap_trials; r_square; regression_name }
 ;;

@@ -10,7 +10,6 @@ module Variable = Variable
 module Measurement = Measurement
 module Analysis_config = Analysis_config
 module Analysis_result = Analysis_result
-
 include Core_bench_internals.Bench
 
 let measure = Bench.measure ~measure_with:Benchmark.measure_all

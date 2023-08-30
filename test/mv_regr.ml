@@ -31,9 +31,9 @@ module SimpleBenchmarks = struct
       ~name:"ArrayCreateIntSize300"
       ~args:[ 100; 200; 300; 400; 1000; 10000 ]
       (fun index ->
-         let _dummy = Array.create ~len:index 0 in
-         Staged.stage (fun () ->
-           if get_bool () then ignore (Array.create ~len:300 0) else ignore _dummy))
+      let _dummy = Array.create ~len:index 0 in
+      Staged.stage (fun () ->
+        if get_bool () then ignore (Array.create ~len:300 0) else ignore _dummy))
   ;;
 
   let t7 =

@@ -27,33 +27,33 @@ module Result : sig
     { (* [benchmark_name] is just the user defined name when defining an inline test
          e.g. "addition test" *)
       benchmark_name : string
-    (* [benchmark_name_with_index] is the user defined name along with the index number
+        (* [benchmark_name_with_index] is the user defined name along with the index number
        for indexed tests e.g. "addition test:1000" *)
     ; benchmark_name_with_index : string
-    (* [full_benchmark_name] includes file, module name, given name, and index
+        (* [full_benchmark_name] includes file, module name, given name, and index
        concatenated e.g. "[test.ml] addition test:1000" *)
     ; full_benchmark_name : string
-    (* [dup_id] is a unique id for benchmarks that have the exact same name *)
+        (* [dup_id] is a unique id for benchmarks that have the exact same name *)
     ; dup_id : int option
     ; file_name : string
     ; module_name : string
     ; library_name : string
-    (* version contains the full string received from Version_util.version
+        (* version contains the full string received from Version_util.version
         *)
     ; version : string
-    (* hg_revision contains only the action revision id used by hg
+        (* hg_revision contains only the action revision id used by hg
        e.g. "1e88f63603b3" *)
     ; hg_revision : string option
     ; hg_active_bookmark : string option
     ; x_library_inlining : bool
     ; ocaml_version : string
-    (* machine_where_benchmark_was_run stores the name of the performance machine used
+        (* machine_where_benchmark_was_run stores the name of the performance machine used
        for the benchmarks  *)
     ; machine_where_benchmark_was_run : string
-    (* epoch_time_of_run is the epoch time of when exactly the benchmarks were run,
+        (* epoch_time_of_run is the epoch time of when exactly the benchmarks were run,
        in nanoseconds *)
     ; epoch_time_of_run : Int63.t
-    (* time_of_hg_revision is the time at which the hg revision was created *)
+        (* time_of_hg_revision is the time at which the hg revision was created *)
     ; time_of_hg_revision : string option (* Various stats computed by bench. *)
     ; time_r_square : float
     ; time_per_run_nanos : float

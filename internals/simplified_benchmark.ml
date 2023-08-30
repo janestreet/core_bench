@@ -90,9 +90,9 @@ module Results = struct
 end
 
 let extract
-      ?(hostname = "<unknown host>")
-      ?(libname = "")
-      (results : Analysis_result.t list)
+  ?(hostname = "<unknown host>")
+  ?(libname = "")
+  (results : Analysis_result.t list)
   =
   let get_bench_name_with_index res =
     let name = Analysis_result.name res in

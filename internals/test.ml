@@ -22,14 +22,14 @@ module Basic_test = struct
   [@@deriving fields ~getters]
 
   let create_with_initialization
-        ~name
-        ?(test_name = "")
-        ?(file_name = "")
-        ?(module_name = "")
-        ?(group_key = None)
-        ?(arg = None)
-        ~key
-        f
+    ~name
+    ?(test_name = "")
+    ?(file_name = "")
+    ?(module_name = "")
+    ?(group_key = None)
+    ?(arg = None)
+    ~key
+    f
     =
     { name
     ; test_name
@@ -59,12 +59,12 @@ type t =
 [@@deriving fields ~getters]
 
 let create_with_initialization
-      ~name
-      ?(test_name = "")
-      ?(file_name = "")
-      ?(module_name = "")
-      ?(key = 0)
-      bm
+  ~name
+  ?(test_name = "")
+  ?(file_name = "")
+  ?(module_name = "")
+  ?(key = 0)
+  bm
   =
   { name
   ; test_name
@@ -88,13 +88,13 @@ let create ~name ?test_name ?file_name ?module_name ?key bm =
 ;;
 
 let create_parameterised
-      ~name
-      ?(test_name = "")
-      ?(file_name = "")
-      ?(module_name = "")
-      ~args
-      ?(key = 0)
-      bm
+  ~name
+  ?(test_name = "")
+  ?(file_name = "")
+  ?(module_name = "")
+  ~args
+  ?(key = 0)
+  bm
   =
   { name
   ; test_name

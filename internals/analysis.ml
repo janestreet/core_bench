@@ -3,7 +3,6 @@ open Linear_algebra_wrapper
 module M = Measurement
 module AC = Analysis_config
 
-
 let analyze_one meas analysis_config =
   let resp = analysis_config.AC.responder in
   let preds = Array.of_list analysis_config.AC.predictors in

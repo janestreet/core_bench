@@ -15,19 +15,19 @@ type t =
 [@@deriving fields ~getters]
 
 let create
-      ?(don't_display_table = false)
-      ?(max_name_length = Defaults.max_name_length)
-      ?(limit_width_to = Defaults.limit_width_to)
-      ?(display = Defaults.display)
-      ?(ascii_table = false)
-      ?(show_output_as_sexp = false)
-      ?(show_absolute_ci = false)
-      ?(show_percentage = false)
-      ?(show_speedup = false)
-      ?(show_samples = false)
-      ?(show_all_values = false)
-      ?(show_overheads = false)
-      ()
+  ?(don't_display_table = false)
+  ?(max_name_length = Defaults.max_name_length)
+  ?(limit_width_to = Defaults.limit_width_to)
+  ?(display = Defaults.display)
+  ?(ascii_table = false)
+  ?(show_output_as_sexp = false)
+  ?(show_absolute_ci = false)
+  ?(show_percentage = false)
+  ?(show_speedup = false)
+  ?(show_samples = false)
+  ?(show_all_values = false)
+  ?(show_overheads = false)
+  ()
   =
   { don't_display_table
   ; limit_width_to
