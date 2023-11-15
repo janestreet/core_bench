@@ -44,17 +44,6 @@ let matching_param =
   flag "matching" (listed string) ~doc:"REGEX Include only benchmarks matching the REGEX."
 ;;
 
-let list_command ~libname =
-  let open Command.Let_syntax in
-  Command.basic
-    ~summary:"list benchmark names"
-    [%map_open
-      let matching = matching_param in
-      fun () ->
-        let _, tests = Common.get_matching_tests ~libname matching in
-        List.iter tests ~f:(fun test -> print_endline (Bench.Test.name test))]
-;;
-
 let command ~libname =
   let open Command.Let_syntax in
   Bench.make_command_ext
@@ -70,6 +59,8 @@ let command ~libname =
           ~doc:" Run benchmarks even when compiled with X_LIBRARY_INLINING=false."
       and suppress_warnings =
         flag "suppress-warnings" no_arg ~doc:" Suppress warnings when clean output needed"
+      and list_only =
+        flag "list-only" no_arg ~doc:" List benchmarks and exit without running them."
       in
       fun args ->
         let should_run =
@@ -80,8 +71,13 @@ let command ~libname =
         in
         if not should_run
         then failwith "Don't run directly, run using the inline_benchmarks_runner script.";
-        match args with
-        | analysis_configs, display_config, `Run (save_to_file, run_config) ->
+        match list_only, args with
+        | true, _ ->
+          let _, tests = Common.get_matching_tests ~libname matching in
+          List.iter tests ~f:(fun test ->
+            List.iter (Core_bench_internals.Test.tests test) ~f:(fun { name; _ } ->
+              print_endline name))
+        | false, (analysis_configs, display_config, `Run (save_to_file, run_config)) ->
           run_benchmarks
             ~libname
             ~matching
@@ -93,7 +89,7 @@ let command ~libname =
             ~analysis_configs
             ?save_to_file
             ()
-        | _analysis_configs, _display_config, `From_file _filenames ->
+        | false, (_analysis_configs, _display_config, `From_file _filenames) ->
           failwith "Loading saved files is not supported for inline executables."]
 ;;
 

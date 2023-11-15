@@ -5,4 +5,3 @@ open! Core
 val main : libname:string -> unit
 
 val command : libname:string -> Command.t
-val list_command : libname:string -> Command.t
