@@ -8,7 +8,7 @@
 <       s.M.cycles <- Int63.zero;
 ---
 >       s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
-181c184,205
+179c182,203
 <   List.map tests ~f:(measure run_config)
 ---
 >   if RC.fork_each_benchmark run_config
