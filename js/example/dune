@@ -1,3 +1,6 @@
-(executables (names main)
+(executables
+ (modes byte exe)
+ (names main)
  (libraries js_of_ocaml core core_bench_js incremental)
- (preprocess (pps ppx_jane ppx_bench)))
+ (preprocess
+  (pps ppx_jane ppx_bench)))

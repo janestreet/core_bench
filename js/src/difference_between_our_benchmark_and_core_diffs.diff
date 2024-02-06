@@ -1,14 +1,14 @@
 11a12
 > module Unix = Core_unix
-87a89
+88a90
 >       let c1 = Time_stamp_counter.now () in
-94a97
+95a98
 >       let c2 = Time_stamp_counter.now () in
-103c106
+105c108
 <       s.M.cycles <- Int63.zero;
 ---
 >       s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
-179c182,203
+180c183,204
 <   List.map tests ~f:(measure run_config)
 ---
 >   if RC.fork_each_benchmark run_config

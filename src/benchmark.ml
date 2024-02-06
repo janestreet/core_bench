@@ -57,6 +57,7 @@ let measure =
       if RC.no_compactions run_config
       then Gc.set { (Gc.get ()) with Gc.Control.max_overhead = 1_000_000 };
       (* pre-run measurements *)
+      let gc1_minor_words, gc1_promoted_words, gc1_major_words = Gc.counters () in
       let gc1 = Gc.quick_stat () in
       let t1 = Time_float.now () in
       let c1 = Time_stamp_counter.now () in
@@ -69,6 +70,7 @@ let measure =
       (* post-run measurements *)
       let c2 = Time_stamp_counter.now () in
       let t2 = Time_float.now () in
+      let gc2_minor_words, gc2_promoted_words, gc2_major_words = Gc.counters () in
       let gc2 = Gc.quick_stat () in
       total_runs := !total_runs + current_runs;
       (* reset the old Gc now that we are done with measurements *)
@@ -80,14 +82,11 @@ let measure =
       s.M.nanos
         <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
       s.M.minor_allocated
-        <- Float.iround_towards_zero_exn
-             (gc2.Gc.Stat.minor_words -. gc1.Gc.Stat.minor_words);
+        <- Float.iround_towards_zero_exn (gc2_minor_words -. gc1_minor_words);
       s.M.major_allocated
-        <- Float.iround_towards_zero_exn
-             (gc2.Gc.Stat.major_words -. gc1.Gc.Stat.major_words);
+        <- Float.iround_towards_zero_exn (gc2_major_words -. gc1_major_words);
       s.M.promoted
-        <- Float.iround_towards_zero_exn
-             (gc2.Gc.Stat.promoted_words -. gc1.Gc.Stat.promoted_words);
+        <- Float.iround_towards_zero_exn (gc2_promoted_words -. gc1_promoted_words);
       s.M.compactions <- gc2.Gc.Stat.compactions - gc1.Gc.Stat.compactions;
       s.M.major_collections
         <- gc2.Gc.Stat.major_collections - gc1.Gc.Stat.major_collections;

@@ -1,3 +1,6 @@
-(library (name core_bench_internals) (public_name core_bench.internals)
+(library
+ (name core_bench_internals)
+ (public_name core_bench.internals)
  (libraries textutils.ascii_table_kernel core core_kernel.version_util)
- (preprocess (pps ppx_jane)))
+ (preprocess
+  (pps ppx_jane)))
