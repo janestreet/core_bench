@@ -197,10 +197,10 @@ module Regr = struct
   ;;
 end
 
-let make_speed_and_percentage_columns display_config tbl =
-  let show_percentage = display_config.Display_config.show_percentage in
-  let show_speedup = display_config.Display_config.show_speedup in
-  let show_all_values = display_config.Display_config.show_all_values in
+let make_speed_and_percentage_columns (display_config : Display_config.Table.t) tbl =
+  let show_percentage = display_config.show_percentage in
+  let show_speedup = display_config.show_speedup in
+  let show_all_values = Display_config.Table.show_all_values display_config in
   if show_percentage || show_speedup
   then (
     (* To computer speedup and percentage, we need the Nanos-vs-Rubs regression as to be
@@ -257,7 +257,7 @@ let make_speed_and_percentage_columns display_config tbl =
   else []
 ;;
 
-let make_columns_for_regressions display_config results =
+let make_columns_for_regressions (display_config : Display_config.Table.t) results =
   let tbl = Int.Table.create () in
   let add_to_table regr =
     Regr.update
@@ -269,9 +269,9 @@ let make_columns_for_regressions display_config results =
   let regressions =
     List.sort (Hashtbl.to_alist tbl) ~compare:(fun (a, _) (b, _) -> compare a b)
   in
-  let show_absolute_ci = display_config.Display_config.show_absolute_ci in
-  let show_all_values = display_config.Display_config.show_all_values in
-  let show_overheads = display_config.Display_config.show_overheads in
+  let show_absolute_ci = display_config.show_absolute_ci in
+  let show_all_values = Display_config.Table.show_all_values display_config in
+  let show_overheads = display_config.show_overheads in
   let cols =
     List.fold ~init:[] regressions ~f:(fun acc (_key, data) ->
       acc @ Regr.make_columns ~show_absolute_ci ~show_all_values ~show_overheads data)
@@ -279,10 +279,10 @@ let make_columns_for_regressions display_config results =
   cols @ make_speed_and_percentage_columns display_config tbl
 ;;
 
-let make_columns display_config results =
+let make_columns (display_config : Display_config.Table.t) results =
   let cols = make_columns_for_regressions display_config results in
   let cols =
-    if display_config.Display_config.show_samples
+    if display_config.show_samples
     then (
       let samples =
         Ascii_table_kernel.Column.create ~align:Right "Runs @ Samples" (fun res ->
@@ -297,7 +297,7 @@ let make_columns display_config results =
   let cols =
     let name =
       Ascii_table_kernel.Column.create
-        ~max_width:display_config.Display_config.max_name_length
+        ~max_width:display_config.max_name_length
         ~align:Left
         "Name"
         (fun res -> Analysis_result.name res)
@@ -305,4 +305,16 @@ let make_columns display_config results =
     name :: cols
   in
   cols
+;;
+
+let make_csv_columns display_config results =
+  make_columns display_config results
+  |> List.map ~f:(fun col ->
+       Delimited_kernel.Write.column
+         ~header:(Ascii_table_kernel.Column.header col)
+         (fun result ->
+         Ascii_table_kernel.Column.to_data col result
+         |> List.map ~f:(fun (_cli_attributes, table_entry) -> table_entry)
+         |> String.concat ~sep:" "))
+  |> Delimited_kernel.Write.of_list
 ;;

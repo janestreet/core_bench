@@ -5,4 +5,8 @@
 open! Core
 open Core_bench_internals
 
-val measure_all : Run_config.t -> Test.Basic_test.t list -> Measurement.t list
+val measure_all
+  :  ?postprocess:(Measurement.t -> unit)
+  -> Run_config.t
+  -> Test.Basic_test.t list
+  -> Measurement.t list

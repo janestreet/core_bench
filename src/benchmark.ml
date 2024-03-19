@@ -135,7 +135,15 @@ let measure =
 
 (* Run multiple benchmarks and aggregate the results. If forking is enabled then this
    function will fork and run each benchmark in a new child process. *)
-let measure_all run_config tests =
+let measure_all ?postprocess run_config tests =
+  let postprocess =
+    match postprocess with
+    | None -> Fn.id
+    | Some postprocess ->
+      fun measurement ->
+        postprocess measurement;
+        measurement
+  in
   Random.self_init ();
   let module RC = Run_config in
   Verbosity.set_verbosity (RC.verbosity run_config);
@@ -173,6 +181,6 @@ let measure_all run_config tests =
     List.map fds ~f:(fun (fdr, _fdw) ->
       let open Stdlib in
       let ic = Caml_unix.in_channel_of_descr fdr in
-      Marshal.from_channel ic))
-  else List.map tests ~f:(measure run_config)
+      postprocess (Marshal.from_channel ic)))
+  else List.map tests ~f:(fun test -> test |> measure run_config |> postprocess)
 ;;

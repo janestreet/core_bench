@@ -10,12 +10,17 @@ open! Core
 val bench
   :  ?run_config:Run_config.t
   -> ?analysis_configs:Analysis_config.t list
-  -> ?display_config:'a
+  -> ?display_config:Display_config.t
   -> ?save_to_file:(Measurement.t -> string)
   -> ?libname:'b
   -> Test.t list
-  -> measure_with:(Run_config.t -> Test.Basic_test.t list -> Measurement.t list)
-  -> display:(?libname:'b -> ?display_config:'a -> Analysis_result.t list -> unit)
+  -> measure_with:
+       (?postprocess:(Measurement.t -> unit)
+        -> Run_config.t
+        -> Test.Basic_test.t list
+        -> Measurement.t list)
+  -> display:
+       (?libname:'b -> ?display_config:Display_config.t -> Analysis_result.t list -> unit)
   -> unit
 
 val measure
@@ -35,6 +40,6 @@ val analyze_and_display
   -> ?display_config:Display_config.t
   -> ?libname:'b
   -> display:
-       (?libname:'b -> ?display_config:Display_config.t -> Analysis_result.t list -> 'c)
+       (?libname:'b -> ?display_config:Display_config.t -> Analysis_result.t list -> unit)
   -> unit
-  -> 'c
+  -> unit

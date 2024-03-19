@@ -33,7 +33,9 @@ let analyze_and_display
         None
       | Ok r -> Some r)
   in
-  display ?libname ?display_config results
+  match (display_config : Display_config.t option) with
+  | Some (Show_as_table { how_to_print = Csv { streaming = true }; _ }) -> ()
+  | _ -> display ?libname ?display_config results
 ;;
 
 let bench
@@ -43,12 +45,52 @@ let bench
   ?save_to_file
   ?libname
   tests
-  ~(measure_with : Run_config.t -> Test.Basic_test.t list -> Measurement.t list)
+  ~(measure_with :
+      ?postprocess:(Measurement.t -> unit)
+      -> Run_config.t
+      -> Test.Basic_test.t list
+      -> Measurement.t list)
   ~display
   =
   match Option.bind run_config ~f:Run_config.thin_overhead with
   | None ->
-    let measurements = measure ?run_config tests ~measure_with in
+    let postprocess =
+      match (display_config : Display_config.t option) with
+      | Some
+          (Show_as_table
+            ({ how_to_print = Csv { streaming = true }; _ } as display_config)) ->
+        let columns = Set_once.create () in
+        let print_csv_line measurement =
+          let result = analyze ?analysis_configs measurement |> Or_error.ok_exn in
+          Set_once.set_if_none
+            columns
+            [%here]
+            (lazy
+              (let generated_columns =
+                 Display.make_csv_columns display_config [ result ]
+               in
+               Delimited_kernel.Write.to_string
+                 ~write_header:true
+                 ~line_breaks:`Unix
+                 generated_columns
+                 []
+               |> print_string;
+               Out_channel.flush stdout;
+               generated_columns));
+          Delimited_kernel.Write.to_string
+            ~write_header:false
+            ~line_breaks:`Unix
+            (force (Set_once.get_exn columns [%here]))
+            [ result ]
+          |> print_string;
+          Out_channel.flush stdout
+        in
+        Some print_csv_line
+      | _ -> None
+    in
+    let measurements =
+      measure ?run_config tests ~measure_with:(measure_with ?postprocess)
+    in
     (match save_to_file with
      | Some to_filename -> save_measurements measurements ~to_filename
      | None -> ());

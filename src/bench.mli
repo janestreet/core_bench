@@ -233,22 +233,6 @@ end
 (** [Display_config.t] specifies how the output tables should be formatted. *)
 module Display_config : sig
   type t
-
-  val create
-    :  ?don't_display_table:bool
-    -> ?max_name_length:int
-    -> ?limit_width_to:int
-    -> ?display:Ascii_table.Display.t
-    -> ?ascii_table:bool
-    -> ?show_output_as_sexp:bool
-    -> ?show_absolute_ci:bool
-    -> ?show_percentage:bool
-    -> ?show_speedup:bool
-    -> ?show_samples:bool
-    -> ?show_all_values:bool
-    -> ?show_overheads:bool
-    -> unit
-    -> t
 end
 
 (** Each [Analysis_config.t] specifies a regression run by [Core_bench]. This module also

@@ -14,7 +14,7 @@ include Core_bench_internals.Bench
 
 let measure = Bench.measure ~measure_with:Benchmark.measure_all
 
-let display ?libname ?(display_config = Display_config.create ()) =
+let display ?libname ?(display_config = Display_config.default) =
   My_display.display ?libname ~display_config
 ;;
 

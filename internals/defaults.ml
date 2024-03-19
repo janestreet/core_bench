@@ -2,7 +2,16 @@ open Core
 
 (* default columns for command *)
 let columns_as_string = [ "time"; "alloc"; "percentage" ]
-let command_columns = List.map ~f:Bench_command_column.of_string columns_as_string
+
+let columns_as_string_for_streaming =
+  List.filter columns_as_string ~f:(Fn.non (String.equal "percentage"))
+;;
+
+let command_columns ~for_streaming =
+  List.map
+    ~f:Bench_command_column.of_string
+    (if for_streaming then columns_as_string_for_streaming else columns_as_string)
+;;
 
 (* how to measure *)
 let geometric_scale = 1.01

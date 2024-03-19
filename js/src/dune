@@ -1,6 +1,7 @@
 (library
  (name core_bench_js)
  (public_name core_bench.js)
- (libraries textutils.ascii_table_kernel core_bench_internals core)
+ (libraries textutils.ascii_table_kernel core core_bench_internals
+   core_extended.delimited_kernel time_now)
  (preprocess
   (pps ppx_jane)))

@@ -9,6 +9,11 @@ module Warnings : sig
 end
 
 val make_columns
-  :  Display_config.t
+  :  Display_config.Table.t
   -> Analysis_result.t list
   -> Analysis_result.t Ascii_table_kernel.Column.t list
+
+val make_csv_columns
+  :  Display_config.Table.t
+  -> Analysis_result.t list
+  -> Analysis_result.t Delimited_kernel.Write.t

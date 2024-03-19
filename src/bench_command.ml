@@ -20,203 +20,116 @@ type callback_load_analyze_and_display =
   -> unit
 
 let wrapper_param =
-  let open Command.Let_syntax in
-  [%map_open
-    let limit_width_to =
-      flag
-        "-width"
-        (optional_with_default Defaults.limit_width_to int)
-        ~doc:
-          (sprintf
-             "WIDTH width limit on column display (default %d)."
-             Defaults.limit_width_to)
-    and display_style =
-      flag
-        "-display"
-        (optional_with_default Defaults.display_as_string string)
-        ~doc:
-          (sprintf
-             "STYLE Table style (short, tall, line, blank or column). Default %s."
-             Defaults.display_as_string)
-    and verbosity = flag "-v" no_arg ~doc:" High verbosity level."
-    and quota =
-      flag
-        "-quota"
-        (optional_with_default Defaults.quota Quota.arg_type)
-        ~doc:
-          (sprintf
-             "<INT>x|<SPAN> Quota allowed per test. May be a number of runs (e.g. 1000x \
-              or 1e6x) or a time span (e.g. 10s or 500ms). Default %s."
-             (Quota.to_string Defaults.quota))
-    and fork_each_benchmark =
-      flag "-fork" no_arg ~doc:" Fork and run each benchmark in separate child-process"
-    and show_all_values =
-      flag "-all-values" no_arg ~doc:" Show all column values, including very small ones."
-    and no_compactions = flag "-no-compactions" no_arg ~doc:" Disable GC compactions."
-    and show_overheads =
-      flag "-overheads" no_arg ~doc:" Show measurement overheads, when applicable."
-    and sampling_type =
-      choose_one
-        ~if_nothing_chosen:(Default_to (`Geometric Defaults.geometric_scale))
-        [ flag
-            "-linear"
-            (optional int)
-            ~doc:"INCREMENT Use linear sampling to explore number of runs, example 1."
-          |> map ~f:(Option.map ~f:(fun k -> `Linear k))
-        ; flag
-            "-geometric"
-            (optional float)
-            ~doc:
-              (sprintf
-                 "SCALE Use geometric sampling. (default %.2f)"
-                 Defaults.geometric_scale)
-          |> map ~f:(Option.map ~f:(fun s -> `Geometric s))
-        ]
-    and save_sample_data =
-      flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files."
-    and show_output_as_sexp = flag "-sexp" no_arg ~doc:" Output as sexp."
-    and minimal_tables =
-      flag "-ascii" no_arg ~doc:" Display data in simple ascii based tables."
-    and reduced_bootstrap =
-      flag
-        "-reduced-bootstrap"
-        no_arg
-        ~doc:" Reduce the number of bootstrapping iterations"
-    and show_absolute_ci =
-      flag
-        "-ci-absolute"
-        no_arg
-        ~doc:" Display 95% confidence interval in absolute numbers"
-    and stabilize_gc_between_runs =
-      flag "-stabilize-gc" no_arg ~doc:" Stabilize GC between each sample capture."
-    and clear_columns =
-      flag
-        "-clear-columns"
-        no_arg
-        ~doc:" Don't display default columns. Only show  user specified ones."
-    and analyze_files =
-      flag
-        "-load"
-        (listed Filename_unix.arg_type)
-        ~doc:
-          "FILE Analyze previously saved data files and don't run tests. [-load] can be \
-           specified multiple times."
-    and regressions =
-      flag
-        "-regression"
-        (listed string)
-        ~doc:"REGR Specify additional regressions (See -? help). "
-    and thin_overhead =
-      flag
-        "-thin-overhead"
-        (optional float)
-        ~doc:
-          "INT If given, just run the test function(s) N times; skip measurements and \
-           regressions. Float lexemes like \"1e6\" are allowed."
-      |> map ~f:(Option.map ~f:Float.to_int)
-    and max_name_length =
-      flag_optional_with_default_doc
-        "name-length-max"
-        int
-        [%sexp_of: int]
-        ~default:Defaults.max_name_length
-        ~doc:" max width of name column"
-    and anon_columns = anon (sequence ("COLUMN" %: Bench_command_column.arg)) in
-    fun ~main () ->
-      let sanitize_name str =
-        String.map str ~f:(fun c ->
-          if Char.is_alphanum c || String.mem "-_." c then c else '_')
-      in
-      let display = Defaults.string_to_display display_style in
-      let display, ascii_table =
-        if minimal_tables then Ascii_table.Display.column_titles, true else display, false
-      in
-      let verbosity : Verbosity.t =
-        if show_output_as_sexp then Quiet else if verbosity then High else Low
-      in
-      let columns = if clear_columns then [] else Defaults.command_columns in
-      let columns = columns @ anon_columns in
-      let analysis_configs, columns =
-        let f =
-          let open Bench_command_column in
-          function
-          | Analysis analysis -> First analysis
-          | Display_column col -> Second col
-        in
-        List.partition_map columns ~f
-      in
-      let analysis_configs = List.concat analysis_configs in
-      let analysis_configs =
-        let to_name i = sprintf " [%d]" (i + 1) in
-        analysis_configs
-        @ List.mapi regressions ~f:(fun i reg ->
-            let regression_name = to_name i in
-            printf "Regression%s = %s\n%!" regression_name reg;
-            Analysis_config.parse reg ~regression_name)
-      in
-      let analysis_configs =
-        if reduced_bootstrap
-        then
-          List.map
-            analysis_configs
-            ~f:
-              (Analysis_config.reduce_bootstrap
-                 ~bootstrap_trials:Analysis_config.default_reduced_bootstrap_trials)
-        else analysis_configs
-      in
-      let save =
-        if save_sample_data
-        then (
-          printf "Measurements will be saved.\n%!";
-          let time_str =
-            Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local)
-          in
-          Some
-            (fun meas ->
-              let name = Measurement.name meas in
-              let fn =
-                sprintf
-                  "%s-%s-%s.txt"
-                  (sanitize_name name)
-                  time_str
-                  (Quota.to_string quota)
-              in
-              printf "Saving to: %s.\n%!" fn;
-              fn))
-        else None
-      in
-      let run_config =
-        Run_config.create
-          ~verbosity
-          ~quota
-          ~sampling_type
-          ~stabilize_gc_between_runs
-          ~no_compactions
-          ~fork_each_benchmark
-          ?thin_overhead
-          ()
-      in
-      let display_config =
-        Display_config.create
-          ~limit_width_to
-          ~max_name_length
-          ~show_samples:(List.mem columns `Samples ~equal:Display_column.equal)
-          ~show_percentage:(List.mem columns `Percentage ~equal:Display_column.equal)
-          ~show_speedup:(List.mem columns `Speedup ~equal:Display_column.equal)
-          ~show_all_values
-          ~show_absolute_ci
-          ~show_overheads
-          ~display
-          ~ascii_table
-          ~show_output_as_sexp
-          ()
-      in
-      let configs =
-        match analyze_files with
-        | [] -> analysis_configs, display_config, `Run (save, run_config)
-        | filenames -> analysis_configs, display_config, `From_file filenames
-      in
-      main configs]
+  let%map_open.Command () = return ()
+  and display_config = Display_config.param
+  and quota =
+    flag
+      "-quota"
+      (optional_with_default Defaults.quota Quota.arg_type)
+      ~doc:
+        (sprintf
+           "<INT>x|<SPAN> Quota allowed per test. May be a number of runs (e.g. 1000x or \
+            1e6x) or a time span (e.g. 10s or 500ms). Default %s. [pacs]"
+           (Quota.to_string Defaults.quota))
+  and fork_each_benchmark =
+    flag
+      "-fork"
+      no_arg
+      ~doc:" Fork and run each benchmark in separate child-process. [pacs]"
+  and no_compactions =
+    flag "-no-compactions" no_arg ~doc:" Disable GC compactions. [pacs]"
+  and sampling_type =
+    choose_one
+      ~if_nothing_chosen:(Default_to (`Geometric Defaults.geometric_scale))
+      [ flag
+          "-linear"
+          (optional int)
+          ~doc:
+            "INCREMENT Use linear sampling to explore number of runs, example 1. [pacs]"
+        |> map ~f:(Option.map ~f:(fun k -> `Linear k))
+      ; flag
+          "-geometric"
+          (optional float)
+          ~doc:
+            (sprintf
+               "SCALE Use geometric sampling (default %.2f). [pacs]"
+               Defaults.geometric_scale)
+        |> map ~f:(Option.map ~f:(fun s -> `Geometric s))
+      ]
+  and save_sample_data =
+    flag "-save" no_arg ~doc:" Save benchmark data to <test name>.txt files. [pacs]"
+  and reduced_bootstrap =
+    flag
+      "-reduced-bootstrap"
+      no_arg
+      ~doc:" Reduce the number of bootstrapping iterations. [pacs]"
+  and stabilize_gc_between_runs =
+    flag "-stabilize-gc" no_arg ~doc:" Stabilize GC between each sample capture. [pacs]"
+  and analyze_files =
+    flag
+      "-load"
+      (listed Filename_unix.arg_type)
+      ~doc:
+        "FILE Analyze previously saved data files and don't run tests. [-load] can be \
+         specified multiple times. [pacs]"
+  and thin_overhead =
+    flag
+      "-thin-overhead"
+      (optional float)
+      ~doc:
+        "INT If given, just run the test function(s) N times; skip measurements and \
+         regressions. Float lexemes like \"1e6\" are allowed. [....]"
+    |> map ~f:(Option.map ~f:Float.to_int)
+  in
+  fun ~main () ->
+    let sanitize_name str =
+      String.map str ~f:(fun c ->
+        if Char.is_alphanum c || String.mem "-_." c then c else '_')
+    in
+    let analysis_configs = Display_config.analysis_configs display_config in
+    let analysis_configs =
+      if reduced_bootstrap
+      then
+        List.map
+          analysis_configs
+          ~f:
+            (Analysis_config.reduce_bootstrap
+               ~bootstrap_trials:Analysis_config.default_reduced_bootstrap_trials)
+      else analysis_configs
+    in
+    let save =
+      if save_sample_data
+      then (
+        printf "Measurements will be saved.\n%!";
+        let time_str = Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local) in
+        Some
+          (fun meas ->
+            let name = Measurement.name meas in
+            let fn =
+              sprintf "%s-%s-%s.txt" (sanitize_name name) time_str (Quota.to_string quota)
+            in
+            printf "Saving to: %s.\n%!" fn;
+            fn))
+      else None
+    in
+    let verbosity = Display_config.verbosity display_config in
+    let run_config =
+      Run_config.create
+        ~verbosity
+        ~quota
+        ~sampling_type
+        ~stabilize_gc_between_runs
+        ~no_compactions
+        ~fork_each_benchmark
+        ?thin_overhead
+        ()
+    in
+    let configs =
+      match analyze_files with
+      | [] -> analysis_configs, display_config, `Run (save, run_config)
+      | filenames -> analysis_configs, display_config, `From_file filenames
+    in
+    main configs
 ;;
 
 let readme () =
@@ -258,7 +171,20 @@ let readme () =
      namely the number of runs, major GCs and compaction stats and display\n\
      error estimates. Drop the prefix '+' to suppress error estimation. The\n\
      variables available for regression include:\n\
-     \t%s\n"
+     \t%s\n\n\
+     Output formats\n\
+     ==============\n\
+     Benchmarks can be displayed in one of four formats:\n\n\
+    \  (default) Pretty table\n\
+    \  [-ascii]  Plain ASCII table\n\
+    \  [-csv]    CSV\n\
+    \  [-sexp]   Sexp\n\n\
+     Some of the flags that follow are only compatible with a subset of\n\
+     these display formats. Each flag in the help text below lists the\n\
+     displays with which it can be used; we represent these formats with\n\
+     the letters 'p', 'a', 'c', and 's', respectively. For example, a flag\n\
+     ending with \"[pa..]\" can be used with pretty tables and ASCII\n\
+     tables, but not with CSV or sexp output."
     Bench_command_column.column_description_table
     (String.concat ~sep:" " Defaults.columns_as_string)
     (Variable.summarize ())
@@ -269,10 +195,10 @@ let make_ext ~summary main_param =
   Command.basic
     ~readme
     ~summary
-    [%map_open
-      let wrapper = wrapper_param
-      and main = main_param in
-      wrapper ~main]
+    (let%map_open () = return ()
+     and wrapper = wrapper_param
+     and main = main_param in
+     wrapper ~main)
 ;;
 
 let make

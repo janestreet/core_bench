@@ -12,16 +12,19 @@ build: [
 depends: [
   "ocaml" {>= "4.14.0"}
   "core"
+  "core_extended"
   "core_kernel"
   "core_unix"
+  "delimited_parsing"
   "ppx_compare"
   "ppx_fields_conv"
   "ppx_jane"
   "ppx_let"
   "ppx_sexp_conv"
   "textutils"
-  "dune"            {>= "2.0.0"}
-  "re"              {>= "1.8.0"}
+  "time_now"
+  "dune"              {>= "2.0.0"}
+  "re"                {>= "1.8.0"}
 ]
 available: arch != "arm32" & arch != "x86_32"
 synopsis: "Benchmarking library"

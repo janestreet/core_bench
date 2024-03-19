@@ -58,7 +58,7 @@ let measure =
       (* pre-run measurements *)
       let gc1_minor_words, gc1_promoted_words, gc1_major_words = Gc.counters () in
       let gc1 = Gc.quick_stat () in
-      let t1 = Time_float.now () in
+      let t1 = Time_now.nanosecond_counter_for_timing () in
       (* MEASURE A SINGLE SAMPLE *)
       for _ = 1 to current_runs do
         ignore (f () : (* existential type from GADT *) _)
@@ -66,7 +66,7 @@ let measure =
       (* END OF MEASUREMENT *)
 
       (* post-run measurements *)
-      let t2 = Time_float.now () in
+      let t2 = Time_now.nanosecond_counter_for_timing () in
       let gc2_minor_words, gc2_promoted_words, gc2_major_words = Gc.counters () in
       let gc2 = Gc.quick_stat () in
       total_runs := !total_runs + current_runs;
@@ -76,8 +76,7 @@ let measure =
       let s = results.(current_index) in
       s.M.runs <- current_runs;
       s.M.cycles <- Int63.zero;
-      s.M.nanos
-        <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
+      s.M.nanos <- Int63.(t2 - t1);
       s.M.minor_allocated
         <- Float.iround_towards_zero_exn (gc2_minor_words -. gc1_minor_words);
       s.M.major_allocated
@@ -132,7 +131,15 @@ let measure =
 
 (* Run multiple benchmarks and aggregate the results. If forking is enabled then this
    function will fork and run each benchmark in a new child process. *)
-let measure_all run_config tests =
+let measure_all ?postprocess run_config tests =
+  let postprocess =
+    match postprocess with
+    | None -> Fn.id
+    | Some postprocess ->
+      fun measurement ->
+        postprocess measurement;
+        measurement
+  in
   Random.self_init ();
   let module RC = Run_config in
   Verbosity.set_verbosity (RC.verbosity run_config);
@@ -150,5 +157,5 @@ let measure_all run_config tests =
        (Time_float.Span.to_string est_time)
        (List.length tests)
        (Time_float.Span.to_string span));
-  List.map tests ~f:(measure run_config)
+  List.map tests ~f:(fun test -> test |> measure run_config |> postprocess)
 ;;

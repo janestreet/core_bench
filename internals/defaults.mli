@@ -4,7 +4,7 @@
 open! Core
 
 val columns_as_string : string list
-val command_columns : Bench_command_column.t list
+val command_columns : for_streaming:bool -> Bench_command_column.t list
 val display : Ascii_table_kernel.Display.t
 val display_as_string : string
 val fork_each_benchmark : bool

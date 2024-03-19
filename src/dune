@@ -1,7 +1,7 @@
 (library
  (name core_bench)
  (public_name core_bench)
- (libraries textutils.ascii_table core core_bench_internals
+ (libraries textutils.ascii_table core core_bench_internals delimited_parsing
    core_unix.filename_unix core_unix.time_stamp_counter
    core_unix.time_float_unix)
  (preprocess
