@@ -1,3 +1,18 @@
+## Release v0.17.0
+
+* Add `-csv` and `-streamed-csv` flags to get a machine-readable representation of the
+  regular tabular output
+
+* Improve error messages from passing mutually-incompatible command-line flags.
+
+* Improve granularity of benchmark outputs when benchmarking `js_of_ocaml`.
+
+* Move `list` subcommand to `-list-only` flag of main command.
+
+* Do not count not count initial GC stabilization towards `-quota`.
+
+* Give more specific error messages when regression fails.
+
 ## Release v0.16.0
 
 * Updated due to name change of `Time` -> `Time_float`.
