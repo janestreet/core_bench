@@ -165,7 +165,7 @@ let mul_mv ?(transa = false) a x =
     let result = Vec.create0 m in
     for i = 0 to m - 1 do
       result.(i)
-        <- Array.foldi x ~init:0. ~f:(fun j accum x_j -> accum +. (c_get i j *. x_j))
+      <- Array.foldi x ~init:0. ~f:(fun j accum x_j -> accum +. (c_get i j *. x_j))
     done;
     result)
 ;;

@@ -97,10 +97,11 @@ let wrapper_param =
                ~bootstrap_trials:Analysis_config.default_reduced_bootstrap_trials)
       else analysis_configs
     in
+    let verbosity = Display_config.verbosity display_config in
     let save =
       if save_sample_data
       then (
-        printf "Measurements will be saved.\n%!";
+        Verbosity.print_low "Measurements will be saved.\n%!";
         let time_str = Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local) in
         Some
           (fun meas ->
@@ -108,11 +109,10 @@ let wrapper_param =
             let fn =
               sprintf "%s-%s-%s.txt" (sanitize_name name) time_str (Quota.to_string quota)
             in
-            printf "Saving to: %s.\n%!" fn;
+            Verbosity.print_low "Saving to: %s.\n%!" fn;
             fn))
       else None
     in
-    let verbosity = Display_config.verbosity display_config in
     let run_config =
       Run_config.create
         ~verbosity

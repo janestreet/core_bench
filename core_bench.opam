@@ -16,6 +16,7 @@ depends: [
   "core_kernel"
   "core_unix"
   "delimited_parsing"
+  "ppx_bench"
   "ppx_compare"
   "ppx_fields_conv"
   "ppx_jane"

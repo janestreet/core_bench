@@ -6,7 +6,7 @@ module Ci95 = struct
     { left_endpoint : float
     ; right_endpoint : float
     }
-  [@@deriving fields ~getters, sexp]
+  [@@deriving fields ~getters, sexp] [@@fields.no_zero_alloc]
 
   let create ~left_endpoint ~right_endpoint = { left_endpoint; right_endpoint }
 

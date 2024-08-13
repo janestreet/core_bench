@@ -233,6 +233,8 @@ end
 (** [Display_config.t] specifies how the output tables should be formatted. *)
 module Display_config : sig
   type t
+
+  val print_warning : t -> string -> unit
 end
 
 (** Each [Analysis_config.t] specifies a regression run by [Core_bench]. This module also
@@ -341,5 +343,5 @@ val make_command_ext
         | `Run of (Measurement.t -> string) option * Run_config.t
         ]
       -> unit)
-     Command.Param.t
+       Command.Param.t
   -> Command.t

@@ -35,5 +35,5 @@ val make_ext
         | `Run of (Measurement.t -> string) option * Run_config.t
         ]
       -> unit)
-     Command.Param.t
+       Command.Param.t
   -> Command.t

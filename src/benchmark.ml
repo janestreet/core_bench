@@ -80,18 +80,18 @@ let measure =
       s.M.runs <- current_runs;
       s.M.cycles <- (Time_stamp_counter.diff c2 c1 :> Int63.t);
       s.M.nanos
-        <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
+      <- Float.int63_round_down_exn (Time_float.Span.to_ns (Time_float.diff t2 t1));
       s.M.minor_allocated
-        <- Float.iround_towards_zero_exn (gc2_minor_words -. gc1_minor_words);
+      <- Float.iround_towards_zero_exn (gc2_minor_words -. gc1_minor_words);
       s.M.major_allocated
-        <- Float.iround_towards_zero_exn (gc2_major_words -. gc1_major_words);
+      <- Float.iround_towards_zero_exn (gc2_major_words -. gc1_major_words);
       s.M.promoted
-        <- Float.iround_towards_zero_exn (gc2_promoted_words -. gc1_promoted_words);
+      <- Float.iround_towards_zero_exn (gc2_promoted_words -. gc1_promoted_words);
       s.M.compactions <- gc2.Gc.Stat.compactions - gc1.Gc.Stat.compactions;
       s.M.major_collections
-        <- gc2.Gc.Stat.major_collections - gc1.Gc.Stat.major_collections;
+      <- gc2.Gc.Stat.major_collections - gc1.Gc.Stat.major_collections;
       s.M.minor_collections
-        <- gc2.Gc.Stat.minor_collections - gc1.Gc.Stat.minor_collections;
+      <- gc2.Gc.Stat.minor_collections - gc1.Gc.Stat.minor_collections;
       incr index;
       (* determine the next number of runs *)
       let next =

@@ -16,15 +16,15 @@ module Warnings = struct
     | _, _ -> ()
   ;;
 
-  let display () =
+  let display ~display_config =
     if !has_long_running_benchmarks
     then
-      printf
+      sprintf
         "Benchmarks that take 1ns to %s can be estimated precisely. For more reliable \n\
-         estimates, redesign your benchmark to have a shorter execution time.\n\
-         %!"
+         estimates, redesign your benchmark to have a shorter execution time."
         (Time_float.Span.to_string
            (Time_float.Span.of_ns long_running_benchmark_time_limit_nanos))
+      |> Display_config.print_warning display_config
   ;;
 end
 
@@ -197,7 +197,11 @@ module Regr = struct
   ;;
 end
 
-let make_speed_and_percentage_columns (display_config : Display_config.Table.t) tbl =
+let make_speed_and_percentage_columns
+  (display_config : Display_config.Table.t)
+  warning_destination
+  tbl
+  =
   let show_percentage = display_config.show_percentage in
   let show_speedup = display_config.show_speedup in
   let show_all_values = Display_config.Table.show_all_values display_config in
@@ -208,7 +212,9 @@ let make_speed_and_percentage_columns (display_config : Display_config.Table.t) 
     let timing_key = Analysis_config.make_key Analysis_config.nanos_vs_runs in
     match Hashtbl.find tbl timing_key with
     | None ->
-      printf "Error: Estimating speedup/percentage requires Nanos-vs-Runs analysis.\n%!";
+      Display_config.Warning_destination.print_warning
+        warning_destination
+        "Error: Estimating speedup/percentage requires Nanos-vs-Runs analysis.\n%!";
       []
     | Some regr ->
       let smallest =
@@ -257,7 +263,11 @@ let make_speed_and_percentage_columns (display_config : Display_config.Table.t) 
   else []
 ;;
 
-let make_columns_for_regressions (display_config : Display_config.Table.t) results =
+let make_columns_for_regressions
+  (display_config : Display_config.Table.t)
+  warning_destination
+  results
+  =
   let tbl = Int.Table.create () in
   let add_to_table regr =
     Regr.update
@@ -276,11 +286,11 @@ let make_columns_for_regressions (display_config : Display_config.Table.t) resul
     List.fold ~init:[] regressions ~f:(fun acc (_key, data) ->
       acc @ Regr.make_columns ~show_absolute_ci ~show_all_values ~show_overheads data)
   in
-  cols @ make_speed_and_percentage_columns display_config tbl
+  cols @ make_speed_and_percentage_columns display_config warning_destination tbl
 ;;
 
-let make_columns (display_config : Display_config.Table.t) results =
-  let cols = make_columns_for_regressions display_config results in
+let make_columns (display_config : Display_config.Table.t) warning_destination results =
+  let cols = make_columns_for_regressions display_config warning_destination results in
   let cols =
     if display_config.show_samples
     then (
@@ -307,12 +317,12 @@ let make_columns (display_config : Display_config.Table.t) results =
   cols
 ;;
 
-let make_csv_columns display_config results =
-  make_columns display_config results
+let make_csv_columns display_config warning_destination results =
+  make_columns display_config warning_destination results
   |> List.map ~f:(fun col ->
-       Delimited_kernel.Write.column
-         ~header:(Ascii_table_kernel.Column.header col)
-         (fun result ->
+    Delimited_kernel.Write.column
+      ~header:(Ascii_table_kernel.Column.header col)
+      (fun result ->
          Ascii_table_kernel.Column.to_data col result
          |> List.map ~f:(fun (_cli_attributes, table_entry) -> table_entry)
          |> String.concat ~sep:" "))

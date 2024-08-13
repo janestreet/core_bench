@@ -29,12 +29,17 @@ let analyze_and_display
   let results =
     List.filter_map results ~f:(function
       | Error err ->
-        eprintf "Error %s\n%!" (Error.to_string_hum err);
+        Display_config.print_warning
+          (Option.value display_config ~default:Display_config.default)
+          (sprintf "Error %s" (Error.to_string_hum err));
         None
       | Ok r -> Some r)
   in
   match (display_config : Display_config.t option) with
-  | Some (Show_as_table { how_to_print = Csv { streaming = true }; _ }) -> ()
+  | Some
+      { benchmark_display = Show_as_table { how_to_print = Csv { streaming = true }; _ }
+      ; _
+      } -> ()
   | _ -> display ?libname ?display_config results
 ;;
 
@@ -57,8 +62,11 @@ let bench
     let postprocess =
       match (display_config : Display_config.t option) with
       | Some
-          (Show_as_table
-            ({ how_to_print = Csv { streaming = true }; _ } as display_config)) ->
+          { benchmark_display =
+              Show_as_table
+                ({ how_to_print = Csv { streaming = true }; _ } as display_config)
+          ; warning_destination
+          } ->
         let columns = Set_once.create () in
         let print_csv_line measurement =
           let result = analyze ?analysis_configs measurement |> Or_error.ok_exn in
@@ -67,7 +75,7 @@ let bench
             [%here]
             (lazy
               (let generated_columns =
-                 Display.make_csv_columns display_config [ result ]
+                 Display.make_csv_columns display_config warning_destination [ result ]
                in
                Delimited_kernel.Write.to_string
                  ~write_header:true

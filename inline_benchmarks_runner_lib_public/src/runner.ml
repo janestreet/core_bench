@@ -2,14 +2,11 @@ open Core
 open Poly
 open Core_bench
 
-let x_library_inlining_warning ~run_without_inlining ~suppress_warnings =
+let x_library_inlining_warning ~run_without_inlining ~display_config =
   if not Version_util.x_library_inlining
   then (
-    if not suppress_warnings
-    then
-      Core.printf
-        "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.\n\
-         %!";
+    "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate."
+    |> Bench.Display_config.print_warning display_config;
     if not run_without_inlining
     then
       failwith
@@ -25,16 +22,15 @@ let run_benchmarks
   ~no_sexp:_
   ~run_config
   ~run_without_inlining
-  ~suppress_warnings
   ~display_config
   ~analysis_configs
   ?save_to_file
   ()
   =
-  x_library_inlining_warning ~run_without_inlining ~suppress_warnings;
+  x_library_inlining_warning ~run_without_inlining ~display_config;
   let _tbl, tests = Common.get_matching_tests ~libname matching in
   if List.is_empty tests
-  then printf "No benchmarks to run!\n%!"
+  then Bench.Display_config.print_warning display_config "No benchmarks to run!"
   else
     Bench.bench ~run_config ~analysis_configs ~display_config ?save_to_file ~libname tests
 ;;
@@ -57,8 +53,6 @@ let command ~libname =
           "run-without-cross-library-inlining"
           no_arg
           ~doc:" Run benchmarks even when compiled with X_LIBRARY_INLINING=false."
-      and suppress_warnings =
-        flag "suppress-warnings" no_arg ~doc:" Suppress warnings when clean output needed"
       and list_only =
         flag "list-only" no_arg ~doc:" List benchmarks and exit without running them."
       in
@@ -84,7 +78,6 @@ let command ~libname =
             ~no_sexp
             ~run_config
             ~run_without_inlining
-            ~suppress_warnings
             ~display_config
             ~analysis_configs
             ?save_to_file

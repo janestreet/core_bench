@@ -71,6 +71,7 @@ module Table = struct
                ~doc:" Show all column values, including very small ones. [pa..]"
            and verbosity = flag "-v" no_arg ~doc:" High verbosity level. [pa..]" in
            let verbosity : Verbosity.t = if verbosity then High else Low in
+           Verbosity.set_verbosity verbosity;
            Human_readable { table_format; show_all_values; verbosity })
         ]
     ;;
@@ -115,9 +116,9 @@ module Table = struct
       let to_name i = sprintf " [%d]" (i + 1) in
       analysis_configs
       @ List.mapi regressions ~f:(fun i reg ->
-          let regression_name = to_name i in
-          printf "Regression%s = %s\n%!" regression_name reg;
-          Analysis_config.parse reg ~regression_name)
+        let regression_name = to_name i in
+        Verbosity.print_low "Regression%s = %s\n%!" regression_name reg;
+        Analysis_config.parse reg ~regression_name)
     in
     { how_to_print
     ; limit_width_to
@@ -197,9 +198,66 @@ module Table = struct
   ;;
 end
 
-let default = Show_as_table Table.default
+module Benchmark_display = struct
+  include Benchmark_display
 
-let verbosity : t -> Verbosity.t = function
+  let default = Show_as_table Table.default
+
+  let param =
+    let open Command.Param in
+    choose_one_non_optional
+      ~if_nothing_chosen:(Default_to default)
+      [ flag "-sexp" (no_arg_required Show_as_sexp) ~doc:" Output as sexp. [...s]"
+      ; (let%map.Command table = Table.param in
+         Show_as_table table)
+      ]
+  ;;
+end
+
+module Warning_destination = struct
+  include Warning_destination
+
+  let default = Stderr
+
+  let param =
+    let%map_open.Command () = return ()
+    and t_opt =
+      choose_one_non_optional
+        ~if_nothing_chosen:Return_none
+        [ flag
+            "-suppress-warnings"
+            (no_arg_some Suppress)
+            ~doc:" Suppress warnings when clean output needed"
+        ; flag "-warnings-to-stderr" (no_arg_some Stderr) ~doc:" Send warnings to STDERR"
+        ; flag "-warnings-to-stdout" (no_arg_some Stdout) ~doc:" Send warnings to STDOUT"
+        ]
+    in
+    t_opt |> Option.join |> Option.value ~default
+  ;;
+
+  let print_warning t warn =
+    match t with
+    | Suppress -> ()
+    | Stdout -> printf "%s\n%!" warn
+    | Stderr -> eprintf "%s\n%!" warn
+  ;;
+end
+
+let default =
+  { benchmark_display = Benchmark_display.default
+  ; warning_destination = Warning_destination.default
+  }
+;;
+
+let param =
+  let%map_open.Command () = return ()
+  and benchmark_display = Benchmark_display.param
+  and warning_destination = Warning_destination.param in
+  { benchmark_display; warning_destination }
+;;
+
+let verbosity { benchmark_display; _ } : Verbosity.t =
+  match benchmark_display with
   | Show_as_sexp -> Quiet
   | Show_as_table { how_to_print; _ } ->
     (match how_to_print with
@@ -207,7 +265,8 @@ let verbosity : t -> Verbosity.t = function
      | Human_readable { verbosity; _ } -> verbosity)
 ;;
 
-let analysis_configs = function
+let analysis_configs { benchmark_display; _ } : Analysis_config.t list =
+  match benchmark_display with
   | Show_as_sexp ->
     List.concat
       [ [ Analysis_config.nanos_vs_runs ]
@@ -217,12 +276,6 @@ let analysis_configs = function
   | Show_as_table { analysis_configs; _ } -> analysis_configs
 ;;
 
-let param =
-  let open Command.Param in
-  choose_one_non_optional
-    ~if_nothing_chosen:(Default_to (Show_as_table Table.default))
-    [ flag "-sexp" (no_arg_required Show_as_sexp) ~doc:" Output as sexp. [...s]"
-    ; (let%map.Command table = Table.param in
-       Show_as_table table)
-    ]
+let print_warning { warning_destination; _ } warn =
+  Warning_destination.print_warning warning_destination warn
 ;;

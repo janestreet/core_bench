@@ -33,9 +33,23 @@ module Definitions = struct
     [@@deriving fields ~getters]
   end
 
+  module Benchmark_display = struct
+    type t =
+      | Show_as_sexp
+      | Show_as_table of Table.t
+  end
+
+  module Warning_destination = struct
+    type t =
+      | Suppress
+      | Stdout
+      | Stderr
+  end
+
   type t =
-    | Show_as_sexp
-    | Show_as_table of Table.t
+    { benchmark_display : Benchmark_display.t
+    ; warning_destination : Warning_destination.t
+    }
 end
 
 module type Display_config = sig
@@ -58,19 +72,32 @@ module type Display_config = sig
           include Human_readable
         end
 
-        val param : t Command.Param.t
         val display : t -> Ascii_table_kernel.Display.t
       end
 
       val param : t Command.Param.t
     end
 
-    val param : t Command.Param.t
     val show_all_values : t -> bool
+  end
+
+  module Benchmark_display : sig
+    include module type of struct
+      include Benchmark_display
+    end
+  end
+
+  module Warning_destination : sig
+    include module type of struct
+      include Warning_destination
+    end
+
+    val print_warning : t -> string -> unit
   end
 
   val default : t
   val param : t Command.Param.t
   val verbosity : t -> Verbosity.t
   val analysis_configs : t -> Analysis_config.t list
+  val print_warning : t -> string -> unit
 end
