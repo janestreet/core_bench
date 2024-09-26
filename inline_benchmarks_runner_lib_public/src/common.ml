@@ -26,7 +26,13 @@ let entry_to_bench_test entry ~key =
   let module_name = entry.bench_module_name in
   match entry.Entry.test_spec with
   | Regular_thunk f ->
-    Bench.Test.create_with_initialization ~name ~test_name ~file_name ?module_name ~key f
+    Bench.Test.create_with_initialization
+      ~name
+      ~test_name
+      ~file_name
+      ?module_name
+      ~key
+      (fun `init -> (f `init).uncurried)
   | Parameterised_thunk { params; thunk; _ } ->
     Bench.Test.create_parameterised
       ~name
@@ -35,7 +41,7 @@ let entry_to_bench_test entry ~key =
       ?module_name
       ~args:params
       ~key
-      (fun len -> Staged.stage (thunk len))
+      (fun len -> Staged.stage (thunk len).uncurried)
 ;;
 
 let pattern_to_predicate s =
