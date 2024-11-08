@@ -10,6 +10,7 @@ type t =
   ; mutable promoted : int
   ; mutable major_collections : int
   ; mutable minor_collections : int
+  ; mutable extra : float String.Map.t
   }
 [@@deriving sexp, fields ~getters ~iterators:fold]
 
@@ -23,6 +24,7 @@ let create () =
   ; promoted = 0
   ; major_collections = 0
   ; minor_collections = 0
+  ; extra = String.Map.empty
   }
 ;;
 
@@ -39,6 +41,7 @@ let field_names () =
     ~promoted:field_name
     ~minor_collections:field_name
     ~major_collections:field_name
+    ~extra:(fun xs _ -> xs)
   |> List.rev
 ;;
 
@@ -58,6 +61,10 @@ let field_values_to_string t =
     ~minor_allocated:prepend_int
     ~major_allocated:prepend_int
     ~promoted:prepend_int
+    ~extra:(fun xs extra ->
+      let extra = Field.get extra t in
+      assert (Map.is_empty extra);
+      xs)
   |> List.rev
   |> String.concat ~sep:","
 ;;
@@ -87,11 +94,12 @@ let of_field_values_string line =
        ~minor_allocated:set_int_value
        ~major_allocated:set_int_value
        ~promoted:set_int_value
+       ~extra:(fun vs _field -> vs)
    with
    | [] -> ()
    | ls ->
      failwithf
-       "Too many data values in saved metrics file: %s"
+       "Too many data values in saved metrics file %s"
        (String.concat ~sep:"," ls)
        ());
   t
@@ -117,4 +125,5 @@ let accessor = function
   | `Major_allocated -> floatify_int major_allocated
   | `Promoted -> floatify_int promoted
   | `One -> fun _ -> 1.
+  | `Extra str -> fun t -> Map.find_exn t.extra str
 ;;

@@ -57,10 +57,15 @@ module Regression = struct
   let has_r_square t = Option.is_some t.r_square
   let predictors t = Array.map t.coefficients ~f:(fun c -> c.Coefficient.predictor)
 
+  type for_hash =
+    { responder : Variable.t
+    ; predictors : Variable.t list
+    }
+  [@@deriving hash]
+
   let make_key responder coefficients =
-    let init = Variable.to_int responder lsl Variable.max_int in
-    Array.fold ~init coefficients ~f:(fun acc coeff ->
-      (1 lsl Variable.to_int (Coefficient.predictor coeff)) + acc)
+    let predictors = coefficients |> Array.to_list |> List.map ~f:Coefficient.predictor in
+    [%hash: for_hash] { responder; predictors }
   ;;
 
   let create ~responder ?r_square ~coefficients ~regression_name () =

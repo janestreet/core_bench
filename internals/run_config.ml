@@ -8,10 +8,12 @@ type t =
   ; stabilize_gc_between_runs : bool
   ; fork_each_benchmark : bool
   ; thin_overhead : int option
+  ; pmc_counters : string String.Map.t option
   }
 [@@deriving fields ~getters, sexp]
 
 let create
+  ?pmc_counters
   ?(verbosity = Verbosity.Low)
   ?(no_compactions = Defaults.no_compactions)
   ?(quota = Defaults.quota)
@@ -28,5 +30,6 @@ let create
   ; stabilize_gc_between_runs
   ; fork_each_benchmark
   ; thin_overhead
+  ; pmc_counters
   }
 ;;

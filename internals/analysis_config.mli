@@ -32,3 +32,4 @@ val nanos_vs_runs : t
 val parse : ?regression_name:string -> string -> t
 val reduce_bootstrap : t -> bootstrap_trials:int -> t
 val with_error_estimation : ?bootstrap_trials:int -> t -> t
+val vs_runs : ?r_square:bool -> Variable.t -> unit -> t

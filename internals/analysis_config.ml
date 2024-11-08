@@ -19,7 +19,7 @@ let create
   { responder; predictors; bootstrap_trials; r_square; regression_name }
 ;;
 
-let vs_runs responder () = create ~responder ~predictors:[ `Runs ] ()
+let vs_runs ?r_square responder () = create ?r_square ~responder ~predictors:[ `Runs ] ()
 let vs_runs_overhead responder () = create ~responder ~predictors:[ `Runs; `One ] ()
 let nanos_vs_runs = vs_runs `Nanos ()
 let cycles_vs_runs = vs_runs `Cycles ()
@@ -54,9 +54,15 @@ let reduce_bootstrap t ~bootstrap_trials =
   if t.bootstrap_trials > bootstrap_trials then { t with bootstrap_trials } else t
 ;;
 
+type for_hash =
+  { responder : Variable.t
+  ; predictors : Variable.t list
+  }
+[@@deriving hash]
+
 let make_key t =
-  let init = Variable.to_int t.responder lsl Variable.max_int in
-  List.fold ~init t.predictors ~f:(fun acc pred -> (1 lsl Variable.to_int pred) + acc)
+  let ({ responder; predictors; _ } : t) = t in
+  [%hash: for_hash] { responder; predictors }
 ;;
 
 let parse ?regression_name str =

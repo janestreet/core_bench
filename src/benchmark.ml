@@ -1,4 +1,19 @@
 open Core
+
+module I64 = struct
+  include Int64
+
+  module Ref = struct
+    type nonrec t = t Ref.t
+
+    let create t = exclave_ ref t
+
+    module O = struct
+      let decr t = t := !t - one
+    end
+  end
+end
+
 open Core_bench_internals
 module Unix = Core_unix
 
@@ -14,16 +29,54 @@ let stabilize_gc () =
   loop 10 0
 ;;
 
+(* Carefully written to have the minimum loop overhead for small closures.
+   In particular, we:
+
+   - Don't inline this, so that we don't spill live registers from the much larger
+   [measure] functions across the call.
+
+   - run the loop backwards so our termination condition compares to zero (a constant)
+
+   - use 64 bit integers for slightly simpler loop arithmetic.
+*)
+let[@inline never] [@specialise never] [@local never] measure_one_closure
+  (type a)
+  ~f
+  ~current_runs
+  =
+  let i = I64.Ref.create (I64.of_int current_runs) in
+  let open I64.Ref.O in
+  while I64.is_positive !i do
+    ignore (f () : a);
+    decr i
+  done
+;;
+
+let max_samples = 3_000
+
+module Perf_counters = struct
+  let create ctrs =
+    match ctrs with
+    | None -> ()
+    | Some _ -> failwith "perf counters not supported in this release"
+  ;;
+
+  let before () ~idx:_ = ()
+  let after () ~idx:_ = ()
+  let write () ~max_idx:_ ~results:_ = ()
+  let close () = ()
+end
+
 (* The main benchmarking function *)
 let measure =
   let module RC = Run_config in
   let module M = Measurement_sample in
   fun run_config test ->
     (* test function *)
+    let pmc = Perf_counters.create run_config.RC.pmc_counters in
     let (Test.Basic_test.T f) = test.Test.Basic_test.f in
     let f = f `init in
     (* the samples *)
-    let max_samples = 3_000 in
     let results = Array.init max_samples ~f:(fun _ -> M.create ()) in
     (* counters *)
     let index = ref 0 in
@@ -61,12 +114,11 @@ let measure =
       let gc1 = Gc.quick_stat () in
       let t1 = Time_float.now () in
       let c1 = Time_stamp_counter.now () in
+      Perf_counters.before pmc ~idx:current_index;
       (* MEASURE A SINGLE SAMPLE *)
-      for _ = 1 to current_runs do
-        ignore (f () : (* existential type from GADT *) _)
-      done;
+      measure_one_closure ~f ~current_runs;
       (* END OF MEASUREMENT *)
-
+      Perf_counters.after pmc ~idx:current_index;
       (* post-run measurements *)
       let c2 = Time_stamp_counter.now () in
       let t2 = Time_float.now () in
@@ -110,6 +162,8 @@ let measure =
       runs := next
     done;
     let end_time = Time_float.now () in
+    Perf_counters.write pmc ~max_idx:(!index - 1) ~results;
+    Perf_counters.close pmc;
     (* END OF MAIN TEST LOOP *)
     let total_samples = !index in
     let largest_run = !runs in

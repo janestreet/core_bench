@@ -12,23 +12,9 @@ type t =
   | `Minor_allocated
   | `Major_allocated
   | `Promoted
+  | `Extra of string
   ]
-[@@deriving sexp]
-
-let max_int = 10
-
-let to_int = function
-  | `Runs -> 0
-  | `Nanos -> 1
-  | `Cycles -> 2
-  | `Minor_allocated -> 3
-  | `Major_allocated -> 4
-  | `Promoted -> 5
-  | `Minor_collections -> 6
-  | `Major_collections -> 7
-  | `Compactions -> 8
-  | `One -> 9
-;;
+[@@deriving sexp, hash]
 
 let get_units = function
   | `Runs -> Display_units.Count
@@ -41,6 +27,7 @@ let get_units = function
   | `Minor_allocated -> Display_units.Words
   | `Major_allocated -> Display_units.Words
   | `One -> Display_units.Count
+  | `Extra _ -> Display_units.Count
 ;;
 
 let conv =
@@ -64,8 +51,11 @@ let summarize () =
 ;;
 
 let to_short_string var =
-  let opt = List.find_map conv ~f:(fun (v, s, _) -> if v = var then Some s else None) in
-  Option.value_exn opt ~message:"Bug: Unable to find short string for variable."
+  match var with
+  | `Extra str -> str
+  | var ->
+    let opt = List.find_map conv ~f:(fun (v, s, _) -> if v = var then Some s else None) in
+    Option.value_exn opt ~message:"Bug: Unable to find short string for variable."
 ;;
 
 let of_short_string str =

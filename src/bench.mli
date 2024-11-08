@@ -175,6 +175,7 @@ module Variable : sig
     | `Minor_allocated
     | `Major_allocated
     | `One (* the "variable" that is always 1 *)
+    | `Extra of string
     ]
   [@@deriving sexp]
 end
@@ -219,7 +220,8 @@ module Run_config : sig
   type t = Core_bench_internals.Run_config.t
 
   val create
-    :  ?verbosity:Verbosity.t
+    :  ?pmc_counters:string String.Map.t
+    -> ?verbosity:Verbosity.t
     -> ?no_compactions:bool
     -> ?quota:Quota.t
     -> ?sampling_type:[ `Geometric of float | `Linear of int ]
