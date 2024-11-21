@@ -80,6 +80,21 @@ let wrapper_param =
         "INT If given, just run the test function(s) N times; skip measurements and \
          regressions. Float lexemes like \"1e6\" are allowed. [....]"
     |> map ~f:(Option.map ~f:Float.to_int)
+  and pmc_counters =
+    let%map.Command pmc =
+      flag
+        "pmc-counters"
+        (optional (string |> Arg_type.comma_separated ~allow_empty:true))
+        ~doc:"CTR[:alias],... names of performance monitoring counters to track"
+    in
+    let%map.Option pmc in
+    String.Map.of_alist_exn
+    @@
+    let%map.List pmc in
+    match String.split pmc ~on:':' with
+    | [ ctr ] -> ctr, ctr
+    | [ ctr; alias ] -> ctr, alias
+    | _ -> failwith "pmc-counters must be of the form CTR[:alias]"
   in
   fun ~main () ->
     let sanitize_name str =
@@ -96,6 +111,18 @@ let wrapper_param =
             (Analysis_config.reduce_bootstrap
                ~bootstrap_trials:Analysis_config.default_reduced_bootstrap_trials)
       else analysis_configs
+    in
+    let analysis_configs =
+      let for_pmc =
+        match pmc_counters with
+        | None -> analysis_configs
+        | Some ctrs ->
+          let%map.List ctr = Map.data ctrs in
+          (* I wish this was more configurable. Certainly if people have specified named
+             counters, they presumably _want_ them. But do they want r_squared? IDK. *)
+          Analysis_config.vs_runs (`Extra ctr) ()
+      in
+      for_pmc @ analysis_configs
     in
     let verbosity = Display_config.verbosity display_config in
     let save =
@@ -115,6 +142,7 @@ let wrapper_param =
     in
     let run_config =
       Run_config.create
+        ?pmc_counters
         ~verbosity
         ~quota
         ~sampling_type
