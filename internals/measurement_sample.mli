@@ -13,7 +13,7 @@ type t =
   ; mutable promoted : int
   ; mutable major_collections : int
   ; mutable minor_collections : int
-  ; mutable extra : float String.Map.t
+  ; mutable extra : (string * float) list
   }
 [@@deriving sexp]
 

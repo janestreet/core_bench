@@ -10,7 +10,7 @@ type t =
   ; mutable promoted : int
   ; mutable major_collections : int
   ; mutable minor_collections : int
-  ; mutable extra : float String.Map.t
+  ; mutable extra : (string * float) list
   }
 [@@deriving sexp, fields ~getters ~iterators:fold]
 
@@ -24,7 +24,7 @@ let create () =
   ; promoted = 0
   ; major_collections = 0
   ; minor_collections = 0
-  ; extra = String.Map.empty
+  ; extra = []
   }
 ;;
 
@@ -63,7 +63,7 @@ let field_values_to_string t =
     ~promoted:prepend_int
     ~extra:(fun xs extra ->
       let extra = Field.get extra t in
-      assert (Map.is_empty extra);
+      assert (List.is_empty extra);
       xs)
   |> List.rev
   |> String.concat ~sep:","
@@ -125,5 +125,5 @@ let accessor = function
   | `Major_allocated -> floatify_int major_allocated
   | `Promoted -> floatify_int promoted
   | `One -> fun _ -> 1.
-  | `Extra str -> fun t -> Map.find_exn t.extra str
+  | `Extra str -> fun t -> List.Assoc.find_exn t.extra ~equal:String.equal str
 ;;
