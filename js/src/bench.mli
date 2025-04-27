@@ -23,8 +23,8 @@ val bench
   -> Test.t list
   -> unit
 
-(** [measure] is a fragment of the functionality of [bench]. [measure tests] will run
-    the specified [tests] and return the resulting measurement results. *)
+(** [measure] is a fragment of the functionality of [bench]. [measure tests] will run the
+    specified [tests] and return the resulting measurement results. *)
 val measure : ?run_config:Run_config.t -> Test.t list -> Measurement.t list
 
 (** [analyze] is a fragment of the functionality of [bench]. [analyze ~analysis_configs m]

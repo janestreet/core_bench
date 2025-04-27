@@ -2,6 +2,7 @@ module Analysis_config = Analysis_config
 module Analysis_result = Analysis_result
 module Analysis_result_intf = Analysis_result_intf
 module Bench = Bench
+module Bench_command = Bench_command
 module Bench_command_column = Bench_command_column
 module Defaults = Defaults
 module Display = Display

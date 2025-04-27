@@ -2,6 +2,7 @@
  (name inline_benchmarks_public)
  (public_name core_bench.inline_benchmarks)
  (libraries core_unix.command_unix core core_bench core_bench_internals
+   inline_benchmarks_kernel_private core_unix.filename_unix
    ppx_bench.runtime-lib re core_kernel.version_util)
  (preprocess
   (pps ppx_let)))

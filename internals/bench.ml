@@ -72,7 +72,6 @@ let bench
           let result = analyze ?analysis_configs measurement |> Or_error.ok_exn in
           Set_once.set_if_none
             columns
-            [%here]
             (lazy
               (let generated_columns =
                  Display.make_csv_columns display_config warning_destination [ result ]
@@ -88,7 +87,7 @@ let bench
           Delimited_kernel.Write.to_string
             ~write_header:false
             ~line_breaks:`Unix
-            (force (Set_once.get_exn columns [%here]))
+            (force (Set_once.get_exn columns))
             [ result ]
           |> print_string;
           Out_channel.flush stdout

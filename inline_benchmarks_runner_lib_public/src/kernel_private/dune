@@ -1,0 +1,7 @@
+(library
+ (name inline_benchmarks_kernel_private)
+ (public_name core_bench.inline_benchmarks_kernel_private)
+ (libraries core core_bench_internals ppx_bench.runtime-lib re
+   core_kernel.version_util)
+ (preprocess
+  (pps ppx_let)))

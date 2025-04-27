@@ -1,11 +1,12 @@
 open! Core
 
-(** The purpose of functions in this module are documented in the [Core_bench.Bench] module
+(** The purpose of functions in this module are documented in the [Core_bench.Bench]
+    module
 
-    These functions are different in one main regard: they take first-class functions
-    for platform-specific functionality, like displaying the tables, or performing the
-    actual measurement for the benchmark.  That is what these
-    [measure_with] and [display] parameters are for. *)
+    These functions are different in one main regard: they take first-class functions for
+    platform-specific functionality, like displaying the tables, or performing the actual
+    measurement for the benchmark. That is what these [measure_with] and [display]
+    parameters are for. *)
 
 val bench
   :  ?run_config:Run_config.t

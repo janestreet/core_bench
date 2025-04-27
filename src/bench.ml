@@ -26,11 +26,13 @@ let bench = Bench.bench ~measure_with:Benchmark.measure_all ~display
 
 let make_command tests =
   Bench_command.make
+    ~filename_argtype:Filename_unix.arg_type
     ~bench
     ~analyze:(fun ~filenames ?analysis_configs ?display_config () ->
       let measurements = load_measurements ~filenames in
       analyze_and_display ~measurements ?analysis_configs ?display_config ())
     ~tests
+    ()
 ;;
 
-let make_command_ext = Bench_command.make_ext
+let make_command_ext = Bench_command.make_ext ~filename_argtype:Filename_unix.arg_type

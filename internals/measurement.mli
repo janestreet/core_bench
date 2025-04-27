@@ -14,7 +14,7 @@ val largest_run : t -> int
 val sample_count : t -> int
 val samples : t -> Measurement_sample.t array
 
-(** [samples] should have length at least [sample_count].  Extra entries are dropped. *)
+(** [samples] should have length at least [sample_count]. Extra entries are dropped. *)
 val create
   :  name:string
   -> test_name:string

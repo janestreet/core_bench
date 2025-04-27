@@ -10,14 +10,14 @@ module type Analysis_result = sig
     val right_endpoint : t -> float
     val create : left_endpoint:float -> right_endpoint:float -> t
 
-    (** 95% confidence interval expressed in (absolute) error form.  E.g., if estimate =
-        50. and confidence95 = (49., 52.), then [confidence95_abs_err] returns (-1., 2.).
-    *)
+    (** 95% confidence interval expressed in (absolute) error form. E.g., if estimate =
+
+        50. and confidence95 = (49., 52.), then [confidence95_abs_err] returns (-1., 2.). *)
     val ci95_abs_err : t -> estimate:float -> float * float
 
-    (** 95% confidence interval in relative error form (with 2.5 = 250%, etc.).  E.g., if
+    (** 95% confidence interval in relative error form (with 2.5 = 250%, etc.). E.g., if
         estimate = 50. and confidence95 = (49., 52.), then [confidence95_rel_err] returns
-        (-0.02, 0.04).  *)
+        (-0.02, 0.04). *)
     val ci95_rel_err : t -> estimate:float -> float * float
 
     val bad_ci95 : t
