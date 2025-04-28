@@ -3,7 +3,6 @@
     Generates the command line interface to [Core_bench]. *)
 
 open! Core
-open! Core_bench_internals
 
 type callback_bench =
   ?run_config:Run_config.t
@@ -22,13 +21,16 @@ type callback_load_analyze_and_display =
   -> unit
 
 val make
-  :  bench:callback_bench
+  :  ?filename_argtype:string Command.Arg_type.t
+  -> bench:callback_bench
   -> analyze:callback_load_analyze_and_display
   -> tests:Test.t list
+  -> unit
   -> Command.t
 
 val make_ext
-  :  summary:string
+  :  ?filename_argtype:string Command.Arg_type.t
+  -> summary:string
   -> (Analysis_config.t list
       * Display_config.t
       * [ `From_file of string list

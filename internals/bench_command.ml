@@ -1,7 +1,6 @@
 (* This module makes the command line interface for bench. *)
 open Core
-open Core_bench_internals
-module Time = Time_float_unix
+module Time = Time_float
 
 type callback_bench =
   ?run_config:Run_config.t
@@ -19,7 +18,7 @@ type callback_load_analyze_and_display =
   -> unit
   -> unit
 
-let wrapper_param =
+let wrapper_param ~filename_argtype =
   let%map_open.Command () = return ()
   and display_config = Display_config.param
   and quota =
@@ -68,7 +67,7 @@ let wrapper_param =
   and analyze_files =
     flag
       "-load"
-      (listed Filename_unix.arg_type)
+      (listed filename_argtype)
       ~doc:
         "FILE Analyze previously saved data files and don't run tests. [-load] can be \
          specified multiple times. [pacs]"
@@ -129,7 +128,15 @@ let wrapper_param =
       if save_sample_data
       then (
         Verbosity.print_low "Measurements will be saved.\n%!";
-        let time_str = Time.format (Time.now ()) "%F-%R" ~zone:(force Time.Zone.local) in
+        let time_str =
+          let time = Time.now () in
+          let date, ofday = Time.to_date_ofday time ~zone:(force Time.Zone.local) in
+          let year, month, day =
+            Date.year date, Date.month date |> Month.to_int, Date.day date
+          in
+          let { Time_float.Span.Parts.hr; min; _ } = Time.Ofday.to_parts ofday in
+          sprintf "%04d-%02d-%02d-%02d-%02d" year month day hr min
+        in
         Some
           (fun meas ->
             let name = Measurement.name meas in
@@ -218,23 +225,26 @@ let readme () =
     (Variable.summarize ())
 ;;
 
-let make_ext ~summary main_param =
+let make_ext ?(filename_argtype = Command.Arg_type.Export.string) ~summary main_param =
   let open Command.Let_syntax in
   Command.basic
     ~readme
     ~summary
     (let%map_open () = return ()
-     and wrapper = wrapper_param
+     and wrapper = wrapper_param ~filename_argtype
      and main = main_param in
      wrapper ~main)
 ;;
 
 let make
+  ?filename_argtype
   ~(bench : callback_bench)
   ~(analyze : callback_load_analyze_and_display)
   ~(tests : Test.t list)
+  ()
   =
   make_ext
+    ?filename_argtype
     ~summary:
       (sprintf
          "Benchmark for %s"

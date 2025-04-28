@@ -12,14 +12,13 @@
         Random.self_init ();
         let x = Random.float 10.0 in
         let y = Random.float 10.0 in
-        Command.run (Bench.make_command [
-          Bench.Test.create ~name:"Float add" (fun () ->
-            ignore (x +. y));
-          Bench.Test.create ~name:"Float mul" (fun () ->
-            ignore (x *. y));
-          Bench.Test.create ~name:"Float div" (fun () ->
-            ignore (x /. y));
-        ])
+        Command.run
+          (Bench.make_command
+             [ Bench.Test.create ~name:"Float add" (fun () -> ignore (x +. y))
+             ; Bench.Test.create ~name:"Float mul" (fun () -> ignore (x *. y))
+             ; Bench.Test.create ~name:"Float div" (fun () -> ignore (x /. y))
+             ])
+      ;;
     ]}
 
     When compiled this gives you an executable:
@@ -56,7 +55,7 @@
 
     The simplest benchmark specification is just a [unit -> unit] thunk and a name:
     {[
-      Bench.Test.create ~name:"Float add" (fun () -> ignore (x +. y));
+      Bench.Test.create ~name:"Float add" (fun () -> ignore (x +. y))
     ]}
 
     One can also create indexed benchmarks, which can be helpful in understanding
@@ -66,13 +65,14 @@
       open Core_bench
 
       let () =
-        Command.run (Bench.make_command [
-          Bench.Test.create_indexed
-            ~name:"Array.create"
-            ~args:[1; 10; 100; 200; 300; 400]
-            (fun len ->
-               Staged.stage (fun () -> ignore(Array.create ~len 0)));
-        ])
+        Command.run
+          (Bench.make_command
+             [ Bench.Test.create_indexed
+                 ~name:"Array.create"
+                 ~args:[ 1; 10; 100; 200; 300; 400 ]
+                 (fun len -> Staged.stage (fun () -> ignore (Array.create ~len 0)))
+             ])
+      ;;
     ]}
 
     this produces:
@@ -95,8 +95,7 @@
     functionality exposed through the .mli and is a great way to interactively explore
     what the various options do.
 
-    @see <https://github.com/janestreet/core_bench/wiki> Core_bench wiki
-*)
+    @see <https://github.com/janestreet/core_bench/wiki> Core_bench wiki *)
 
 open! Core
 open! Core_bench_internals
@@ -126,8 +125,8 @@ module Test : sig
     -> ([ `init ] -> unit -> 'a)
     -> t
 
-  (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
-      about the ['a] below. *)
+  (** Creates a group of benchmarks indexed by a size. Also see comment on [create] about
+      the ['a] below. *)
   val create_parameterised
     :  name:string
     -> ?test_name:string
@@ -138,8 +137,8 @@ module Test : sig
     -> ('param -> (unit -> 'a) Staged.t)
     -> t
 
-  (** Creates a group of benchmarks indexed by a size.  Also see comment on [create]
-      about the ['a] below. *)
+  (** Creates a group of benchmarks indexed by a size. Also see comment on [create] about
+      the ['a] below. *)
   val create_indexed
     :  name:string
     -> ?test_name:string
@@ -161,8 +160,8 @@ module Test : sig
   val name : t -> string
 end
 
-(** [Variable.t]s represent variables than can be used as predictors or the responder
-    when specifying a regression. *)
+(** [Variable.t]s represent variables than can be used as predictors or the responder when
+    specifying a regression. *)
 module Variable : sig
   type t =
     [ `Runs
@@ -180,13 +179,12 @@ module Variable : sig
   [@@deriving sexp]
 end
 
-(** A quota can be specified as an amount of wall time, or a number of times to
-    run the function.
+(** A quota can be specified as an amount of wall time, or a number of times to run the
+    function.
 
-    (Strictly speaking, for [Num_calls n], it is possible that the function is
-    called fewer than [n] times if the array of measurements fills up.  But
-    with default settings for how batches are sized, you don't run into this
-    issue until [n] is over 1.9e16.) *)
+    (Strictly speaking, for [Num_calls n], it is possible that the function is called
+    fewer than [n] times if the array of measurements fills up. But with default settings
+    for how batches are sized, you don't run into this issue until [n] is over 1.9e16.) *)
 module Quota : sig
   type t =
     | Span of Time_float.Span.t
@@ -195,17 +193,15 @@ module Quota : sig
 
   (** Examples:
       - "10" -> Span 10s (float-like: convert to seconds)
-      - "1m" -> Span 1m  (span-like: keep as span)
+      - "1m" -> Span 1m (span-like: keep as span)
       - "5x" -> Num_calls 5
-      - "1e9x" -> Num_calls 1_000_000_000
-  *)
+      - "1e9x" -> Num_calls 1_000_000_000 *)
   include Stringable.S with type t := t
 
   val arg_type : t Command.Param.Arg_type.t
 
-  (** [fulfilled t ~start ~num_calls] returns [true] iff we have fulfilled the
-      quota, given that we *started* at time [start] and have run the function
-      [num_calls] times. *)
+  (** [fulfilled t ~start ~num_calls] returns [true] iff we have fulfilled the quota,
+      given that we *started* at time [start] and have run the function [num_calls] times. *)
   val fulfilled : t -> start:Time_float.t -> num_calls:int -> bool
 
   (** [max_count (Num_calls n)] returns [n], [max_count (Span _)] returns [max_int]. *)
@@ -234,7 +230,7 @@ end
 
 (** [Display_config.t] specifies how the output tables should be formatted. *)
 module Display_config : sig
-  type t
+  type t = Core_bench_internals.Display_config.t
 
   val print_warning : t -> string -> unit
 end
@@ -242,7 +238,7 @@ end
 (** Each [Analysis_config.t] specifies a regression run by [Core_bench]. This module also
     provides several typical regressions that one might want to run. *)
 module Analysis_config : sig
-  type t
+  type t = Core_bench_internals.Analysis_config.t
 
   val create
     :  responder:Variable.t
@@ -260,7 +256,7 @@ module Analysis_config : sig
       below, no error estimate is computed. *)
   val nanos_vs_runs : t
 
-  (** [cycles_vs_runs]  predicts cycles using runs. *)
+  (** [cycles_vs_runs] predicts cycles using runs. *)
   val cycles_vs_runs : t
 
   (** [nanos ~predictors] estimates nanos using specified [predictors]. *)
@@ -269,12 +265,12 @@ module Analysis_config : sig
   (** similar to [nanos] *)
   val cycles : predictors:Variable.t list -> t
 
-  (** [allocations_vs_runs] estimates minor allocations, major allocations and
-      promotoions in terms of runs and overhead. *)
+  (** [allocations_vs_runs] estimates minor allocations, major allocations and promotoions
+      in terms of runs and overhead. *)
   val allocations_vs_runs : t list
 
-  (** [allocations_vs_runs] estimates minor collections, major collections and
-      compations in terms of runs. *)
+  (** [allocations_vs_runs] estimates minor collections, major collections and compations
+      in terms of runs. *)
   val gc_vs_runs : t list
 
   (** A laundry list of several typical regressions: [nanos_vs_runs],
@@ -299,8 +295,7 @@ end
 (** [make_command tests] is the easiest way to generate a command-line program that runs a
     list of benchmarks. Here [tests : Test.t list] are the benchmarks that should be run.
     This returns a [Command.t] which provides a command-line interface for running the
-    benchmarks. See notes above for an example.
-*)
+    benchmarks. See notes above for an example. *)
 val make_command : Test.t list -> Command.t
 
 (** [bench tests] will run, analyze and display the specified [tests]. Use this when one
@@ -316,8 +311,8 @@ val bench
   -> Test.t list
   -> unit
 
-(** [measure] is a fragment of the functionality of [bench]. [measure tests] will run
-    the specified [tests] and return the resulting measurement results. *)
+(** [measure] is a fragment of the functionality of [bench]. [measure tests] will run the
+    specified [tests] and return the resulting measurement results. *)
 val measure : ?run_config:Run_config.t -> Test.t list -> Measurement.t list
 
 (** [analyze] is a fragment of the functionality of [bench]. [analyze ~analysis_configs m]

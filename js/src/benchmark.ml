@@ -140,7 +140,7 @@ let measure_all ?postprocess run_config tests =
         postprocess measurement;
         measurement
   in
-  Random.self_init ();
+  Random.self_init () ~allow_in_tests:true;
   let module RC = Run_config in
   Verbosity.set_verbosity (RC.verbosity run_config);
   (match RC.quota run_config with

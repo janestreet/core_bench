@@ -99,18 +99,17 @@ let qr_in_place a =
     a, r)
 ;;
 
-(** [qr A] returns the QR-decomposition of [A] as a pair (Q,R). [A] must have
-    at least as many rows as columns and have full rank.
+(** [qr A] returns the QR-decomposition of [A] as a pair (Q,R). [A] must have at least as
+    many rows as columns and have full rank.
 
-    If [in_place] (default: [false]) is [true], then [A] is overwritten with [Q].
-*)
+    If [in_place] (default: [false]) is [true], then [A] is overwritten with [Q]. *)
 let qr ?(in_place = false) a =
   let a = if in_place then a else Mat.copy a in
   qr_in_place a
 ;;
 
-(** [triu_solve R b] solves R x = b where [R] is an m x m upper-triangular matrix
-    and [b] is an m x 1 column vector.  *)
+(** [triu_solve R b] solves R x = b where [R] is an m x m upper-triangular matrix and [b]
+    is an m x 1 column vector. *)
 let triu_solve r b =
   let m = Array.length b in
   if m <> Array.length r
@@ -134,16 +133,15 @@ let triu_solve r b =
     else Ok sol)
 ;;
 
-(** [mul A B] computes the matrix product [A * B].  If [transa] (default: [false])
-    is [true], then we compute A' * B where A' denotes the transpose of A. *)
+(** [mul A B] computes the matrix product [A * B]. If [transa] (default: [false]) is
+    [true], then we compute A' * B where A' denotes the transpose of A. *)
 
 (* val mul : ?transa:bool -> m -> m -> m *)
 
-(** [mul_mv A x] computes the product [A * x] (where [A] is a matrix and [x] is
-    a column vector).
+(** [mul_mv A x] computes the product [A * x] (where [A] is a matrix and [x] is a column
+    vector).
 
-    [transa] is as with [mul].
-*)
+    [transa] is as with [mul]. *)
 let mul_mv ?(transa = false) a x =
   (* we let c denote either a or a', depending on whether transa is set. *)
   let rows = Array.length a in
@@ -170,15 +168,14 @@ let mul_mv ?(transa = false) a x =
     result)
 ;;
 
-(** [ols A b] computes the ordinary least-squares solution to A x = b.
-    [A] must have at least as many rows as columns and have full rank.
+(** [ols A b] computes the ordinary least-squares solution to A x = b. [A] must have at
+    least as many rows as columns and have full rank.
 
-    This can be used to compute solutions to non-singular square systems,
-    but is somewhat sub-optimal for that purpose.
+    This can be used to compute solutions to non-singular square systems, but is somewhat
+    sub-optimal for that purpose.
 
-    The algorithm is to factor A = Q * R and solve R x = Q' b where Q' denotes
-    the transpose of Q.
-*)
+    The algorithm is to factor A = Q * R and solve R x = Q' b where Q' denotes the
+    transpose of Q. *)
 let ols ?(in_place = false) a b =
   let q, r = qr ~in_place a in
   triu_solve r (mul_mv ~transa:true q b)

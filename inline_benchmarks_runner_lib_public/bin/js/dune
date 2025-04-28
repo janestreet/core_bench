@@ -1,0 +1,6 @@
+(library
+ (name public_runner_js)
+ (public_name core_bench.runner_js)
+ (library_flags -linkall)
+ (libraries core inline_benchmarks_js_public)
+ (preprocess no_preprocessing))
