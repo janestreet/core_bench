@@ -130,7 +130,9 @@ let wrapper_param ~filename_argtype =
         Verbosity.print_low "Measurements will be saved.\n%!";
         let time_str =
           let time = Time.now () in
-          let date, ofday = Time.to_date_ofday time ~zone:(force Time.Zone.local) in
+          let date, ofday =
+            Time.to_date_ofday time ~zone:(Portable_lazy.force Time.Zone.local_portable)
+          in
           let year, month, day =
             Date.year date, Date.month date |> Month.to_int, Date.day date
           in
