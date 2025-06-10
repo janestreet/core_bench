@@ -26,7 +26,6 @@ depends: [
   "textutils"
   "time_now"
   "dune"              {>= "3.17.0"}
-  "js_of_ocaml"       {= "6.0.1+jst"}
   "js_of_ocaml-ppx"   {= "6.0.1+jst"}
   "re"                {>= "1.8.0"}
 ]
