@@ -19,3 +19,4 @@ let display ?libname ?(display_config = Display_config.default) =
 ;;
 
 let bench = Bench.bench ~measure_with:Benchmark.measure_all ~display
+let analyze_and_display = analyze_and_display ~display

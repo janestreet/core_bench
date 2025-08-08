@@ -2,7 +2,6 @@
  (name inline_benchmarks_js_public)
  (public_name core_bench.inline_benchmarks_js)
  (libraries command_nodejs core core_bench_internals core_bench_js
-   inline_benchmarks_kernel_private js_of_ocaml ppx_bench.runtime-lib re
-   core_kernel.version_util)
+   inline_benchmarks_kernel_private ppx_bench.runtime-lib)
  (preprocess
   (pps ppx_let js_of_ocaml-ppx)))
