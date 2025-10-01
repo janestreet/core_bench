@@ -112,11 +112,13 @@ let bench
     let n = Int.max 0 n in
     (* Just run each test function n times. *)
     List.iter (Test.expand tests) ~f:(fun basic_test ->
-      match Test.Basic_test.f basic_test with
-      | Test.Basic_test.T f ->
-        Verbosity.print_low "Running '%s' %i times\n" (Test.Basic_test.name basic_test) n;
-        let f = f `init in
-        for _ = 1 to n do
-          ignore (f () : (* existential type from GADT *) _)
-        done)
+      let (Test.Basic_test.T { f; hooks }) = Test.Basic_test.f basic_test in
+      Verbosity.print_low "Running '%s' %i times\n" (Test.Basic_test.name basic_test) n;
+      hooks.around_benchmark ~f:(fun bm_ctx ->
+        let f = f bm_ctx in
+        hooks.around_measurement bm_ctx ~f:(fun arg ->
+          for _ = 1 to n do
+            ignore ((Staged.unstage f) arg : (* existential type from GADT *) _)
+          done)
+        [@nontail]))
 ;;

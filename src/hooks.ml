@@ -1,0 +1,1 @@
+include Core_bench_internals.Test.Hooks

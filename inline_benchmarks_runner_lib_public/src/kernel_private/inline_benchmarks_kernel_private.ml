@@ -18,30 +18,40 @@ let make_benchmark_name entry =
 ;;
 
 (* Code for filtering the out the benchmarks to run *)
-let entry_to_bench_test entry ~key =
+let entry_to_bench_test (type a b) entry ~key =
   let open Entry in
   let name = make_benchmark_name entry in
   let test_name = entry.name in
   let file_name = entry.filename in
   let module_name = entry.bench_module_name in
+  let (module Config : Bench_config_types.S with type arg = a and type benchmark_ctx = b) =
+    entry.config
+  in
+  let hooks =
+    { Test.Hooks.around_benchmark = Config.around_benchmark
+    ; around_measurement = Config.around_measurement
+    }
+  in
   match entry.Entry.test_spec with
   | Regular_thunk f ->
-    Test.create_with_initialization
+    Test.create_with_initialization_and_hooks
       ~name
       ~test_name
       ~file_name
       ?module_name
       ~key
-      (fun `init -> (f `init).uncurried)
+      ~hooks
+      (fun ctx -> (f ctx).uncurried)
   | Parameterised_thunk { params; thunk; _ } ->
-    Test.create_parameterised
+    Test.create_parameterised_with_hooks
       ~name
       ~test_name
       ~file_name
       ?module_name
       ~args:params
       ~key
-      (fun len -> Staged.stage (thunk len).uncurried)
+      ~hooks
+      (fun len ctx -> Staged.stage (thunk len ctx).uncurried)
 ;;
 
 let pattern_to_predicate s =
@@ -63,10 +73,10 @@ let get_matching_tests ~libname patterns =
       in
       (* for parameterized tests we must include the param in the filter (so we can filter
          to "size:1000" or what have you.) *)
-      List.filter_map entries ~f:(fun entry ->
+      List.filter_map entries ~f:(fun (P entry as entry_p) ->
         let name = make_benchmark_name entry in
         match entry.Entry.test_spec with
-        | Regular_thunk _ -> Option.some_if (filter name) entry
+        | Regular_thunk _ -> Option.some_if (filter name) entry_p
         | Parameterised_thunk { params; arg_name; thunk } ->
           let params =
             List.filter params ~f:(fun (p, _) ->
@@ -77,21 +87,22 @@ let get_matching_tests ~libname patterns =
            | [] -> None
            | _ :: _ ->
              Some
-               (Entry.with_test_spec
-                  entry
-                  (Parameterised_thunk { params; arg_name; thunk }))))
+               (P
+                  (Entry.with_test_spec
+                     entry
+                     (Parameterised_thunk { params; arg_name; thunk })))))
   in
   let tests =
-    List.map entries ~f:(fun entry ->
+    List.map entries ~f:(fun (P entry as entry_p) ->
       let key = entry.Entry.unique_id in
-      Hashtbl.add_exn tbl ~key ~data:entry;
+      Hashtbl.add_exn tbl ~key ~data:entry_p;
       entry_to_bench_test entry ~key)
   in
   tbl, tests
 ;;
 
 let x_library_inlining_warning ~run_without_inlining ~display_config =
-  if not Version_util.x_library_inlining
+  if not Version_util_compat.x_library_inlining
   then (
     "Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate."
     |> Display_config.print_warning display_config;

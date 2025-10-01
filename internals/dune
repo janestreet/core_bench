@@ -2,6 +2,6 @@
  (name core_bench_internals)
  (public_name core_bench.internals)
  (libraries textutils.ascii_table_kernel core_extended.delimited_kernel
-   core_kernel.ansi_kernel core core_kernel.version_util)
+   core_kernel.ansi_kernel core)
  (preprocess
   (pps ppx_jane)))
