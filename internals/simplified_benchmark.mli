@@ -38,15 +38,10 @@ module Result : sig
     ; file_name : string
     ; module_name : string
     ; library_name : string
-        (* version contains the full string received from Version_util.version
-        *)
-    ; version : string
         (* hg_revision contains only the action revision id used by hg
        e.g. "1e88f63603b3" *)
     ; hg_revision : string option
     ; hg_active_bookmark : string option
-    ; x_library_inlining : bool
-    ; ocaml_version : string
         (* machine_where_benchmark_was_run stores the name of the performance machine used
        for the benchmarks  *)
     ; machine_where_benchmark_was_run : string

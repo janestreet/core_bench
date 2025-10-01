@@ -116,6 +116,16 @@ module Test : sig
     -> (unit -> 'a)
     -> t
 
+  val create_with_hooks
+    :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> ?key:int
+    -> hooks:([< `init ], 'arg) Hooks.t
+    -> ('arg @ local -> 'r)
+    -> t
+
   val create_with_initialization
     :  name:string
     -> ?test_name:string
@@ -123,6 +133,16 @@ module Test : sig
     -> ?module_name:string
     -> ?key:int
     -> ([ `init ] -> unit -> 'a)
+    -> t
+
+  val create_with_initialization_and_hooks
+    :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> ?key:int
+    -> hooks:('benchmark_ctx, 'arg) Hooks.t
+    -> ('benchmark_ctx @ local -> ('arg @ local -> 'r) @ local)
     -> t
 
   (** Creates a group of benchmarks indexed by a size. Also see comment on [create] about
@@ -137,6 +157,17 @@ module Test : sig
     -> ('param -> (unit -> 'a) Staged.t)
     -> t
 
+  val create_parameterised_with_hooks
+    :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> args:(string * 'param) list
+    -> ?key:int
+    -> hooks:('benchmark_ctx, 'arg) Hooks.t
+    -> ('param -> 'benchmark_ctx @ local -> ('arg @ local -> 'r) Staged.t @ local)
+    -> t
+
   (** Creates a group of benchmarks indexed by a size. Also see comment on [create] about
       the ['a] below. *)
   val create_indexed
@@ -146,7 +177,18 @@ module Test : sig
     -> ?module_name:string
     -> args:int list
     -> ?key:int
-    -> (int -> (unit -> 'a) Staged.t)
+    -> (int -> (unit -> 'a) Staged.t @ local)
+    -> t
+
+  val create_indexed_with_hooks
+    :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> args:int list
+    -> ?key:int
+    -> hooks:('benchmark_ctx, 'arg) Hooks.t
+    -> (int -> 'benchmark_ctx @ local -> ('arg @ local -> 'r) Staged.t @ local)
     -> t
 
   val create_group

@@ -41,3 +41,13 @@ val display
   -> ?display_config:Display_config.t
   -> Analysis_result.t list
   -> unit
+
+(** [analyze_and_display] is a fragment of the functionality of [bench]. [display results]
+    will display a tabular summary of [results] on the terminal. *)
+val analyze_and_display
+  :  measurements:Measurement.t list
+  -> ?analysis_configs:Analysis_config.t list
+  -> ?display_config:Display_config.t
+  -> ?libname:string
+  -> unit
+  -> unit

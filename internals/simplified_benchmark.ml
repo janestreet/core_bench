@@ -66,11 +66,8 @@ module Result = struct
     ; file_name : string
     ; module_name : string
     ; library_name : string
-    ; version : string
     ; hg_revision : string option
     ; hg_active_bookmark : string option
-    ; x_library_inlining : bool
-    ; ocaml_version : string
     ; machine_where_benchmark_was_run : string
     ; epoch_time_of_run : Int63.t
     ; time_of_hg_revision : string option
@@ -114,7 +111,6 @@ let extract
     && Array.exists preds ~f:(( = ) `Runs)
   in
   let cur_time = Time_ns.now () |> Time_ns.to_int63_ns_since_epoch in
-  let version = Version_util.version in
   let simplified_results =
     List.map results ~f:(fun res ->
       let jtest =
@@ -126,11 +122,8 @@ let extract
           ; file_name = Analysis_result.file_name res
           ; module_name = Analysis_result.module_name res
           ; library_name = libname
-          ; version
           ; hg_revision = None
           ; hg_active_bookmark = None
-          ; x_library_inlining = Version_util.x_library_inlining
-          ; ocaml_version = Version_util.ocaml_version
           ; machine_where_benchmark_was_run = hostname
           ; epoch_time_of_run = cur_time
           ; time_of_hg_revision = None

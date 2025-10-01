@@ -3,8 +3,30 @@
 open! Core
 module Id : Unique_id.Id
 
+module Hooks : sig
+  (** "Hooks" to run at various points in the benchmark process. *)
+  type ('benchmark_ctx, 'arg) t =
+    { around_benchmark : 'r. f:('benchmark_ctx @ local -> 'r) @ local once -> 'r
+    (** Function run around each benchmark. The ['benchmark_ctx] argument is passed to the
+        [around_measurement] function and to the benchmark itself. *)
+    ; around_measurement :
+        'r. 'benchmark_ctx @ local -> f:('arg @ local -> 'r) @ local once -> 'r
+    (** Function run around each batch of measurements in the benchmark. the ['arg]
+        argument is passed to the benchmark itself *)
+    }
+
+  (** The default hooks, which do nothing, use [`init] as the measurement context, and
+      pass [unit] to the benchmark. *)
+  val default : ([ `init ], unit) t
+end
+
 module Basic_test : sig
-  type packed_f = T : ([ `init ] -> unit -> 'a) -> packed_f
+  type packed_f =
+    | T :
+        { hooks : ('benchmark_ctx, 'arg) Hooks.t
+        ; f : 'benchmark_ctx @ local -> ('arg @ local -> 'r) Staged.t @ local
+        }
+        -> packed_f
 
   type t =
     { test_id : Id.t
@@ -18,6 +40,18 @@ module Basic_test : sig
     ; f : packed_f
     }
 
+  val create_with_initialization
+    :  name:string
+    -> ?test_name:string
+    -> ?file_name:string
+    -> ?module_name:string
+    -> ?group_key:int option
+    -> ?arg:string option
+    -> key:int
+    -> hooks:('benchmark_ctx, 'arg) Hooks.t
+    -> ('benchmark_ctx @ local -> ('arg @ local -> unit) @ local)
+    -> t
+
   val test_id : t -> Id.t
   val name : t -> string
   val test_name : t -> string
@@ -30,18 +64,6 @@ module Basic_test : sig
 
   val group_key : t -> int option
   val f : t -> packed_f
-
-  val create_with_initialization
-    :  name:string
-    -> ?test_name:string
-    -> ?file_name:string
-    -> ?module_name:string
-    -> ?group_key:int option
-    -> ?arg:string option
-    -> key:int
-    -> ([ `init ] -> unit -> unit)
-    -> t
-
   val make_filename : t -> string
 end
 
@@ -63,13 +85,33 @@ val create
   -> (unit -> 'a)
   -> t
 
+val create_with_hooks
+  :  name:string
+  -> ?test_name:string
+  -> ?file_name:string
+  -> ?module_name:string
+  -> ?key:int
+  -> hooks:([< `init ], 'arg) Hooks.t
+  -> ('arg @ local -> 'r)
+  -> t
+
 val create_with_initialization
   :  name:string
   -> ?test_name:string
   -> ?file_name:string
   -> ?module_name:string
   -> ?key:int
-  -> ([ `init ] -> unit -> 'a)
+  -> ([ `init ] -> (unit -> 'a))
+  -> t
+
+val create_with_initialization_and_hooks
+  :  name:string
+  -> ?test_name:string
+  -> ?file_name:string
+  -> ?module_name:string
+  -> ?key:int
+  -> hooks:('benchmark_ctx, 'arg) Hooks.t
+  -> ('benchmark_ctx @ local -> ('arg @ local -> 'r) @ local)
   -> t
 
 val create_parameterised
@@ -79,7 +121,18 @@ val create_parameterised
   -> ?module_name:string
   -> args:(string * 'param) list
   -> ?key:int
-  -> ('param -> (unit -> 'a) Staged.t)
+  -> ('param -> (unit -> 'a) Staged.t @ local)
+  -> t
+
+val create_parameterised_with_hooks
+  :  name:string
+  -> ?test_name:string
+  -> ?file_name:string
+  -> ?module_name:string
+  -> args:(string * 'param) list
+  -> ?key:int
+  -> hooks:('benchmark_ctx, 'arg) Hooks.t
+  -> ('param -> 'benchmark_ctx @ local -> ('arg @ local -> 'r) Staged.t @ local)
   -> t
 
 val create_indexed
@@ -89,7 +142,18 @@ val create_indexed
   -> ?module_name:string
   -> args:int list
   -> ?key:int
-  -> (int -> (unit -> 'a) Staged.t)
+  -> (int -> (unit -> 'a) Staged.t @ local)
+  -> t
+
+val create_indexed_with_hooks
+  :  name:string
+  -> ?test_name:string
+  -> ?file_name:string
+  -> ?module_name:string
+  -> args:int list
+  -> ?key:int
+  -> hooks:('benchmark_ctx, 'arg) Hooks.t
+  -> (int -> 'benchmark_ctx @ local -> ('arg @ local -> 'r) Staged.t @ local)
   -> t
 
 val create_group
