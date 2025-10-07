@@ -27,7 +27,7 @@ depends: [
   "time_now"
   "dune"              {>= "3.17.0"}
   "js_of_ocaml-ppx"   {= "6.0.1+ox"}
-  "re"                {>= "1.8.0"}
+  "re"                {= "1.14.0+ox"}
 ]
 available: arch != "arm32" & arch != "x86_32"
 synopsis: "Benchmarking library"
