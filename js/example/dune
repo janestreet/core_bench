@@ -1,5 +1,5 @@
 (library
  (name core_bench_js_example)
- (libraries js_of_ocaml core)
+ (libraries core js_of_ocaml)
  (preprocess
   (pps ppx_jane ppx_bench)))
