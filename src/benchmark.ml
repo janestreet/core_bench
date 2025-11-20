@@ -29,11 +29,11 @@ let stabilize_gc () =
   loop 10 0
 ;;
 
-(* Carefully written to have the minimum loop overhead for small closures.
-   In particular, we:
+(* Carefully written to have the minimum loop overhead for small closures. In particular,
+   we:
 
    - Don't inline this, so that we don't spill live registers from the much larger
-   [measure] functions across the call.
+     [measure] functions across the call.
 
    - run the loop backwards so our termination condition compares to zero (a constant)
 
@@ -187,7 +187,7 @@ let measure =
         total_samples
         largest_run;
       (* if (RC.save_sample_data run_config)
-     * then M.save test ~results total_samples; *)
+       * then M.save test ~results total_samples; *)
       measurement)
 ;;
 

@@ -10,7 +10,7 @@ let random_indices_in_place ~max arr =
   done
 ;;
 
-(* [quantile_of_array] sorts the array and returns the values at the quantile indices.  If
+(* [quantile_of_array] sorts the array and returns the values at the quantile indices. If
    we ever expose this function, we should check that low_quantile and high_quantile are
    in the interval [0,1]. *)
 let quantile_of_array ?(failures = 0) arr ~len ~low_quantile ~high_quantile =
@@ -19,10 +19,9 @@ let quantile_of_array ?(failures = 0) arr ~len ~low_quantile ~high_quantile =
     Float.iround_towards_zero_exn
       ((Float.of_int len *. q) +. (0.5 *. Float.of_int failures))
   in
-  (* [extended_get i] retrieves entry [i] from [arr], pretending that
-     [arr.(i) = infinity] when [i > len - 1], and that [arr.(i) = neg_infinity]
-     when [i < failures].
-     It assumes [i >= 0] and that entries with [i < failures] are already [neg_infinity].
+  (* [extended_get i] retrieves entry [i] from [arr], pretending that [arr.(i) = infinity]
+     when [i > len - 1], and that [arr.(i) = neg_infinity] when [i < failures]. It assumes
+     [i >= 0] and that entries with [i < failures] are already [neg_infinity].
   *)
   let extended_get i = if i >= len then Float.infinity else arr.(i) in
   (* For the low_quantile calculation, if the index is too large (too many failures),
@@ -88,7 +87,7 @@ let ols meas ~resp ~preds =
     match Linear_algebra.ols ~in_place:true matrix vector with
     | Ok _ as x -> x
     | Error _ ->
-      (* Try to identify what's wrong.  Note that [ols] has overwritten [matrix], so we
+      (* Try to identify what's wrong. Note that [ols] has overwritten [matrix], so we
          remake it. *)
       let matrix, _vector = make_lr_inputs meas ~resp ~preds in
       (* At this point, most common failure mode is a column of zeros. *)
@@ -113,7 +112,8 @@ let ols meas ~resp ~preds =
                ~predictors:(num_preds : int)]))
 ;;
 
-(* val r_square : Measurement.t -> responder -> predictors -> coefficients:float array -> float *)
+(* val r_square : Measurement.t -> responder -> predictors -> coefficients:float array ->
+   float *)
 let r_square meas ~resp ~preds ~coeffs =
   let predictors_matrix, responder_vector = make_lr_inputs meas ~resp ~preds in
   let sum_responder = Array.fold responder_vector ~init:0. ~f:( +. ) in
@@ -137,31 +137,31 @@ let r_square meas ~resp ~preds ~coeffs =
 (* A note about the constant [threshold = 10] (for the number of nonzero values each
    predictor must have) below:
 
-   We are interested in producing 95% confidence intervals.  As a result, we want enough
-   nonzero entries so that at least 95% of bootstrap replications succeed.  The
-   probability that a particular row is omitted in a particular bootstrap replication is
-   about 1/e = 0.36788.  If there are n nonzero entries in a column, the probability that
-   they're all omitted is 0.36788^n; we want that to be less than 0.05.  n = 3 is
-   sufficiently large for that.
+   We are interested in producing 95% confidence intervals. As a result, we want enough
+   nonzero entries so that at least 95% of bootstrap replications succeed. The probability
+   that a particular row is omitted in a particular bootstrap replication is about 1/e =
+   0.36788. If there are n nonzero entries in a column, the probability that they're all
+   omitted is 0.36788^n; we want that to be less than 0.05. n = 3 is sufficiently large
+   for that.
 
    Of course, there are multiple columns to worry about. Supposing conservatively that the
    user wants to use up to 20 predictors, and noting that the probability that we get
    failure in some column is bounded above by the sum of the probabilities for the
-   individual columns, we want 0.36788^n < 0.05/20.  n = 6 is sufficiently large for that.
+   individual columns, we want 0.36788^n < 0.05/20. n = 6 is sufficiently large for that.
    (In practice, the predictors will tend to be correlated, so the upper bound obtained by
    summing is conservative.)
 
    Something else to worry about is that the fundamental assumption made when using
    bootstrapping--that the empirical distribution is a good approximation of the
-   underlying distribution--starts to break down if we have very few nonzero values.  So,
+   underlying distribution--starts to break down if we have very few nonzero values. So,
    for a little "breathing room", n = 10 should be sufficient.
 
    This should yield far fewer than 5% of bootstrap trials failing, so the following is a
-   relatively minor point.  In the presence of failures, our 95% confidence interval still
-   encompasses 95% of _all_ trials, including failures.  We position the confidence
-   interval so that it is centered within the interval of all trials that succeeded.
-   E.g., if there were 1000 trials, and no failures, we would ordinarily take the values
-   at indices 25 and 975 as endpoints for the 95% confidence interval; if there are 20
+   relatively minor point. In the presence of failures, our 95% confidence interval still
+   encompasses 95% of _all_ trials, including failures. We position the confidence
+   interval so that it is centered within the interval of all trials that succeeded. E.g.,
+   if there were 1000 trials, and no failures, we would ordinarily take the values at
+   indices 25 and 975 as endpoints for the 95% confidence interval; if there are 20
    failures, we will (with all the failures sorted to the front of the array) instead take
    the values at indices 35 and 985.
 *)

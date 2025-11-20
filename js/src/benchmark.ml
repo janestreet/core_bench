@@ -128,7 +128,7 @@ let measure =
         total_samples
         largest_run;
       (* if (RC.save_sample_data run_config)
-     * then M.save test ~results total_samples; *)
+       * then M.save test ~results total_samples; *)
       measurement)
 ;;
 
