@@ -18,7 +18,7 @@ let display_minimum = function
   | Percentage -> 0.0001
 ;;
 
-(* 100%=1., not 100.*)
+(* 100%=1., not 100. *)
 
 module Magnitude = struct
   type t =

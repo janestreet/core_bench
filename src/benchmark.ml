@@ -29,11 +29,11 @@ let stabilize_gc () =
   loop 10 0
 ;;
 
-(* Carefully written to have the minimum loop overhead for small closures.
-   In particular, we:
+(* Carefully written to have the minimum loop overhead for small closures. In particular,
+   we:
 
    - Don't inline this, so that we don't spill live registers from the much larger
-   [measure] functions across the call.
+     [measure] functions across the call.
 
    - run the loop backwards so our termination condition compares to zero (a constant)
 
@@ -99,14 +99,15 @@ let measure =
         let current_index = !index in
         (* Stabilize gc if required.
 
-         We stabilize the gc through the first pass through this loop anyway. If we don't do
-         this the incoming GC state (some data may be on the minor heap that is partly full)
-         will cause an early collection or two which will not happen subsequently. These
-         early collections are just noise.
+           We stabilize the gc through the first pass through this loop anyway. If we
+           don't do this the incoming GC state (some data may be on the minor heap that is
+           partly full) will cause an early collection or two which will not happen
+           subsequently. These early collections are just noise.
 
-         When benchmarking functions that do not allocate any memory, this early noise is
-         the only significant input. In these cases, these spurious early collections will
-         give the allocation stats (major and promoted words) a slight negative value. *)
+           When benchmarking functions that do not allocate any memory, this early noise
+           is the only significant input. In these cases, these spurious early collections
+           will give the allocation stats (major and promoted words) a slight negative
+           value. *)
         if RC.stabilize_gc_between_runs run_config && current_runs <> 0
         then stabilize_gc ();
         (* make any Gc changes required. *)
@@ -187,7 +188,7 @@ let measure =
         total_samples
         largest_run;
       (* if (RC.save_sample_data run_config)
-     * then M.save test ~results total_samples; *)
+       * then M.save test ~results total_samples; *)
       measurement)
 ;;
 

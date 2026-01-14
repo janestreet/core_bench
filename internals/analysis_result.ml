@@ -10,13 +10,14 @@ module Ci95 = struct
 
   let create ~left_endpoint ~right_endpoint = { left_endpoint; right_endpoint }
 
-  (* 95% confidence interval expressed in (absolute) error form.  E.g., if estimate =
-     50. and confidence95 = (49., 52.), then [confidence95_abs_err] returns (-1., 2.).  *)
+  (* 95% confidence interval expressed in (absolute) error form. E.g., if estimate =
+
+     50. and confidence95 = (49., 52.), then [confidence95_abs_err] returns (-1., 2.). *)
   let ci95_abs_err t ~estimate = t.left_endpoint -. estimate, t.right_endpoint -. estimate
 
-  (* 95% confidence interval in relative error form (with 2.5 = 250%, etc.).  E.g., if
+  (* 95% confidence interval in relative error form (with 2.5 = 250%, etc.). E.g., if
      estimate = 50. and confidence95 = (49., 52.), then [confidence95_rel_err] returns
-     (-0.02, 0.04).  *)
+     (-0.02, 0.04). *)
   let ci95_rel_err t ~estimate =
     let low, high = ci95_abs_err t ~estimate in
     low /. estimate, high /. estimate

@@ -173,7 +173,7 @@ module Table = struct
         (listed string)
         ~doc:"REGR Specify additional regressions (See -? help). [pac.]"
     and max_name_length =
-      flag_optional_with_default_doc
+      flag_optional_with_default_doc_sexp
         "name-length-max"
         int
         [%sexp_of: int]
