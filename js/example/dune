@@ -2,4 +2,4 @@
  (name core_bench_js_example)
  (libraries core js_of_ocaml)
  (preprocess
-  (pps ppx_jane ppx_bench)))
+  (pps ppx_jane -compare-require-explicit-locality ppx_bench)))

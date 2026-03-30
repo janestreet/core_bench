@@ -21,6 +21,7 @@ end
 module Basic_test = struct
   type packed_f =
     | T :
+        'benchmark_ctx 'arg 'r.
         { hooks : ('benchmark_ctx, 'arg) Hooks.t
         ; f : 'benchmark_ctx -> ('arg -> 'r) Staged.t
         }
