@@ -40,7 +40,7 @@ let stabilize_gc () =
    - use 64 bit integers for slightly simpler loop arithmetic.
 *)
 let[@inline never] [@specialise never] [@local never] measure_one_closure
-  (type a)
+  (type a : value_or_null)
   ~f
   ~current_runs
   arg

@@ -23,6 +23,7 @@ end
 module Basic_test : sig
   type packed_f =
     | T :
+        'benchmark_ctx 'arg ('r : value_or_null).
         { hooks : ('benchmark_ctx, 'arg) Hooks.t
         ; f : 'benchmark_ctx @ local -> ('arg @ local -> 'r) Staged.t @ local
         }
@@ -105,7 +106,8 @@ val create_with_initialization
   -> t
 
 val create_with_initialization_and_hooks
-  :  name:string
+  : 'benchmark_ctx 'arg ('r : value_or_null).
+  name:string
   -> ?test_name:string
   -> ?file_name:string
   -> ?module_name:string
