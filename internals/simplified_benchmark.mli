@@ -42,7 +42,7 @@ module Result : sig
     ; hg_revision : string option
     ; hg_active_bookmark : string option
         (* machine_where_benchmark_was_run stores the name of the performance machine used
-           for the benchmarks  *)
+           for the benchmarks *)
     ; machine_where_benchmark_was_run : string
         (* epoch_time_of_run is the epoch time of when exactly the benchmarks were run, in
            nanoseconds *)

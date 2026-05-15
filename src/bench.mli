@@ -12,7 +12,7 @@
         Random.self_init ();
         let x = Random.float 10.0 in
         let y = Random.float 10.0 in
-        Command.run
+        Command_unix.run
           (Bench.make_command
              [ Bench.Test.create ~name:"Float add" (fun () -> ignore (x +. y))
              ; Bench.Test.create ~name:"Float mul" (fun () -> ignore (x *. y))
@@ -65,7 +65,7 @@
       open Core_bench
 
       let () =
-        Command.run
+        Command_unix.run
           (Bench.make_command
              [ Bench.Test.create_indexed
                  ~name:"Array.create"

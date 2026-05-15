@@ -55,6 +55,23 @@ let[@inline never] [@specialise never] [@local never] measure_one_closure
 
 let max_samples = 3_000
 
+[%%if host_is_arm64]
+
+module Perf_counters = struct
+  let create ctrs =
+    match ctrs with
+    | None -> ()
+    | Some _ -> failwith "perf counters not supported on arm"
+  ;;
+
+  let before () ~idx:_ = ()
+  let after () ~idx:_ = ()
+  let write () ~max_idx:_ ~results:_ = ()
+  let close () = ()
+end
+
+[%%else]
+
 module Perf_counters = struct
   let create ctrs =
     match ctrs with
@@ -67,6 +84,8 @@ module Perf_counters = struct
   let write () ~max_idx:_ ~results:_ = ()
   let close () = ()
 end
+
+[%%endif]
 
 (* The main benchmarking function *)
 let measure =
