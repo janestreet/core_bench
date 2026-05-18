@@ -141,7 +141,11 @@ let wrapper_param ~filename_argtype =
         in
         Some
           (fun meas ->
-            let name = Measurement.name meas in
+            let name =
+              match Measurement.file_name meas with
+              | "" -> Measurement.name meas
+              | file_name -> file_name
+            in
             let fn =
               sprintf "%s-%s-%s.txt" (sanitize_name name) time_str (Quota.to_string quota)
             in

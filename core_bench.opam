@@ -23,6 +23,7 @@ depends: [
   "ppx_fields_conv"
   "ppx_jane"
   "ppx_let"
+  "ppx_optcomp"
   "ppx_sexp_conv"
   "textutils"
   "time_now"
@@ -30,7 +31,7 @@ depends: [
   "js_of_ocaml-ppx"   {= "6.0.1+ox"}
   "re"                {= "1.14.0+ox"}
 ]
-available: arch != "arm32" & arch != "x86_32"
+available: arch != "x86_32"
 synopsis: "Benchmarking library"
 description: "
 "
